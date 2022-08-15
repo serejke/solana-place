@@ -1,0 +1,18 @@
+.loading-modal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  left: 50vw;
+  top: 50vh;
+}
+
+.loading-modal-spinner {
+  height: 1.5rem;
+  width: 1.5rem;
+}
+
+.loading-modal-status {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}

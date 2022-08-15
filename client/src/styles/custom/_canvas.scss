@@ -1,0 +1,33 @@
+.game-stage {
+  position: relative;
+}
+
+.game-grid-canvas {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.hide {
+  display: none;
+}
+
+.game-canvas {
+  position: absolute;
+  z-index: 0;
+  background: white;
+}
+
+.game-helper-canvas {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.grid-toggle {
+  display: flex;
+}
+
+.grid-toggle-label {
+  margin-left: 0.5rem;
+}

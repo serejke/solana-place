@@ -1,0 +1,30 @@
+.action-button {
+  background-color: #512da8;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 12px;
+  padding: 0 12px;
+  border-radius: 4px;
+  height: 2rem;
+  min-width: 12rem;
+  justify-content: center;
+}
+
+.action-button:not([disabled]):focus-visible {
+  outline-color: white;
+}
+
+.action-button:not([disabled]):hover {
+  background-color: #1a1f2e;
+}
+
+.action-button[disabled] {
+  background: #404144;
+  color: #999;
+  cursor: not-allowed;
+}
