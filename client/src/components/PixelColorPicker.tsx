@@ -62,7 +62,7 @@ export function PixelColorPicker() {
     <div style={popover} className="color-picker">
       {canChangeMore
         ? <GithubPicker
-          width="213px"
+          width="313px"
           styles={styles}
           colors={getColorsForPicker()}
           onChangeComplete={(color) => {
