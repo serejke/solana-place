@@ -10,7 +10,7 @@ import {Classes} from 'reactcss'
 import {GithubPickerStylesProps} from "react-color/lib/components/github/Github";
 import {useBoardDispatch, useBoardState} from "../providers/board/board";
 import {areEqual} from "../providers/board/state";
-import { MAX_CHANGES_PER_TRANSACTION } from "providers/board/changePixels";
+import {MAX_CHANGES_PER_TRANSACTION} from "providers/board/changePixels";
 
 const GITHUB_PICKER_TRIANGLE_SIZE = 16;
 
@@ -62,6 +62,7 @@ export function PixelColorPicker() {
     <div style={popover} className="color-picker">
       {canChangeMore
         ? <GithubPicker
+          width="213px"
           styles={styles}
           colors={getColorsForPicker()}
           onChangeComplete={(color) => {
@@ -79,7 +80,11 @@ export function PixelColorPicker() {
             })
           }}
         />
-        : <div className="popup-max-changes-per-transaction">Maximum of {MAX_CHANGES_PER_TRANSACTION} changes are allowed in a single transaction</div>
+        : (
+          <div className="popup-max-changes-per-transaction">
+            Maximum of {MAX_CHANGES_PER_TRANSACTION} changes are allowed in a single transaction
+          </div>
+        )
       }
     </div>
   )
