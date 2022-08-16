@@ -1,10 +1,9 @@
 import * as React from "react";
-import {useAnchorState} from "../providers/anchor";
 import {useClusterConfig} from "../providers/server/cluster";
 import {useBoardDispatch, useBoardState} from "../providers/board/board";
 import {useBoardConfig, useSetBoardConfig} from "../providers/board/config";
 import Toggle from "react-toggle";
-import {useAnchorWallet} from "@solana/wallet-adapter-react";
+import {useWallet} from "@solana/wallet-adapter-react";
 import {WalletMultiButton} from "@solana/wallet-adapter-react-ui";
 import Draggable from "react-draggable"
 import {changePixels} from "providers/board/changePixels";
@@ -13,18 +12,17 @@ import {useBoardHistory} from "../providers/board/history";
 import {useHighlightPixel} from "../providers/board/highlighter";
 import {getColorByIndex} from "../utils/color-utils";
 import SolanaExplorerLogo from '../styles/icons/dark-solana-logo.svg';
+import {useServerConfig} from "../providers/server/serverConfig";
 
 export function Dashboard() {
-  const solanaPlaceProgram = useAnchorState()?.solanaPlaceProgram;
-  const anchorProvider = useAnchorState()?.anchorProvider;
-  const gameProgramAccount = useClusterConfig()?.gameAccount;
+  const httpUrl = useServerConfig().httpUrl;
   const boardConfig = useBoardConfig();
   const setBoardConfig = useSetBoardConfig();
 
   const boardDispatch = useBoardDispatch();
   const changedPixels = useBoardState()?.changed ?? [];
 
-  const anchorWallet = useAnchorWallet();
+  const wallet = useWallet();
   const activeUsers = useActiveUsers();
 
   return (
@@ -32,17 +30,16 @@ export function Dashboard() {
       <div className="dashboard">
         <div className="dashboard-row">
           <div className="dashboard-item">
-            {!anchorWallet && <WalletMultiButton className="action-button"/>}
-            {anchorWallet
-              && solanaPlaceProgram
-              && gameProgramAccount
-              && anchorProvider
+            {!wallet && <WalletMultiButton className="action-button"/>}
+            {wallet
               && <button
                 className="action-button"
                 disabled={changedPixels.length === 0}
                 onClick={() => {
-                  changePixels(solanaPlaceProgram, gameProgramAccount, anchorProvider, changedPixels)
-                    .then(() => boardDispatch({type: "clearChangedPixels"}));
+                  changePixels(httpUrl, changedPixels, wallet)
+                    .then(() => boardDispatch({type: "clearChangedPixels"}))
+                    .catch(console.error)
+                  ;
                 }}>Send</button>}
           </div>
           <div className="dashboard-item grid-toggle">

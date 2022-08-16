@@ -1,3 +1,5 @@
+import {TransactionDetailsDto} from "./transactionDto";
+
 export type PixelChangedEventDto = {
   state: number,
   row: number,
@@ -20,13 +22,4 @@ export type BoardChangeDto = {
 
 export type BoardHistoryDto = {
   changes: BoardChangeDto[];
-}
-
-export type TransactionConfirmationDto = "pending" | "confirmed" | "finalized";
-
-export type TransactionDetailsDto = {
-  signature: string,
-  sender: string,
-  timestamp: number,
-  confirmation: TransactionConfirmationDto
 }

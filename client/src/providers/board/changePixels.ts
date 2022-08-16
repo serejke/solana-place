@@ -1,27 +1,28 @@
-import {SolanaPlaceProgram} from "../anchor";
-import {PublicKey, Transaction} from "@solana/web3.js";
-import {AnchorProvider} from "@project-serum/anchor";
 import {ChangedPixel} from "./state";
+import {createTransactionToChangePixels} from "../server/request/buildTransaction";
+import {ChangePixelRequestDto} from "../server/dto/changePixelRequestDto";
+import {WalletContextState} from "@solana/wallet-adapter-react";
+import {sendTransaction} from "../server/request/sendTransaction";
+import {toSerializedTransactionDto} from "../server/dto/converter";
+import {TransactionSignature} from "@solana/web3.js";
+import {CreateTransactionRequestDto} from "../server/dto/transactionDto";
 
 export async function changePixels(
-  solanaPlaceProgram: SolanaPlaceProgram,
-  gameProgramAccount: PublicKey,
-  anchorProvider: AnchorProvider,
+  httpUrl: string,
   changedPixels: ChangedPixel[],
-): Promise<any> {
-  return Promise.all(
-    (changedPixels ?? []).map((changedPixel) =>
-      solanaPlaceProgram.methods
-        .changeColor(changedPixel.coordinates.row, changedPixel.coordinates.column, changedPixel.newColor)
-        .accounts({
-          gameAccount: gameProgramAccount
-        })
-        .instruction()
-    ))
-    .then((transactions) => {
-      const transaction = new Transaction();
-      transaction.add(...transactions);
-      return transaction;
-    })
-    .then((transaction) => anchorProvider.sendAndConfirm(transaction));
+  wallet: WalletContextState
+): Promise<TransactionSignature> {
+  const changePixelsRequestDto: CreateTransactionRequestDto<ChangePixelRequestDto[]> = {
+    feePayer: wallet.publicKey!.toBase58()!,
+    data: changedPixels.map(changedPixel => ({
+      row: changedPixel.coordinates.row,
+      column: changedPixel.coordinates.column,
+      newColor: changedPixel.newColor
+    }))
+  }
+  const transaction = await createTransactionToChangePixels(httpUrl, changePixelsRequestDto);
+  const signTransaction = wallet.signTransaction!;
+  const signedTransaction = await signTransaction(transaction);
+  const serializedTransactionDto = toSerializedTransactionDto(signedTransaction);
+  return await sendTransaction(httpUrl, serializedTransactionDto)
 }

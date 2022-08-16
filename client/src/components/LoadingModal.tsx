@@ -12,10 +12,6 @@ export function LoadingModal({show, phase}: { show: boolean; phase?: LoadingPhas
   switch (phase) {
     case "complete":
       return null;
-    case "wallet":
-      loadingText = "Loading wallet";
-      break;
-    case "connection":
     case "config":
       loadingText = "Initializing";
       break;

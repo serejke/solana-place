@@ -12,6 +12,8 @@ import {BoardSubscriberService} from "./service/BoardSubscriberService";
 import {BoardService} from "./service/BoardService";
 import {BoardHistoryService} from "./service/BoardHistoryService";
 import {CloseableService} from "./service/CloseableService";
+import {TransactionBuilderService} from "./service/TransactionBuilderService";
+import {TransactionService} from "./service/TransactionService";
 
 export class Application {
   constructor(
@@ -29,15 +31,25 @@ export class Application {
     const boardSubscriberService = BoardSubscriberService.create(anchorService, webSocketServer);
     const boardService = BoardService.create(anchorService);
     const boardHistoryService = BoardHistoryService.create(anchorService);
+    const transactionBuilderService = TransactionBuilderService.create(anchorService);
+    const transactionService = TransactionService.create(connection);
     // const clusterStateService = ClusterStateService.create(connection);
 
-    const apiServer = await ApiServer.start(app, boardService, boardHistoryService);
+    const apiServer = await ApiServer.start(
+      app,
+      boardService,
+      boardHistoryService,
+      transactionService,
+      transactionBuilderService
+    );
 
     const allServices = [
       anchorService,
       boardSubscriberService,
       boardService,
       boardHistoryService,
+      transactionService,
+      transactionBuilderService,
       // clusterStateService,
 
       webSocketServer,

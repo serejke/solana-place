@@ -1,6 +1,6 @@
 import React from "react";
 import {useServerConfig} from "providers/server/serverConfig";
-import {fetchWithRetry} from "./request";
+import {fetchWithRetry} from "../request/fetchClusterInfo";
 import {Cluster, PublicKey} from "@solana/web3.js";
 
 export interface ClusterConfig {

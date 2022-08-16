@@ -1,9 +1,9 @@
 import * as React from "react";
 import {BoardHistory} from "./model";
 import {useState} from "react";
-import {fetchBoardHistory} from "../server/cluster/request";
 import {useServerConfig} from "../server/serverConfig";
 import {useBoardState} from "./board";
+import {fetchBoardHistory} from "../server/request/fetchBoard";
 
 type BoardHistoryState = {
   boardHistory?: BoardHistory

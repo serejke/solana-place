@@ -1,12 +1,12 @@
 import * as React from "react";
 import {SelectedPixelProvider} from "./selected";
 import {useServerConfig} from "../server/serverConfig";
-import {fetchBoard} from "../server/cluster/request";
 import {BoardDispatch, boardStateReducer} from "./reducer";
 import {BoardState} from "./state";
 import {useSocketMessageHandlers} from "../server/socket";
 import {PixelChangedEventDto} from "../server/dto/dto";
 import {HighlightedPixelProvider} from "./highlighter";
+import {fetchBoard} from "../server/request/fetchBoard";
 
 const StateContext = React.createContext<BoardState | undefined>(undefined);
 const DispatchContext = React.createContext<BoardDispatch | undefined>(undefined);
