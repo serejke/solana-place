@@ -13,6 +13,7 @@ import {useHighlightPixel} from "../providers/board/highlighter";
 import {getColorByIndex} from "../utils/color-utils";
 import SolanaExplorerLogo from '../styles/icons/dark-solana-logo.svg';
 import {useServerConfig} from "../providers/server/serverConfig";
+import {displayTimestamp} from "../utils/date";
 
 export function Dashboard() {
   const httpUrl = useServerConfig().httpUrl;
@@ -121,7 +122,7 @@ function BoardHistoryTable() {
           })}
         >
           <td><BoardHistoryChangeArrow oldColor={change.change.oldColor} newColor={change.change.newColor}/></td>
-          <td>{change.transactionDetails.timestamp}</td>
+          <td>{formatTime(change.transactionDetails.timestamp)}</td>
           <td>{change.transactionDetails.signature.slice(0, 7)}…</td>
           <td>{change.transactionDetails.sender.slice(0, 7)}…</td>
           <td><BoardHistoryExplorerLink signature={change.transactionDetails.signature}/></td>
@@ -130,6 +131,33 @@ function BoardHistoryTable() {
       </tbody>
     </table>
   </div>;
+}
+
+function formatTime(timestamp: number): string {
+  const date = new Date();
+  const elapsedSeconds = Math.abs(Math.floor(date.getTime() / 1000) - timestamp);
+  if (elapsedSeconds < 10) {
+    return "< 10 sec ago"
+  }
+  if (elapsedSeconds < 60) {
+    return "< 1 min ago"
+  }
+  if (elapsedSeconds < 60 * 5) {
+    return "< 5 min ago"
+  }
+  if (elapsedSeconds < 60 * 60) {
+    return "< 1h ago"
+  }
+  if (elapsedSeconds < 6 * 60 * 60) {
+    return "< 6h ago"
+  }
+  if (elapsedSeconds < 24 * 60 * 60) {
+    return "< 1 day ago"
+  }
+  if (elapsedSeconds < 3 * 24 * 60 * 60) {
+    return "< 3 days ago"
+  }
+  return displayTimestamp(timestamp * 1000);
 }
 
 function BoardHistoryChangeArrow({oldColor, newColor}: { oldColor: number, newColor: number }) {
