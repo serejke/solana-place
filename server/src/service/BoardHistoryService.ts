@@ -18,12 +18,11 @@ export class BoardHistoryService implements CloseableService {
     return new BoardHistoryService(anchorState);
   }
 
-  async getBoardHistory(): Promise<BoardHistory> {
+  async getBoardHistory(limit: number): Promise<BoardHistory> {
     const connection = this.anchorState.anchorProvider.connection;
-    // TODO[sync]: pagination when >1000 transactions.
     const signaturesForAddress = await connection.getSignaturesForAddress(
       GAME_PROGRAM_ACCOUNT,
-      undefined,
+      {limit},
       "confirmed"
     );
 

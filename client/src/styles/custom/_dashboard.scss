@@ -25,6 +25,11 @@
   flex-grow: 1;
 }
 
+.board-history {
+  max-height: 30vh;
+  overflow-y: scroll;
+}
+
 .board-history-table {
   width: 100%
 }

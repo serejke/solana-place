@@ -40,7 +40,8 @@ export default class ApiServer implements CloseableService {
     })
 
     app.get("/board-history", async (req, res) => {
-      res.json(toBoardHistoryDto(await boardHistoryService.getBoardHistory()));
+      const limit = 100;
+      res.json(toBoardHistoryDto(await boardHistoryService.getBoardHistory(limit)));
     })
 
     app.post("/board/changePixels/tx", async (req, res) => {

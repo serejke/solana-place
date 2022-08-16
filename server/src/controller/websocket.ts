@@ -33,7 +33,12 @@ export default class WebSocketServer implements CloseableService {
         activeUsers--;
       });
       ws.on("message", (data: Buffer, isBinary: boolean) => {
-        console.log("Received message", isBinary, data);
+        const message = isBinary ? data : data.toString();
+        if (typeof message === "string") {
+          console.log("Received message", isBinary, data);
+        } else {
+          console.log("Received binary data of length" + data.length)
+        }
       });
       ws.on("pong", heartbeat);
     });
