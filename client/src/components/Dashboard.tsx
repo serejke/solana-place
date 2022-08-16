@@ -1,6 +1,6 @@
 import * as React from "react";
 import {useClusterConfig} from "../providers/server/cluster";
-import {useBoardDispatch, useBoardState} from "../providers/board/board";
+import {useBoardState} from "../providers/board/board";
 import {useBoardConfig, useSetBoardConfig} from "../providers/board/config";
 import Toggle from "react-toggle";
 import {useWallet} from "@solana/wallet-adapter-react";
@@ -19,7 +19,6 @@ export function Dashboard() {
   const boardConfig = useBoardConfig();
   const setBoardConfig = useSetBoardConfig();
 
-  const boardDispatch = useBoardDispatch();
   const changedPixels = useBoardState()?.changed ?? [];
 
   const wallet = useWallet();
@@ -37,7 +36,6 @@ export function Dashboard() {
                 disabled={changedPixels.length === 0}
                 onClick={() => {
                   changePixels(httpUrl, changedPixels, wallet)
-                    .then(() => boardDispatch({type: "clearChangedPixels"}))
                     .catch(console.error)
                   ;
                 }}>Send</button>}

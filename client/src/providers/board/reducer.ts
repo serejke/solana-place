@@ -43,8 +43,10 @@ export function boardStateReducer(state: BoardState, action: BoardStateAction): 
       const coordinates = action.coordinates;
       const newColors = JSON.parse(JSON.stringify(state.colors));
       newColors[coordinates.row][coordinates.column] = action.newColor;
+      const newChanged = state.changed.filter(changedPixel => !areEqual(changedPixel.coordinates, coordinates))
       return {
         ...state,
+        changed: newChanged,
         colors: newColors
       }
     case "changePixel": {

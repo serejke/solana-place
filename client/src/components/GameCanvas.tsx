@@ -3,13 +3,14 @@ import React, {useRef, useState} from "react";
 import {useSelectPixel} from "../providers/board/selected";
 import {
   CHANGED_COLOR,
-  GRID_COLOR, HIGHLIGHTED_COLOR,
+  GRID_COLOR,
+  HIGHLIGHTED_COLOR,
   HIGHLIGHTED_STROKE_WIDTH,
   HOVERED_PIXEL_COLOR,
   UNOCCUPIED_COLOR
 } from "../utils/color-utils";
 import {useBoardConfig} from "../providers/board/config";
-import {areEqual, BoardState, getColor, isWithinBounds, PixelCoordinates} from "../providers/board/state";
+import {BoardState, getColor, isWithinBounds, PixelCoordinates} from "../providers/board/state";
 import {useHighlightedPixel} from "../providers/board/highlighter";
 
 const PIXEL_SIZE = 10;
@@ -31,7 +32,7 @@ export function GameCanvas() {
   const currentBoardState = useRef<BoardState>();
 
   React.useEffect(() => {
-    if (!boardState) return;
+    if (!boardState?.width || !boardState?.height) return;
     const resizeListener = () => {
       const newWidth = Math.max(boardState.width * PIXEL_SIZE, window.innerWidth);
       const newHeight = Math.max(boardState.height * PIXEL_SIZE, window.innerHeight);
@@ -52,7 +53,7 @@ export function GameCanvas() {
     resizeListener();
     window.addEventListener("resize", resizeListener)
     return () => window.removeEventListener("resize", resizeListener)
-  }, [boardState, canvasSize]);
+  }, [boardState?.width, boardState?.height, canvasSize]);
 
   React.useEffect(() => {
     if (!canvasSize) return;
@@ -96,22 +97,27 @@ export function GameCanvas() {
   }, [canvasSize])
 
   React.useEffect(() => {
-    if (!highlightedPixel) return;
-    const ctx = canvasHelperRef.current?.getContext("2d");
-    if (!ctx) return;
-    const coordinates = highlightedPixel.pixelCoordinates;
-    highlightPixel(ctx, coordinates, HIGHLIGHTED_COLOR);
-    return () => clearHighlightedOrHoveredPixel(ctx, coordinates)
-  }, [highlightedPixel])
-
-
-  React.useEffect(() => {
-    if (!hoveredPixel) return;
-    const ctx = canvasHelperRef.current?.getContext("2d");
-    if (!ctx) return;
-    hoverPixel(ctx, hoveredPixel, HOVERED_PIXEL_COLOR);
-    return () => clearHighlightedOrHoveredPixel(ctx, hoveredPixel);
-  }, [hoveredPixel])
+    const helperCtx = canvasHelperRef.current?.getContext("2d");
+    if (!helperCtx) return;
+    if (highlightedPixel) {
+      highlightPixel(helperCtx, highlightedPixel.pixelCoordinates, HIGHLIGHTED_COLOR);
+    }
+    if (hoveredPixel) {
+      hoverPixel(helperCtx, hoveredPixel, HOVERED_PIXEL_COLOR);
+    }
+    if (boardState?.changed) {
+      boardState.changed.forEach((changedPixel) => {
+        hoverPixel(helperCtx, changedPixel.coordinates, CHANGED_COLOR);
+      });
+    }
+    return () => {
+      highlightedPixel && clearHighlightedOrHoveredPixel(helperCtx, highlightedPixel.pixelCoordinates);
+      hoveredPixel && clearHighlightedOrHoveredPixel(helperCtx, hoveredPixel);
+      boardState?.changed && boardState.changed.forEach((changedPixel) => {
+        clearHighlightedOrHoveredPixel(helperCtx, changedPixel.coordinates);
+      })
+    }
+  }, [hoveredPixel, highlightedPixel, boardState?.changed])
 
   const onClickCallback: CanvasCallback = React.useCallback(({position}) => {
     if (!boardState) return;
@@ -125,7 +131,7 @@ export function GameCanvas() {
     });
   }, [selectPixel, boardState]);
 
-  const onMouseMoveCallback: CanvasCallback = React.useCallback(({ctx, position}) => {
+  const onMouseMoveCallback: CanvasCallback = React.useCallback(({position}) => {
     if (!boardState) return;
     const pixelCoordinates = getPixelCoordinates(position);
     if (isWithinBounds(boardState, pixelCoordinates.row, pixelCoordinates.column)) {
@@ -225,25 +231,6 @@ function colorPixel(ctx: CanvasRenderingContext2D, pixelCoordinates: PixelCoordi
   }
 }
 
-function drawPixel(
-  ctx: CanvasRenderingContext2D,
-  boardState: BoardState,
-  row: number,
-  column: number
-) {
-  const color = getColor(boardState, row, column);
-  if (color === undefined) {
-    return;
-  }
-
-  colorPixel(ctx, {row, column}, color);
-
-  const isChanged = boardState.changed.find((pixel) => areEqual(pixel.coordinates, {row, column}))
-  if (isChanged) {
-    hoverPixel(ctx, {row, column}, CHANGED_COLOR);
-  }
-}
-
 function drawBoard(
   ctx: CanvasRenderingContext2D,
   boardState: BoardState,
@@ -261,7 +248,9 @@ function drawBoard(
         // No need to re-paint.
         continue;
       }
-      drawPixel(ctx, boardState, row, column);
+      if (color !== undefined) {
+        colorPixel(ctx, {row, column}, color);
+      }
     }
   }
 }
