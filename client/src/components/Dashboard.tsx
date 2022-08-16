@@ -38,7 +38,7 @@ export function Dashboard() {
                   changePixels(httpUrl, changedPixels, wallet)
                     .catch(console.error)
                   ;
-                }}>Send</button>}
+                }}>Send{changedPixels.length > 0 ? ` (${changedPixels.length})` : ""}</button>}
           </div>
           <div className="dashboard-item grid-toggle">
             <Toggle

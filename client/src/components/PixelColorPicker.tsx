@@ -10,6 +10,7 @@ import {Classes} from 'reactcss'
 import {GithubPickerStylesProps} from "react-color/lib/components/github/Github";
 import {useBoardDispatch, useBoardState} from "../providers/board/board";
 import {areEqual} from "../providers/board/state";
+import { MAX_CHANGES_PER_TRANSACTION } from "providers/board/changePixels";
 
 const GITHUB_PICKER_TRIANGLE_SIZE = 16;
 
@@ -32,6 +33,8 @@ export function PixelColorPicker() {
       closePicker();
     }
   }, [selectedPixel, boardState, boardDispatch, closePicker])
+
+  const canChangeMore = boardState && boardState.changed.length < MAX_CHANGES_PER_TRANSACTION;
 
   if (!selectedPixel) {
     return null;
@@ -56,25 +59,28 @@ export function PixelColorPicker() {
   }
 
   return (
-    <div style={popover}>
-      <GithubPicker
-        styles={styles}
-        colors={getColorsForPicker()}
-        onChangeComplete={(color) => {
-          const colorIndex = getColorIndexFromPickerResult(color);
-          if (colorIndex === undefined) {
-            console.error("Unknown color", color);
+    <div style={popover} className="color-picker">
+      {canChangeMore
+        ? <GithubPicker
+          styles={styles}
+          colors={getColorsForPicker()}
+          onChangeComplete={(color) => {
+            const colorIndex = getColorIndexFromPickerResult(color);
+            if (colorIndex === undefined) {
+              console.error("Unknown color", color);
+              closePicker();
+              return;
+            }
             closePicker();
-            return;
-          }
-          closePicker();
-          boardDispatch({
-            type: "changePixel",
-            coordinates: selectedPixel.pixelCoordinates,
-            newColor: colorIndex
-          })
-        }}
-      />
+            boardDispatch({
+              type: "changePixel",
+              coordinates: selectedPixel.pixelCoordinates,
+              newColor: colorIndex
+            })
+          }}
+        />
+        : <div className="popup-max-changes-per-transaction">Maximum of {MAX_CHANGES_PER_TRANSACTION} changes are allowed in a single transaction</div>
+      }
     </div>
   )
 }
