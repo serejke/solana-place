@@ -4,6 +4,7 @@ import {useState} from "react";
 import {useServerConfig} from "../server/serverConfig";
 import {useBoardState} from "./board";
 import {fetchBoardHistory} from "../server/request/fetchBoard";
+import {useThrottle } from "@react-hook/throttle";
 
 type BoardHistoryState = {
   boardHistory?: BoardHistory
@@ -17,10 +18,16 @@ export function BoardHistoryProvider({children}: ProviderProps) {
   const [boardHistory, setBoardHistory] = useState<BoardHistory>();
   const serverConfig = useServerConfig();
   const boardState = useBoardState();
+
+  const [throttledBoardState, setThrottledBoardState] = useThrottle(boardState, 1);
+  React.useEffect(() => {
+    setThrottledBoardState(boardState);
+  }, [boardState, setThrottledBoardState]);
+
   React.useEffect(() => {
     fetchBoardHistory(serverConfig.httpUrl)
       .then(boardHistoryDto => setBoardHistory(boardHistoryDto));
-  }, [serverConfig.httpUrl, setBoardHistory, boardState])
+  }, [serverConfig.httpUrl, setBoardHistory, throttledBoardState])
   return (
     <BoardHistoryContext.Provider value={{boardHistory}}>
       {children}

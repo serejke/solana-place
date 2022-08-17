@@ -41,6 +41,7 @@
     "prettier": "^2.6.2",
     "qrcode.react": "^3.0.2",
     "react": "^18.1.0",
+    "@react-hook/throttle": "^2.2.0",
     "react-color": "^2.19.3",
     "react-dom": "^18.1.0",
     "react-draggable": "^4.4.5",
