@@ -1,14 +1,14 @@
 import {cluster, clusterUrl} from "../program/urls";
 import {GAME_PROGRAM_ACCOUNT, PROGRAM_ID} from "../program/program";
 import {Express} from "express";
-import {toBoardHistoryDto, toBoardStateDto, toSerializedMessageDto} from "../dto/converter";
+import {toBoardHistoryDto, toBoardStateDto} from "../dto/converter";
 import {BoardService} from "../service/BoardService";
 import {BoardHistoryService} from "../service/BoardHistoryService";
 import {CloseableService} from "../service/CloseableService";
 import {ChangePixelRequestDto} from "../dto/changePixelRequestDto";
 import {TransactionBuilderService} from "../service/TransactionBuilderService";
 import {PublicKey, Transaction} from "@solana/web3.js";
-import {CreateTransactionRequestDto, SerializedMessageDto, SerializedTransactionDto} from "../dto/transactionDto";
+import {CreateTransactionRequestDto, SerializedTransactionDto} from "../dto/transactionDto";
 import base58 from "bs58";
 import {TransactionService} from "../service/TransactionService";
 

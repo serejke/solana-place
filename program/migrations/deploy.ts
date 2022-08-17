@@ -2,16 +2,19 @@ import {Program} from "@project-serum/anchor";
 import {IDL as SolanaPlaceGameIDL, SolanaPlace} from "../target/types/solana_place";
 import solanaPlaceProgramKeypair from "../target/deploy/solana_place-keypair.json";
 import {createGameAccount} from "./game-account-util";
-
-const anchor = require("@project-serum/anchor");
-const web3 = require("@solana/web3.js");
-const fs = require("fs");
+import copyPicture from "./copy-picture";
+import * as anchor from "@project-serum/anchor";
+import * as web3 from "@solana/web3.js";
+import * as fs from "fs";
 
 const GAME_ACCOUNT_KEYPAIR_PATH = "../target/deploy/game_account_keypair.json";
 const GAME_HEIGHT = 128;
 const GAME_WIDTH = 196;
 
 module.exports = async function (provider) {
+  copyPicture(provider);
+  return;
+
   // Configure client to use the provider.
   anchor.setProvider(provider);
 

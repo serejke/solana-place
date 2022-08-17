@@ -7,5 +7,6 @@
     "target": "es6",
     "esModuleInterop": true,
     "resolveJsonModule": true
-  }
+  },
+  "include": ["migrations"]
 }
