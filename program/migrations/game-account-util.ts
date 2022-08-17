@@ -3,14 +3,15 @@ import {Keypair, SystemProgram, Transaction} from "@solana/web3.js";
 import {SolanaPlace} from "../target/types/solana_place";
 
 function calculateGameAccountSpace(height: number, width: number): number {
-  return 8 + 4 + 2 + 2 + (4 + height * width);
+  return 8 + 4 + 2 + 2 + 4 + (4 + height * width);
 }
 
 export async function createGameAccount(
   program: Program<SolanaPlace>,
   programProvider: AnchorProvider,
   height: number,
-  width: number
+  width: number,
+  changeCost: number
 ) {
   let gameKeypair = Keypair.generate();
 
@@ -32,17 +33,14 @@ export async function createGameAccount(
   await programProvider.sendAndConfirm(tx, [gameKeypair]);
 
   await program.methods
-    .initializeOnly(height, width)
+    .initializeOnly(height, width, changeCost)
     .accounts({
       gameAccount: gameKeypair.publicKey
     })
     .signers([gameKeypair])
     .rpc({skipPreflight: true})
-    .then((signature) => {
-      console.log(signature);
-    })
     .catch((e) => {
-      console.log("error", e);
+      console.log("Error initializing the game", e);
     });
 
   return gameKeypair;

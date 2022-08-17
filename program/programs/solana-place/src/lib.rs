@@ -16,9 +16,10 @@ pub mod solana_place {
     pub fn initialize_only(
         ctx: Context<InitializeOnly>,
         height: u16,
-        width: u16
+        width: u16,
+        change_cost: u32
     ) -> Result<()> {
-        instructions::initialize_only(ctx, height, width)
+        return instructions::initialize_only(ctx, height, width, change_cost);
     }
 
     pub fn change_color(
@@ -27,6 +28,6 @@ pub mod solana_place {
         column: u16,
         color: u8
     ) -> Result<()> {
-        instructions::change_color(ctx, row, column, color)
+        return instructions::change_color(ctx, row, column, color)
     }
 }

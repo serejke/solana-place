@@ -1,16 +1,16 @@
 
 export function waitUntil(
   checkFn: () => boolean,
+  timeout: number = 5000,
   checkDelay: number = 100,
-  timeout: number = 1000
 ): Promise<void> {
   const startTime = Date.now()
 
-  function check(resolve: () => void, reject: () => void) {
+  function check(resolve: () => void, reject: (reason: string) => void) {
     if (checkFn()) {
       resolve()
     } else if (Date.now() - startTime > timeout) {
-      reject()
+      reject("Timeout")
     } else {
       setTimeout(() => check(resolve, reject), checkDelay)
     }

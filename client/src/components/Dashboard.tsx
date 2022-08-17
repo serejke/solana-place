@@ -37,8 +37,7 @@ export function Dashboard() {
                 disabled={changedPixels.length === 0}
                 onClick={() => {
                   changePixels(httpUrl, changedPixels, wallet)
-                    .catch(console.error)
-                  ;
+                    .catch(console.error);
                 }}>Send{changedPixels.length > 0 ? ` (${changedPixels.length})` : ""}</button>}
           </div>
           <div className="dashboard-item grid-toggle">

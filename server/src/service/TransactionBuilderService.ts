@@ -1,4 +1,4 @@
-import {PublicKey, Transaction, TransactionInstruction} from "@solana/web3.js";
+import {PublicKey, SystemProgram, Transaction, TransactionInstruction} from "@solana/web3.js";
 import AnchorService from "./AnchorService";
 import {GAME_PROGRAM_ACCOUNT} from "../program/program";
 import {CloseableService} from "./CloseableService";
@@ -28,7 +28,9 @@ export class TransactionBuilderService implements CloseableService {
       this.anchorService.solanaPlaceProgram.methods
         .changeColor(request.row, request.column, request.newColor)
         .accounts({
-          gameAccount: GAME_PROGRAM_ACCOUNT
+          gameAccount: GAME_PROGRAM_ACCOUNT,
+          payer: feePayer,
+          systemProgram: SystemProgram.programId
         })
         .instruction()
       )

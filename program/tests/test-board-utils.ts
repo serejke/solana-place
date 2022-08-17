@@ -5,12 +5,14 @@ type Board = {
   colors: Buffer
 }
 
-export const emptyBoard: (height: number, width: number) => Board = (height: number, width: number) => ({
-  state: 0,
-  height,
-  width,
-  colors: Buffer.from(Array(height * width).fill(0))
-})
+export const emptyBoard: (height, width, changeCost) => Board =
+  (height: number, width: number, changeCost: number) => ({
+    state: 0,
+    height,
+    width,
+    changeCost,
+    colors: Buffer.from(Array(height * width).fill(0))
+  })
 
 export function changeColor(
   board: Board,

@@ -7,6 +7,7 @@ export function parseBoardStateFromAccount(accountState: any): BoardState {
   const state = accountState.state;
   const height = accountState.height;
   const width = accountState.width;
+  const changeCost = accountState.changeCost;
   const colors: number[][] = new Array(height).fill(0).map(() => new Array(width).fill(0));
   for (let row = 0; row < height; row++) {
     for (let column = 0; column < width; column++) {
@@ -17,6 +18,7 @@ export function parseBoardStateFromAccount(accountState: any): BoardState {
     state,
     height,
     width,
+    changeCost,
     colors
   };
 }

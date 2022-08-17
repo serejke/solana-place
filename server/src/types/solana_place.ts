@@ -3,36 +3,6 @@ export type SolanaPlace = {
   "name": "solana_place",
   "instructions": [
     {
-      "name": "initialize",
-      "accounts": [
-        {
-          "name": "gameAccount",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "height",
-          "type": "u16"
-        },
-        {
-          "name": "width",
-          "type": "u16"
-        }
-      ]
-    },
-    {
       "name": "initializeOnly",
       "accounts": [
         {
@@ -49,6 +19,10 @@ export type SolanaPlace = {
         {
           "name": "width",
           "type": "u16"
+        },
+        {
+          "name": "changeCost",
+          "type": "u32"
         }
       ]
     },
@@ -58,6 +32,16 @@ export type SolanaPlace = {
         {
           "name": "gameAccount",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
           "isSigner": false
         }
       ],
@@ -94,6 +78,10 @@ export type SolanaPlace = {
           {
             "name": "width",
             "type": "u16"
+          },
+          {
+            "name": "changeCost",
+            "type": "u32"
           },
           {
             "name": "colors",
@@ -145,6 +133,11 @@ export type SolanaPlace = {
       "code": 6001,
       "name": "PixelOutOfBounds",
       "msg": "Pixel is not within the game's bounds"
+    },
+    {
+      "code": 6002,
+      "name": "BalanceIsNotEnoughForChange",
+      "msg": "Balance is not enough for change"
     }
   ]
 };
@@ -154,36 +147,6 @@ export const IDL: SolanaPlace = {
   "name": "solana_place",
   "instructions": [
     {
-      "name": "initialize",
-      "accounts": [
-        {
-          "name": "gameAccount",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "height",
-          "type": "u16"
-        },
-        {
-          "name": "width",
-          "type": "u16"
-        }
-      ]
-    },
-    {
       "name": "initializeOnly",
       "accounts": [
         {
@@ -200,6 +163,10 @@ export const IDL: SolanaPlace = {
         {
           "name": "width",
           "type": "u16"
+        },
+        {
+          "name": "changeCost",
+          "type": "u32"
         }
       ]
     },
@@ -209,6 +176,16 @@ export const IDL: SolanaPlace = {
         {
           "name": "gameAccount",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
           "isSigner": false
         }
       ],
@@ -245,6 +222,10 @@ export const IDL: SolanaPlace = {
           {
             "name": "width",
             "type": "u16"
+          },
+          {
+            "name": "changeCost",
+            "type": "u32"
           },
           {
             "name": "colors",
@@ -296,6 +277,11 @@ export const IDL: SolanaPlace = {
       "code": 6001,
       "name": "PixelOutOfBounds",
       "msg": "Pixel is not within the game's bounds"
+    },
+    {
+      "code": 6002,
+      "name": "BalanceIsNotEnoughForChange",
+      "msg": "Balance is not enough for change"
     }
   ]
 };

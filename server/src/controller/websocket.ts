@@ -35,7 +35,7 @@ export default class WebSocketServer implements CloseableService {
       ws.on("message", (data: Buffer, isBinary: boolean) => {
         const message = isBinary ? data : data.toString();
         if (typeof message === "string") {
-          console.log("Received message", isBinary, data);
+          console.log("Received message", isBinary, "'" + message + "'");
         } else {
           console.log("Received binary data of length" + data.length)
         }
