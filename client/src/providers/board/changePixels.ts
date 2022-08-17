@@ -7,7 +7,7 @@ import {toSerializedTransactionDto} from "../server/dto/converter";
 import {TransactionSignature} from "@solana/web3.js";
 import {CreateTransactionRequestDto} from "../server/dto/transactionDto";
 
-export const MAX_CHANGES_PER_TRANSACTION = 5;
+export const MAX_CHANGES_PER_TRANSACTION = 20;
 
 export async function changePixels(
   httpUrl: string,
