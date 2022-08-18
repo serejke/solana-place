@@ -3,7 +3,12 @@ import {Keypair, SystemProgram, Transaction} from "@solana/web3.js";
 import {SolanaPlace} from "../target/types/solana_place";
 
 function calculateGameAccountSpace(height: number, width: number): number {
-  return 8 + 4 + 2 + 2 + 4 + (4 + height * width);
+  return 8 // Discriminator
+    + 4 // State
+    + 2 // Height
+    + 2 // Width
+    + 4 // Change cost
+    + (4 + height * width) // Vec of colors ;
 }
 
 export async function createGameAccount(
@@ -15,10 +20,9 @@ export async function createGameAccount(
 ) {
   let gameKeypair = Keypair.generate();
 
-  const connection = programProvider.connection;
   const tx = new Transaction();
   const gameAccountSpace = calculateGameAccountSpace(height, width);
-  const rentExempt = await connection.getMinimumBalanceForRentExemption(gameAccountSpace);
+  const rentExempt = await programProvider.connection.getMinimumBalanceForRentExemption(gameAccountSpace);
 
   tx.add(
     SystemProgram.createAccount({
@@ -38,7 +42,7 @@ export async function createGameAccount(
       gameAccount: gameKeypair.publicKey
     })
     .signers([gameKeypair])
-    .rpc({skipPreflight: true})
+    .rpc()
     .catch((e) => {
       console.log("Error initializing the game", e);
     });

@@ -20,3 +20,7 @@ export function waitUntil(
     check(resolve, reject)
   })
 }
+
+export async function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
