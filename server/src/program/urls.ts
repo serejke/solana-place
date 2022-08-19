@@ -1,19 +1,34 @@
 import { clusterApiUrl, Cluster } from "@solana/web3.js";
 
-function chooseCluster(): Cluster | undefined {
-  if (!process.env.LIVE) return;
-  switch (process.env.CLUSTER) {
-    case "devnet":
-    case "testnet":
-    case "mainnet-beta": {
-      return process.env.CLUSTER;
+export const cluster: Cluster | "custom" = (() => {
+  const envCluster = process.env.CLUSTER;
+  if (envCluster) {
+    switch (envCluster) {
+      case "custom":
+      case "devnet":
+      case "testnet":
+      case "mainnet-beta": {
+        return envCluster;
+      }
+      default:
+        throw new Error(`Unknown cluster value ${envCluster}`);
     }
   }
-  return "devnet";
-}
+  return "custom";
+})();
 
-export const cluster = chooseCluster();
-
-export const clusterUrl =
-  process.env.RPC_URL ||
-  (process.env.LIVE ? clusterApiUrl(cluster, true) : "http://localhost:8899");
+export const clusterUrl: string = (() => {
+  if (process.env.RPC_URL) {
+    return process.env.RPC_URL;
+  }
+  switch (cluster) {
+    case "devnet":
+    case "testnet":
+    case "mainnet-beta":
+      return clusterApiUrl(cluster, true);
+    case "custom":
+      return "http://localhost:8899";
+    default:
+      throw new Error(`Unknown cluster ${cluster}`)
+  }
+})()

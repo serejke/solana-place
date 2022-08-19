@@ -1,6 +1,6 @@
 import {useClientConfig} from "providers/config";
 import * as React from "react";
-import { useServerConfig } from "./serverConfig";
+import {websocketUrl} from "./server-config";
 
 type SetSocket = React.Dispatch<React.SetStateAction<ServerSocket | undefined>>;
 const SocketContext = React.createContext<WebSocket | undefined>(undefined);
@@ -25,17 +25,16 @@ type ServerSocket = {
 let socketCounter = 0;
 
 type SocketProviderProps = { children: React.ReactNode };
-export function SocketProvider({ children }: SocketProviderProps) {
+export function WebSocketProvider({ children }: SocketProviderProps) {
   const [socket, setSocket] = React.useState<ServerSocket | undefined>(undefined);
   const [socketMessageHandlers, setSocketMessageHandlers] = React.useState<SocketMessageHandler[]>([]);
   const failureCallbackRef = React.useRef(() => {});
   const [activeUsers, setActiveUsers] = React.useState<number>(1);
   const { useTpu, rpcUrl } = useClientConfig();
 
-  const { webSocketUrl } = useServerConfig();
   React.useEffect(() => {
-    newSocket(webSocketUrl, setSocket, setActiveUsers, socketMessageHandlers, failureCallbackRef);
-  }, [webSocketUrl, setSocket, setActiveUsers, socketMessageHandlers, failureCallbackRef]);
+    newSocket(websocketUrl, setSocket, setActiveUsers, socketMessageHandlers, failureCallbackRef);
+  }, [setSocket, setActiveUsers, socketMessageHandlers, failureCallbackRef]);
 
   React.useEffect(() => {
     if (socket) {
@@ -152,16 +151,6 @@ export function useActiveUsers(): number {
 
   return context;
 }
-
-export function useFailureCallback() {
-  const context = React.useContext(FailureCallbackContext);
-  if (!context) {
-    throw new Error(`useFailureCallback must be used within a SocketProvider`);
-  }
-
-  return context;
-}
-
 export function useSocketMessageHandlers(): [SocketMessageHandler[], SetSocketMessageHandlers] {
   const context = React.useContext(SocketMessageHandlersContext);
   if (!context) {

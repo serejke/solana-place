@@ -1,6 +1,6 @@
 import * as React from "react";
 import {SelectedPixelProvider} from "./selected";
-import {useServerConfig} from "../server/serverConfig";
+import {serverUrl} from "../server/server-config";
 import {BoardDispatch, boardStateReducer} from "./reducer";
 import {BoardState} from "./state";
 import {useSocketMessageHandlers} from "../server/socket";
@@ -15,19 +15,18 @@ type ProviderProps = { children: React.ReactNode };
 
 export function BoardStateProvider({children}: ProviderProps) {
   const [boardState, boardDispatch] = React.useReducer(boardStateReducer, {height: 0, width: 0, colors: [], changed: []});
-  const serverConfig = useServerConfig();
   const [, setSocketMessageHandlers] = useSocketMessageHandlers();
 
   // Initial request.
   React.useEffect(() => {
-    fetchBoard(serverConfig.httpUrl)
+    fetchBoard(serverUrl)
       .then(boardStateDto => {
         boardDispatch({
           type: "initialState",
           newState: {...boardStateDto, changed: []}
         })
       });
-  }, [serverConfig.httpUrl]);
+  }, []);
 
   // Subscribe to pixel updates via web-socket.
   React.useEffect(() => {

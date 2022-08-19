@@ -1,4 +1,4 @@
-import {cluster, clusterUrl} from "../program/urls";
+import {cluster} from "../program/urls";
 import {GAME_PROGRAM_ACCOUNT, PROGRAM_ID} from "../program/program";
 import {Express} from "express";
 import {toBoardHistoryDto, toBoardStateDto} from "../dto/converter";
@@ -21,12 +21,11 @@ export default class ApiServer implements CloseableService {
     transactionService: TransactionService,
     transactionBuilderService: TransactionBuilderService
   ): Promise<ApiServer> {
-    app.get("/init", async (req, res) => {
+    app.get("/api/init", async (req, res) => {
       res
         .json(
           {
             programId: PROGRAM_ID.toBase58(),
-            clusterUrl,
             cluster,
             gameAccount: GAME_PROGRAM_ACCOUNT.toBase58()
           }
@@ -34,24 +33,24 @@ export default class ApiServer implements CloseableService {
         .end();
     });
 
-    app.get("/board", async (req, res) => {
+    app.get("/api/board", async (req, res) => {
       const boardState = await boardService.getBoardState()
       res.json(toBoardStateDto(boardState));
     })
 
-    app.get("/board-history", async (req, res) => {
+    app.get("/api/board-history", async (req, res) => {
       const limit = 100;
       res.json(toBoardHistoryDto(await boardHistoryService.getBoardHistory(limit)));
     })
 
-    app.post("/board/changePixels/tx", async (req, res) => {
+    app.post("/api/board/changePixels/tx", async (req, res) => {
       const requestsDto = req.body as CreateTransactionRequestDto<ChangePixelRequestDto[]>;
       const feePayer = new PublicKey(requestsDto.feePayer);
       const serializedMessageDto = await transactionBuilderService.createTransactionToChangePixels(feePayer, requestsDto.data);
       res.json(serializedMessageDto);
     })
 
-    app.post("/transaction/send", async (req, res) => {
+    app.post("/api/transaction/send", async (req, res) => {
       const serializedTransactionDto = req.body as SerializedTransactionDto
       const transaction = Transaction.from(base58.decode(serializedTransactionDto.transactionBase58));
       const transactionSignature = await transactionService.send(transaction);

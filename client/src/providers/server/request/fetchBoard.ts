@@ -26,7 +26,7 @@ export async function fetchBoardHistory(httpUrl: string): Promise<BoardHistoryDt
 async function fetchBoardOrRetry(httpUrl: string): Promise<BoardStateDto | "retry"> {
   try {
     const response = await fetch(
-      new Request(httpUrl + "/board", {
+      new Request(httpUrl + "/api/board", {
         method: "GET",
         headers: {"Content-Type": "application/json"}
       })
@@ -48,7 +48,7 @@ async function fetchBoardOrRetry(httpUrl: string): Promise<BoardStateDto | "retr
 async function fetchBoardHistoryOrRetry(httpUrl: string): Promise<BoardHistoryDto | "retry"> {
   try {
     const response = await fetch(
-      new Request(httpUrl + "/board-history", {
+      new Request(httpUrl + "/api/board-history", {
         method: "GET",
         headers: {"Content-Type": "application/json"}
       })

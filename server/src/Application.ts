@@ -7,13 +7,14 @@ import {Connection} from "@solana/web3.js";
 import {clusterUrl} from "./program/urls";
 import WebSocketServer from "./controller/websocket";
 import AnchorService from "./service/AnchorService";
-import {PROGRAM_ID} from "./program/program";
+import {GAME_PROGRAM_ACCOUNT, PROGRAM_ID} from "./program/program";
 import {BoardSubscriberService} from "./service/BoardSubscriberService";
 import {BoardService} from "./service/BoardService";
 import {BoardHistoryService} from "./service/BoardHistoryService";
 import {CloseableService} from "./service/CloseableService";
 import {TransactionBuilderService} from "./service/TransactionBuilderService";
 import {TransactionService} from "./service/TransactionService";
+import path from "path";
 
 export class Application {
   constructor(
@@ -25,6 +26,10 @@ export class Application {
     const [app, httpServer] = this.startExpressApp();
 
     const connection = new Connection(clusterUrl, "confirmed");
+    console.log(`Connected to RPC node ${clusterUrl}`)
+    console.log(`Solana Space Program ID ${PROGRAM_ID.toBase58()}`)
+    console.log(`Solana Space Game Account ${GAME_PROGRAM_ACCOUNT.toBase58()}`)
+
     const webSocketServer = WebSocketServer.start(httpServer);
 
     const anchorService = await AnchorService.create(connection, PROGRAM_ID);
@@ -88,6 +93,13 @@ export class Application {
           next();
         }
       });
+    }
+
+    if (process.env.NODE_ENV === "production") {
+      const rootPath = path.join(__dirname, "..", "..");
+      const staticPath = path.join(rootPath, "client", "build");
+      console.log(`Serving static files from: ${staticPath}`);
+      app.use("/", express.static(staticPath));
     }
 
     const httpServer = http.createServer(app);

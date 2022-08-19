@@ -1,11 +1,10 @@
 import React from "react";
-import {useServerConfig} from "providers/server/serverConfig";
+import {serverUrl} from "providers/server/server-config";
 import {fetchWithRetry} from "../request/fetchClusterInfo";
 import {Cluster, PublicKey} from "@solana/web3.js";
 
 export interface ClusterConfig {
   cluster: Cluster | "custom";
-  rpcUrl: string;
   programId: PublicKey;
   gameAccount: PublicKey;
 }
@@ -69,21 +68,15 @@ const StateContext = React.createContext<State | undefined>(undefined);
 const DispatchContext = React.createContext<Dispatch | undefined>(undefined);
 
 type ApiProviderProps = { children: React.ReactNode };
-export function HttpProvider({ children }: ApiProviderProps) {
+export function ClusterConfigProvider({ children }: ApiProviderProps) {
   const [state, dispatch] = React.useReducer(configReducer, {
     status: ConfigStatus.Fetching,
   });
 
-  const { httpUrl } = useServerConfig();
-  const httpUrlRef = React.useRef(httpUrl);
   React.useEffect(() => {
-    httpUrlRef.current = httpUrl;
-    fetchWithRetry(dispatch, httpUrlRef);
-  }, [httpUrl]);
-
-  React.useEffect(() => {
-    httpUrlRef.current = httpUrl;
-  }, [httpUrl]);
+    fetchWithRetry(dispatch, serverUrl)
+      .catch(console.error);
+  }, []);
 
   return (
     <StateContext.Provider value={state}>

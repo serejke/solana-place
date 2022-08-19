@@ -12,11 +12,10 @@ import {useBoardHistory} from "../providers/board/history";
 import {useHighlightPixel} from "../providers/board/highlighter";
 import {getColorByIndex} from "../utils/color-utils";
 import SolanaExplorerLogo from '../styles/icons/dark-solana-logo.svg';
-import {useServerConfig} from "../providers/server/serverConfig";
+import {serverUrl} from "../providers/server/server-config";
 import {displayTimestamp} from "../utils/date";
 
 export function Dashboard() {
-  const httpUrl = useServerConfig().httpUrl;
   const boardConfig = useBoardConfig();
   const setBoardConfig = useSetBoardConfig();
 
@@ -30,13 +29,13 @@ export function Dashboard() {
       <div className="dashboard">
         <div className="dashboard-row">
           <div className="dashboard-item">
-            {!wallet && <WalletMultiButton className="action-button"/>}
-            {wallet
+            {!wallet.connected && <WalletMultiButton className="action-button"/>}
+            {wallet.connected
               && <button
                 className="action-button"
                 disabled={changedPixels.length === 0}
                 onClick={() => {
-                  changePixels(httpUrl, changedPixels, wallet)
+                  changePixels(serverUrl, changedPixels, wallet)
                     .catch(console.error);
                 }}>Send{changedPixels.length > 0 ? ` (${changedPixels.length})` : ""}</button>}
           </div>
@@ -181,7 +180,6 @@ function useClusterParam(): string | undefined {
     return undefined;
   }
   const cluster = clusterConfig.cluster;
-  const rpcUrl = clusterConfig.rpcUrl;
   switch (cluster) {
     case "mainnet-beta":
       return "";
@@ -190,6 +188,6 @@ function useClusterParam(): string | undefined {
     case "testnet":
       return "cluster=testnet"
     case "custom":
-      return "cluster=custom&customUrl=" + rpcUrl
+      return "cluster=custom&customUrl=http://localhost:8899"
   }
 }

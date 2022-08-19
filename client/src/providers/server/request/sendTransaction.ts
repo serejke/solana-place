@@ -6,7 +6,7 @@ export async function sendTransaction(
   serializedTransactionDto: SerializedTransactionDto
 ): Promise<TransactionSignature> {
   const response = await fetch(
-    new Request(httpUrl + "/transaction/send", {
+    new Request(httpUrl + "/api/transaction/send", {
       method: "POST",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify(serializedTransactionDto)

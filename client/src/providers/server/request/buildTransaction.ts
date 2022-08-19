@@ -8,7 +8,7 @@ export async function createTransactionToChangePixels(
   changePixelsRequestDto: CreateTransactionRequestDto<ChangePixelRequestDto[]>
 ): Promise<Transaction> {
   const response = await fetch(
-    new Request(httpUrl + "/board/changePixels/tx", {
+    new Request(httpUrl + "/api/board/changePixels/tx", {
       method: "POST",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify(changePixelsRequestDto)
