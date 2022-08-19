@@ -75,6 +75,21 @@ export class Application {
   private static startExpressApp(): [Express, http.Server] {
     const app = express();
 
+    // Redirect to HTTPs when deployed to Heroku
+    //  https://help.heroku.com/J2R1S4T8/can-heroku-force-an-application-to-use-ssl-tls
+    if (
+      process.env.NODE_ENV === "production" &&
+      process.env.FORCE_HTTPS !== undefined
+    ) {
+      app.use((req, res, next) => {
+        if (req.header("x-forwarded-proto") !== "https") {
+          res.redirect(`https://${req.header("host")}${req.url}`);
+        } else {
+          next();
+        }
+      });
+    }
+
     const httpServer = http.createServer(app);
     const port = process.env.PORT || 8080;
     httpServer.listen(port);

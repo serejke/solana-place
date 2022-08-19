@@ -4,6 +4,9 @@
   "version": "1.0.0",
   "description": "Backend for Solana Place",
   "author": "Sergei Patrikeev (@serejke)",
+  "engines": {
+    "node": "14.x"
+  },
   "scripts": {
     "build": "webpack --mode production",
     "test": "echo 'no test specified'",
