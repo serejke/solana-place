@@ -1,5 +1,5 @@
-# solana-place
-Pixel canvas for all users of Solana, inspired by [Reddit r/place](https://www.reddit.com/r/place/).
+# [solana-place](https://solana-place.com)
+Pixel canvas for Solana users inspired by [r/place](https://www.reddit.com/r/place/).
 
 ![Screenshot](docs/images/main.png)
 
