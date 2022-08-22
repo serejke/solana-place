@@ -1,13 +1,14 @@
 import * as React from "react";
 import {GithubPicker} from 'react-color';
-import {getColorIndexFromPickerResult, getColorsForPicker} from "../utils/color-utils";
+import {getColorIndexFromPickerResult, getColorsForPicker} from "../utils/colorUtils";
 import {CSSProperties} from "react";
 import {Classes} from 'reactcss'
 import {GithubPickerStylesProps} from "react-color/lib/components/github/Github";
-import {useBoardDispatch, useBoardState} from "../providers/board/board";
-import {areEqual, PixelCoordinates} from "../providers/board/state";
-import {MAX_CHANGES_PER_TRANSACTION} from "providers/board/changePixels";
+import {useBoardDispatch, useBoardState} from "../providers/board/boardState";
+import {areEqual} from "../model/boardState";
+import {MAX_CHANGES_PER_TRANSACTION} from "request/changePixels";
 import {CanvasPosition} from "./GameCanvas";
+import {PixelCoordinates} from "../model/pixelCoordinates";
 
 const GITHUB_PICKER_TRIANGLE_SIZE = 16;
 

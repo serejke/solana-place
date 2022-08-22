@@ -1,8 +1,10 @@
 import AnchorService from "./AnchorService";
 import {GAME_PROGRAM_ACCOUNT, PROGRAM_ID} from "../program/program";
 import {EventParser} from "@project-serum/anchor";
-import {BoardChange, BoardHistory, PixelChangedEvent} from "../model/model";
 import {CloseableService} from "./CloseableService";
+import {EventsHistory} from "../model/eventsHistory";
+import {parseProgramPixelColorChangedEvent} from "../program/board";
+import {TransactionDetails} from "../model/transactionDetails";
 
 export class BoardHistoryService implements CloseableService {
 
@@ -18,7 +20,7 @@ export class BoardHistoryService implements CloseableService {
     return new BoardHistoryService(anchorState);
   }
 
-  async getBoardHistory(limit: number): Promise<BoardHistory> {
+  async getBoardHistory(limit: number): Promise<EventsHistory> {
     const connection = this.anchorState.anchorProvider.connection;
     const signaturesForAddress = await connection.getSignaturesForAddress(
       GAME_PROGRAM_ACCOUNT,
@@ -26,42 +28,39 @@ export class BoardHistoryService implements CloseableService {
       "confirmed"
     );
 
-    const changeEvents = await Promise.all(
+    const eventsWithDetails = await Promise.all(
       signaturesForAddress.map(async (confirmedSignatureInfo) => {
         const signature = confirmedSignatureInfo.signature;
-        const confirmationStatus: "confirmed" | "finalized" = (confirmedSignatureInfo as any).confirmationStatus;
-        const transaction = await connection.getTransaction(signature, { commitment: confirmationStatus});
+        // Undocumented field. In fact, it is always present in the responses.
+        // eslint-disable-next-line
+        const confirmation: "confirmed" | "finalized" = (confirmedSignatureInfo as any).confirmationStatus;
+        const transaction = await connection.getTransaction(signature, {commitment: confirmation});
         if (!transaction) return null;
         const meta = transaction.meta;
         if (!meta) return null;
         if (meta.err) return null;
-        const sender = transaction.transaction.message.accountKeys[0].toBase58();
+        const sender = transaction.transaction.message.accountKeys[0]
         const timestamp = transaction.blockTime ?? confirmedSignatureInfo.blockTime;
         if (!timestamp) return null;
         const logMessages = meta.logMessages;
         if (!logMessages) return null;
+        const transactionDetails: TransactionDetails = {
+          signature,
+          confirmation,
+          sender,
+          timestamp
+        };
+        // eslint-disable-next-line
         const logs: any[] = Array.from(this.eventParser.parseLogs(logMessages));
         return logs
           .filter(log => log.name === "PixelColorChangedEvent")
-          .map(log => log.data)
-          .map(data => data as PixelChangedEvent)
-          .map(event => {
-            const change: BoardChange = {
-              change: event,
-              transactionDetails: {
-                signature,
-                confirmation: confirmationStatus,
-                sender,
-                timestamp
-              }
-            }
-            return change;
-          })
+          .map(log => parseProgramPixelColorChangedEvent(log.data))
+          .map(event => ({event, transactionDetails}))
       })
     );
 
     return {
-      changes: changeEvents.flatMap(e => e ?? []),
+      events: eventsWithDetails.flatMap(e => e ?? []),
     }
   }
 

@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "webpack --mode production",
-    "test": "echo 'no test specified'",
+    "test": "mocha --recursive 'src/__tests__/*.test.ts'",
     "start": "node ./dist/server.js",
     "start:dev": "nodemon src/index.ts",
     "build:dev": "webpack --mode development",
@@ -45,6 +45,8 @@
     "ws": "^8.7.0"
   },
   "devDependencies": {
+    "@types/mocha": "^9.1.1",
+    "mocha": "^10.0.0",
     "nodemon": "^2.0.19"
   }
 }

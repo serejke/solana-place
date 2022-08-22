@@ -1,7 +1,7 @@
 import {cluster} from "../program/urls";
 import {GAME_PROGRAM_ACCOUNT, PROGRAM_ID} from "../program/program";
 import {Express} from "express";
-import {toBoardHistoryDto, toBoardStateDto} from "../dto/converter";
+import {toEventsWithTransactionDetailsDto, toBoardStateDto} from "../dto-converter/converter";
 import {BoardService} from "../service/BoardService";
 import {BoardHistoryService} from "../service/BoardHistoryService";
 import {CloseableService} from "../service/CloseableService";
@@ -34,13 +34,13 @@ export default class ApiServer implements CloseableService {
     });
 
     app.get("/api/board", async (req, res) => {
-      const boardState = await boardService.getBoardState()
+      const boardState = await boardService.getBoardState("confirmed");
       res.json(toBoardStateDto(boardState));
     })
 
     app.get("/api/board-history", async (req, res) => {
       const limit = 100;
-      res.json(toBoardHistoryDto(await boardHistoryService.getBoardHistory(limit)));
+      res.json(toEventsWithTransactionDetailsDto(await boardHistoryService.getBoardHistory(limit)));
     })
 
     app.post("/api/board/changePixels/tx", async (req, res) => {

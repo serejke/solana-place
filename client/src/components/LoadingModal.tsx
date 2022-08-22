@@ -1,9 +1,9 @@
 import React from "react";
 
-import {LoadingPhase} from "providers/game";
+import {GameStateLoadingPhase} from "providers/gameState";
 import {ClipLoader} from "react-spinners";
 
-export function LoadingModal({show, phase}: { show: boolean; phase?: LoadingPhase; }) {
+export function LoadingModal({show, phase}: { show: boolean; phase?: GameStateLoadingPhase; }) {
   if (!show) {
     return null;
   }

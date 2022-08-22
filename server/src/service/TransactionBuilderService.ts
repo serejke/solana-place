@@ -4,7 +4,7 @@ import {GAME_PROGRAM_ACCOUNT} from "../program/program";
 import {CloseableService} from "./CloseableService";
 import {ChangePixelRequestDto} from "../dto/changePixelRequestDto";
 import {SerializedMessageDto} from "../dto/transactionDto";
-import {toSerializedMessageDto} from "../dto/converter";
+import {toSerializedMessageDto} from "../dto-converter/converter";
 
 const MAX_REQUESTS_PER_TRANSACTION = 20;
 

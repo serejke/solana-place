@@ -1,34 +1,41 @@
 import AnchorService from "./AnchorService";
-import WebSocketServer from "../controller/websocket";
-import {PixelChangedEventDto} from "../dto/dto";
 import {CloseableService} from "./CloseableService";
+import {GameEvent} from "../model/gameEvent";
+import {Protocol} from "../protocol/protocol";
 
 export class BoardSubscriberService implements CloseableService {
-  constructor(
-    private listenerId: number,
-    private anchorState: AnchorService
-  ) {
-  }
+  private readonly listenerId: number;
 
-  static create(anchorState: AnchorService, webSocketServer: WebSocketServer): BoardSubscriberService {
-    const listenerId = anchorState.solanaPlaceProgram.addEventListener(
+  constructor(
+    private anchorState: AnchorService,
+    private protocol: Protocol<GameEvent>
+  ) {
+    this.listenerId = anchorState.solanaPlaceProgram.addEventListener(
       "PixelColorChangedEvent",
-      (event, slot, signature) => {
+      async (event, slot, signature) => {
+        console.log(event, slot, signature);
         const state = event.state as number;
         const row = event.row as number;
         const column = event.column as number;
         const oldColor = event.oldColor as number;
         const newColor = event.newColor as number;
-        const pixelChangedEvent: PixelChangedEventDto = {
-          row, column, oldColor, newColor, state
-        }
-        const message = {
+        const pixelChangedEvent: GameEvent = {
           type: "pixelChangedEvent",
-          pixelChangedEvent
+          row,
+          column,
+          oldColor,
+          newColor,
+          state
         }
-        webSocketServer.send(message);
+        await this.protocol.onEvent(pixelChangedEvent, slot, signature);
       });
-    return new BoardSubscriberService(listenerId, anchorState);
+  }
+
+  static create(
+    anchorState: AnchorService,
+    protocol: Protocol<GameEvent>
+  ): BoardSubscriberService {
+    return new BoardSubscriberService(anchorState, protocol);
   }
 
   async close(): Promise<void> {

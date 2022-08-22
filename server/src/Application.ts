@@ -5,7 +5,7 @@ import {createTerminus} from "@godaddy/terminus";
 import ApiServer from "./controller/api";
 import {Connection} from "@solana/web3.js";
 import {clusterUrl} from "./program/urls";
-import WebSocketServer from "./controller/websocket";
+import WebSocketServer from "./controller/socket";
 import AnchorService from "./service/AnchorService";
 import {GAME_PROGRAM_ACCOUNT, PROGRAM_ID} from "./program/program";
 import {BoardSubscriberService} from "./service/BoardSubscriberService";
@@ -15,6 +15,9 @@ import {CloseableService} from "./service/CloseableService";
 import {TransactionBuilderService} from "./service/TransactionBuilderService";
 import {TransactionService} from "./service/TransactionService";
 import path from "path";
+import {Protocol} from "./protocol/protocol";
+import {GameEvent} from "./model/gameEvent";
+import {toEventWithTransactionDetailsDto} from "./dto-converter/converter";
 
 export class Application {
   constructor(
@@ -27,13 +30,18 @@ export class Application {
 
     const connection = new Connection(clusterUrl, "confirmed");
     console.log(`Connected to RPC node ${clusterUrl}`)
-    console.log(`Solana Space Program ID ${PROGRAM_ID.toBase58()}`)
-    console.log(`Solana Space Game Account ${GAME_PROGRAM_ACCOUNT.toBase58()}`)
+    console.log(`Solana Place Program ID ${PROGRAM_ID.toBase58()}`)
+    console.log(`Solana Place Game Account ${GAME_PROGRAM_ACCOUNT.toBase58()}`)
 
     const webSocketServer = WebSocketServer.start(httpServer);
 
     const anchorService = await AnchorService.create(connection, PROGRAM_ID);
-    const boardSubscriberService = BoardSubscriberService.create(anchorService, webSocketServer);
+    const protocol: Protocol<GameEvent> = new Protocol<GameEvent>(connection);
+    protocol.addListener((eventWithTransactionDetails) => {
+      const eventWithTransactionDetailsDto = toEventWithTransactionDetailsDto(eventWithTransactionDetails);
+      webSocketServer.send(eventWithTransactionDetailsDto);
+    });
+    const boardSubscriberService = BoardSubscriberService.create(anchorService, protocol);
     const boardService = BoardService.create(anchorService);
     const boardHistoryService = BoardHistoryService.create(anchorService);
     const transactionBuilderService = TransactionBuilderService.create(anchorService);

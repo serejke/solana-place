@@ -1,0 +1,33 @@
+import {createTransactionToChangePixels} from "./buildTransaction";
+import {ChangePixelRequestDto} from "../dto/changePixelRequestDto";
+import {WalletContextState} from "@solana/wallet-adapter-react";
+import {sendTransaction} from "./sendTransaction";
+import {toSerializedTransactionDto} from "../dto-converter/converter";
+import {TransactionSignature} from "@solana/web3.js";
+import {CreateTransactionRequestDto} from "../dto/transactionDto";
+import {ChangedPixel} from "../model/changedPixel";
+
+export const MAX_CHANGES_PER_TRANSACTION = 20;
+
+export async function changePixels(
+  httpUrl: string,
+  changedPixels: ChangedPixel[],
+  wallet: WalletContextState
+): Promise<TransactionSignature> {
+  if (changedPixels.length > MAX_CHANGES_PER_TRANSACTION) {
+    throw Error("More changes in a single transaction than allowed.")
+  }
+  const changePixelsRequestDto: CreateTransactionRequestDto<ChangePixelRequestDto[]> = {
+    feePayer: wallet.publicKey!.toBase58()!,
+    data: changedPixels.map(changedPixel => ({
+      row: changedPixel.coordinates.row,
+      column: changedPixel.coordinates.column,
+      newColor: changedPixel.newColor
+    }))
+  }
+  const transaction = await createTransactionToChangePixels(httpUrl, changePixelsRequestDto);
+  const signTransaction = wallet.signTransaction!;
+  const signedTransaction = await signTransaction(transaction);
+  const serializedTransactionDto = toSerializedTransactionDto(signedTransaction);
+  return await sendTransaction(httpUrl, serializedTransactionDto)
+}

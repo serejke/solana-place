@@ -1,18 +1,18 @@
 import * as React from "react";
-import {useClusterConfig} from "../providers/server/cluster";
-import {useBoardState} from "../providers/board/board";
-import {useBoardConfig, useSetBoardConfig} from "../providers/board/config";
+import {useClusterConfig} from "../providers/server/clusterConfig";
+import {useBoardState} from "../providers/board/boardState";
+import {useBoardConfig, useSetBoardConfig} from "../providers/board/boardConfig";
 import Toggle from "react-toggle";
 import {useWallet} from "@solana/wallet-adapter-react";
 import {WalletMultiButton} from "@solana/wallet-adapter-react-ui";
 import Draggable from "react-draggable"
-import {changePixels} from "providers/board/changePixels";
-import {useActiveUsers, useIsOnline} from "../providers/server/socket";
-import {useBoardHistory} from "../providers/board/history";
-import {useHighlightPixel} from "../providers/board/highlighter";
-import {getColorByIndex} from "../utils/color-utils";
+import {changePixels} from "request/changePixels";
+import {useActiveUsers, useIsOnline} from "../providers/server/webSocket";
+import {useBoardHistory} from "../providers/board/boardHistory";
+import {useHighlightPixel} from "../providers/board/highlightedPixel";
+import {getColorByIndex} from "../utils/colorUtils";
 import SolanaExplorerLogo from '../styles/icons/dark-solana-logo.svg';
-import {serverUrl} from "../providers/server/server-config";
+import {serverUrl} from "../request/serverUrls";
 import {displayTimestamp} from "../utils/date";
 import {ClipLoader} from "react-spinners";
 import ReactTooltip from "react-tooltip";
@@ -131,23 +131,23 @@ function BoardHistoryTable() {
       </tr>
       </thead>
       <tbody>
-      {boardHistory.changes.map((change) => (
+      {boardHistory.events.map(({event, transactionDetails}) => (
         <tr
-          key={change.transactionDetails.signature + change.change.row + change.change.column}
+          key={transactionDetails.signature + event.row + event.column}
           className="board-history-row"
           onMouseOut={() => highlightPixel(undefined)}
           onMouseOver={() => highlightPixel({
             pixelCoordinates: {
-              row: change.change.row,
-              column: change.change.column
+              row: event.row,
+              column: event.column
             }
           })}
         >
-          <td><BoardHistoryChangeArrow oldColor={change.change.oldColor} newColor={change.change.newColor}/></td>
-          <td>{formatTime(change.transactionDetails.timestamp)}</td>
-          <td>{change.transactionDetails.signature.slice(0, 7)}…</td>
-          <td>{change.transactionDetails.sender.slice(0, 7)}…</td>
-          <td><BoardHistoryExplorerLink signature={change.transactionDetails.signature}/></td>
+          <td><BoardHistoryChangeArrow oldColor={event.oldColor} newColor={event.newColor}/></td>
+          <td>{formatTime(transactionDetails.timestamp)}</td>
+          <td>{transactionDetails.signature.slice(0, 7)}…</td>
+          <td>{transactionDetails.sender.slice(0, 7)}…</td>
+          <td><BoardHistoryExplorerLink signature={transactionDetails.signature}/></td>
         </tr>
       ))}
       </tbody>

@@ -1,4 +1,4 @@
-import {useBoardState} from "../providers/board/board";
+import {useBoardState} from "../providers/board/boardState";
 import React, {useRef, useState} from "react";
 import {
   CHANGED_COLOR,
@@ -7,11 +7,12 @@ import {
   HIGHLIGHTED_STROKE_WIDTH,
   HOVERED_PIXEL_COLOR,
   UNOCCUPIED_COLOR
-} from "../utils/color-utils";
-import {useBoardConfig} from "../providers/board/config";
-import {BoardState, getColor, isWithinBounds, PixelCoordinates} from "../providers/board/state";
-import {useHighlightedPixel} from "../providers/board/highlighter";
+} from "../utils/colorUtils";
+import {useBoardConfig} from "../providers/board/boardConfig";
+import {BoardState, getColor, isWithinBounds} from "../model/boardState";
+import {useHighlightedPixel} from "../providers/board/highlightedPixel";
 import {SelectedPixel} from "./PixelColorPicker";
+import {PixelCoordinates} from "../model/pixelCoordinates";
 
 const PIXEL_SIZE = 10;
 
