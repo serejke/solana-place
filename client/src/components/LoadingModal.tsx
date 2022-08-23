@@ -18,9 +18,6 @@ export function LoadingModal({show, phase}: { show: boolean; phase?: LoadingPhas
     case "initial-state":
       loadingText = "Loading game state"
       break;
-    case "socket":
-      loadingText = "Connecting to the server";
-      break;
     default:
       loadingText = "Loading";
       break;

@@ -125,8 +125,9 @@ function newSocket(
   return socket;
 }
 
-export function useSocket() {
-  return React.useContext(SocketContext);
+export function useIsOnline(): boolean {
+  const socket = React.useContext(SocketContext);
+  return !!socket && socket.readyState === WebSocket.OPEN;
 }
 
 export function useActiveUsers(): number {

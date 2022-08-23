@@ -60,3 +60,23 @@
 .board-history-explorer-link {
   width: 1rem;
 }
+
+.react-toggle--checked .react-toggle-track {
+  background-color: #512da8;
+}
+
+.react-toggle--checked:hover:not(.react-toggle--disabled) .react-toggle-track {
+  background-color: #351e75;
+}
+
+.online-circle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: rgba(105, 255, 49, 0.96);
+  box-sizing: border-box;
+
+  &.online-circle-offline {
+    background-color: rgba(255, 49, 49, 0.87);
+  }
+}

@@ -72,9 +72,6 @@ export function useBoardState(): BoardState | undefined {
   if (!state) {
     throw new Error(`useBoardState must be used within a BoardStateProvider`);
   }
-  if (state.height === 0) {
-    return undefined;
-  }
   return state;
 }
 

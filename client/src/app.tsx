@@ -13,7 +13,7 @@ export default function App() {
   return (
     <div className="main-content">
       <GameCanvas/>
-      {!showLoadingModal && <Dashboard/>}
+      <Dashboard/>
       <PixelColorPicker />
       <LoadingModal show={showLoadingModal} phase={gameState.loadingPhase} />
     </div>

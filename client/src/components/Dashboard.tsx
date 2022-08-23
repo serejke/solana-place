@@ -7,22 +7,23 @@ import {useWallet} from "@solana/wallet-adapter-react";
 import {WalletMultiButton} from "@solana/wallet-adapter-react-ui";
 import Draggable from "react-draggable"
 import {changePixels} from "providers/board/changePixels";
-import {useActiveUsers} from "../providers/server/socket";
+import {useActiveUsers, useIsOnline} from "../providers/server/socket";
 import {useBoardHistory} from "../providers/board/history";
 import {useHighlightPixel} from "../providers/board/highlighter";
 import {getColorByIndex} from "../utils/color-utils";
 import SolanaExplorerLogo from '../styles/icons/dark-solana-logo.svg';
 import {serverUrl} from "../providers/server/server-config";
 import {displayTimestamp} from "../utils/date";
+import {ClipLoader} from "react-spinners";
 
 export function Dashboard() {
   const boardConfig = useBoardConfig();
   const setBoardConfig = useSetBoardConfig();
+  const isOnline = useIsOnline();
 
   const changedPixels = useBoardState()?.changed ?? [];
 
   const wallet = useWallet();
-  const activeUsers = useActiveUsers();
 
   return (
     <Draggable>
@@ -54,8 +55,8 @@ export function Dashboard() {
               }}/>
             <label className="grid-toggle-label" htmlFor="grid-toggle-id">Show grid</label>
           </div>
-          <div className="dashboard-item">
-            Online: {activeUsers}
+          <div className={`dashboard-item online-circle ${!isOnline ? "online-circle-offline" : ""}`}>
+            {!isOnline && <ClipLoader cssOverride={{width: "22px", height: "22px"}} speedMultiplier={0.5}/>}
           </div>
         </div>
         <div className="dashboard-row">
@@ -68,7 +69,7 @@ export function Dashboard() {
   );
 }
 
-function BoardHistoryExplorerLink({signature}: {signature: string}) {
+function BoardHistoryExplorerLink({signature}: { signature: string }) {
   const clusterParam = useClusterParam();
   const explorerLink = (path: string) => `https://explorer.solana.com/${path}?${clusterParam}`;
   return <div className="board-history-cell">
