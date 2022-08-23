@@ -55,8 +55,10 @@ export function Dashboard() {
               }}/>
             <label className="grid-toggle-label" htmlFor="grid-toggle-id">Show grid</label>
           </div>
-          <div className={`dashboard-item online-circle ${!isOnline ? "online-circle-offline" : ""}`}>
-            {!isOnline && <ClipLoader cssOverride={{width: "22px", height: "22px"}} speedMultiplier={0.5}/>}
+          <div className="dashboard-item online-circle-holder">
+            <div className={`online-circle ${!isOnline ? "online-circle-offline" : ""}`}>
+              {!isOnline && <ClipLoader cssOverride={{width: "22px", height: "22px"}} speedMultiplier={0.5}/>}
+            </div>
           </div>
         </div>
         <div className="dashboard-row">

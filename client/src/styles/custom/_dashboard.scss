@@ -23,11 +23,13 @@
 .dashboard-item {
   margin: 0.5rem 0.5rem;
   flex-grow: 1;
+  display: flex;
 }
 
 .board-history {
   max-height: 30vh;
   overflow-y: scroll;
+  flex-grow: 1;
 }
 
 .board-history-table {
@@ -74,7 +76,10 @@
   height: 22px;
   border-radius: 50%;
   background-color: rgba(105, 255, 49, 0.96);
-  box-sizing: border-box;
+
+  &-holder {
+    justify-content: end;
+  }
 
   &.online-circle-offline {
     background-color: rgba(255, 49, 49, 0.87);
