@@ -15,11 +15,14 @@ import SolanaExplorerLogo from '../styles/icons/dark-solana-logo.svg';
 import {serverUrl} from "../providers/server/server-config";
 import {displayTimestamp} from "../utils/date";
 import {ClipLoader} from "react-spinners";
+import ReactTooltip from "react-tooltip";
 
 export function Dashboard() {
   const boardConfig = useBoardConfig();
   const setBoardConfig = useSetBoardConfig();
+
   const isOnline = useIsOnline();
+  const activeUsers = useActiveUsers();
 
   const changedPixels = useBoardState()?.changed ?? [];
 
@@ -56,9 +59,23 @@ export function Dashboard() {
             <label className="grid-toggle-label" htmlFor="grid-toggle-id">Show grid</label>
           </div>
           <div className="dashboard-item online-circle-holder">
-            <div className={`online-circle ${!isOnline ? "online-circle-offline" : ""}`}>
+            <div
+              data-tip={true}
+              data-for="online-circle-tooltip-id"
+              className={`online-circle ${!isOnline ? "online-circle-offline" : ""}`}>
               {!isOnline && <ClipLoader cssOverride={{width: "22px", height: "22px"}} speedMultiplier={0.5}/>}
             </div>
+            <ReactTooltip
+              class="online-circle-tooltip"
+              id="online-circle-tooltip-id"
+              type={isOnline ? "success" : "info"}
+              effect="solid"
+            >
+              {isOnline
+                ? <>Connected<br/>Users online: {activeUsers}</>
+                : <>You are connecting to the server...</>
+              }
+            </ReactTooltip>
           </div>
         </div>
         <div className="dashboard-row">

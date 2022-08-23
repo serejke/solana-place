@@ -84,4 +84,11 @@
   &.online-circle-offline {
     background-color: rgba(255, 49, 49, 0.87);
   }
+
+  &-tooltip {
+    padding: 0.5rem !important;
+    background-color: hsl(109, 50%, 50%) !important;
+    font-size: 1rem !important;
+    white-space: nowrap;
+  }
 }
