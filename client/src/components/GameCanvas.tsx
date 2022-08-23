@@ -1,6 +1,5 @@
 import {useBoardState} from "../providers/board/board";
 import React, {useRef, useState} from "react";
-import {useSelectPixel} from "../providers/board/selected";
 import {
   CHANGED_COLOR,
   GRID_COLOR,
@@ -12,17 +11,21 @@ import {
 import {useBoardConfig} from "../providers/board/config";
 import {BoardState, getColor, isWithinBounds, PixelCoordinates} from "../providers/board/state";
 import {useHighlightedPixel} from "../providers/board/highlighter";
+import {SelectedPixel} from "./PixelColorPicker";
 
 const PIXEL_SIZE = 10;
 
-export function GameCanvas() {
+type GameCanvasProps = {
+  onPixelClicked: (selectedPixel: SelectedPixel) => void
+};
+
+export function GameCanvas({onPixelClicked}: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvasGridRef = useRef<HTMLCanvasElement>(null);
   const canvasHelperRef = useRef<HTMLCanvasElement>(null);
   const [canvasSize, setCanvasSize] = useState<CanvasSize>();
 
   const boardState = useBoardState();
-  const selectPixel = useSelectPixel();
   const highlightedPixel = useHighlightedPixel();
   const showGrid = useBoardConfig().showGrid;
 
@@ -125,11 +128,11 @@ export function GameCanvas() {
     if (!isWithinBounds(boardState, pixelCoordinates.row, pixelCoordinates.column)) {
       return;
     }
-    selectPixel({
+    onPixelClicked({
       pixelCoordinates,
       canvasPosition: position
-    });
-  }, [selectPixel, boardState]);
+    })
+  }, [boardState, onPixelClicked]);
 
   const onMouseMoveCallback: CanvasCallback = React.useCallback(({position}) => {
     if (!boardState) return;

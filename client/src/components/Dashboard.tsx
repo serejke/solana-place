@@ -17,7 +17,11 @@ import {displayTimestamp} from "../utils/date";
 import {ClipLoader} from "react-spinners";
 import ReactTooltip from "react-tooltip";
 
-export function Dashboard() {
+type DashboardProps = {
+  onMouseDown: () => void
+}
+
+export function Dashboard({onMouseDown}: DashboardProps) {
   const boardConfig = useBoardConfig();
   const setBoardConfig = useSetBoardConfig();
 
@@ -29,7 +33,7 @@ export function Dashboard() {
   const wallet = useWallet();
 
   return (
-    <Draggable>
+    <Draggable onMouseDown={onMouseDown}>
       <div className="dashboard">
         <div className="dashboard-row">
           <div className="dashboard-item">

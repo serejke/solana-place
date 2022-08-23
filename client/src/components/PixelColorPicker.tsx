@@ -1,42 +1,47 @@
 import * as React from "react";
 import {GithubPicker} from 'react-color';
-import {
-  useSelectedPixel,
-  useSelectPixel,
-} from "providers/board/selected";
 import {getColorIndexFromPickerResult, getColorsForPicker} from "../utils/color-utils";
 import {CSSProperties} from "react";
 import {Classes} from 'reactcss'
 import {GithubPickerStylesProps} from "react-color/lib/components/github/Github";
 import {useBoardDispatch, useBoardState} from "../providers/board/board";
-import {areEqual} from "../providers/board/state";
+import {areEqual, PixelCoordinates} from "../providers/board/state";
 import {MAX_CHANGES_PER_TRANSACTION} from "providers/board/changePixels";
+import {CanvasPosition} from "./GameCanvas";
 
 const GITHUB_PICKER_TRIANGLE_SIZE = 16;
 
-export function PixelColorPicker() {
-  const selectedPixel = useSelectedPixel();
-  const selectPixel = useSelectPixel();
+export type SelectedPixel = {
+  pixelCoordinates: PixelCoordinates,
+  canvasPosition: CanvasPosition
+}
+
+type PixelColorPickerProps = {
+  selectedPixel: SelectedPixel | undefined,
+  close: () => void
+};
+
+export function PixelColorPicker({selectedPixel, close}: PixelColorPickerProps) {
   const boardState = useBoardState();
   const boardDispatch = useBoardDispatch();
-  const closePicker = React.useCallback(() => selectPixel(undefined), [selectPixel]);
+
+  const isAlreadyChanged = boardState
+    && selectedPixel
+    && boardState.changed.some(pixel => areEqual(pixel.coordinates, selectedPixel.pixelCoordinates));
 
   React.useEffect(() => {
-    if (!selectedPixel) return;
-    if (!boardState) return;
-    const isAlreadyChanged = boardState.changed.some(pixel => areEqual(pixel.coordinates, selectedPixel.pixelCoordinates));
     if (isAlreadyChanged) {
       boardDispatch({
         type: "deleteChangedPixel",
         coordinates: selectedPixel.pixelCoordinates
       })
-      closePicker();
+      close();
     }
-  }, [selectedPixel, boardState, boardDispatch, closePicker])
+  }, [isAlreadyChanged, selectedPixel, boardDispatch, close])
 
   const canChangeMore = boardState && boardState.changed.length < MAX_CHANGES_PER_TRANSACTION;
 
-  if (!selectedPixel) {
+  if (!selectedPixel || isAlreadyChanged) {
     return null;
   }
 
@@ -69,10 +74,10 @@ export function PixelColorPicker() {
             const colorIndex = getColorIndexFromPickerResult(color);
             if (colorIndex === undefined) {
               console.error("Unknown color", color);
-              closePicker();
+              close();
               return;
             }
-            closePicker();
+            close();
             boardDispatch({
               type: "changePixel",
               coordinates: selectedPixel.pixelCoordinates,

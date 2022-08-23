@@ -1,5 +1,4 @@
 import * as React from "react";
-import {SelectedPixelProvider} from "./selected";
 import {serverUrl} from "../server/server-config";
 import {BoardDispatch, boardStateReducer} from "./reducer";
 import {BoardState} from "./state";
@@ -48,11 +47,9 @@ export function BoardStateProvider({children}: ProviderProps) {
   return (
     <StateContext.Provider value={boardState}>
       <DispatchContext.Provider value={boardDispatch}>
-        <SelectedPixelProvider>
-          <HighlightedPixelProvider>
-            {children}
-          </HighlightedPixelProvider>
-        </SelectedPixelProvider>
+        <HighlightedPixelProvider>
+          {children}
+        </HighlightedPixelProvider>
       </DispatchContext.Provider>
     </StateContext.Provider>
   );
