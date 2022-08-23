@@ -1,4 +1,3 @@
-import {useClientConfig} from "providers/config";
 import * as React from "react";
 import {websocketUrl} from "./server-config";
 
@@ -30,23 +29,10 @@ export function WebSocketProvider({ children }: SocketProviderProps) {
   const [socketMessageHandlers, setSocketMessageHandlers] = React.useState<SocketMessageHandler[]>([]);
   const failureCallbackRef = React.useRef(() => {});
   const [activeUsers, setActiveUsers] = React.useState<number>(1);
-  const { useTpu, rpcUrl } = useClientConfig();
 
   React.useEffect(() => {
     newSocket(websocketUrl, setSocket, setActiveUsers, socketMessageHandlers, failureCallbackRef);
   }, [setSocket, setActiveUsers, socketMessageHandlers, failureCallbackRef]);
-
-  React.useEffect(() => {
-    if (socket) {
-      socket.socket.send(useTpu ? "tpu" : "rpc");
-    }
-  }, [socket, useTpu]);
-
-  React.useEffect(() => {
-    if (socket && rpcUrl) {
-      socket.socket.send(rpcUrl);
-    }
-  }, [socket, rpcUrl]);
 
   React.useEffect(() => {
     setSocketMessageHandlers((handlers) => [
