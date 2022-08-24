@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "webpack --mode production",
-    "test": "mocha --recursive 'src/__tests__/*.test.ts'",
+    "test": "mocha --recursive 'tests/*.test.ts'",
     "start": "node ./dist/server.js",
     "start:dev": "nodemon src/index.ts",
     "build:dev": "webpack --mode development",
