@@ -159,23 +159,24 @@ const SECONDS_PER_MINUTE = 60;
 const SECONDS_PER_HOUR = 60 * 60;
 const SECONDS_PER_DAY = 24 * 60 * 60;
 
+const timeRanges: [number, string][] = [
+  [10, "10 sec"],
+  [SECONDS_PER_MINUTE, "1 min"],
+  [5 * SECONDS_PER_MINUTE, "5 min"],
+  [10 * SECONDS_PER_MINUTE, "10 min"],
+  [30 * SECONDS_PER_MINUTE, "30 min"],
+  [SECONDS_PER_HOUR, "1 hour"],
+  [3 * SECONDS_PER_HOUR, "3 hour"],
+  [6 * SECONDS_PER_HOUR, "6 hour"],
+  [SECONDS_PER_DAY, "1 day"],
+  [3 * SECONDS_PER_DAY, "3 day"]
+]
+
 function formatTime(timestamp: number): string {
   const date = new Date();
   const elapsedSeconds = Math.abs(Math.floor(date.getTime() / 1000) - timestamp);
-  const timeRanges: [number, string][] = [
-    [10, "10 sec"],
-    [SECONDS_PER_MINUTE, "1 min"],
-    [5 * SECONDS_PER_MINUTE, "5 min"],
-    [10 * SECONDS_PER_MINUTE, "10 min"],
-    [30 * SECONDS_PER_MINUTE, "30 min"],
-    [SECONDS_PER_HOUR, "1 hour"],
-    [3 * SECONDS_PER_HOUR, "3 hour"],
-    [6 * SECONDS_PER_HOUR, "6 hour"],
-    [SECONDS_PER_DAY, "1 day"],
-    [3 * SECONDS_PER_DAY, "3 day"],
-  ]
   for (const [time, timeString] of timeRanges) {
-    if (time < elapsedSeconds) {
+    if (elapsedSeconds < time) {
       return "< " + timeString + " ago";
     }
   }
