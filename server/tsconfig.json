@@ -6,6 +6,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "typeRoots": ["./src/types", "./node_modules/@types"],
+    "types": ["mocha"]
   },
   "include": ["src"]
 }

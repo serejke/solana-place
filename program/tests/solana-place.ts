@@ -3,7 +3,6 @@ import {AnchorError, Program} from "@project-serum/anchor";
 import {SolanaPlace} from "../target/types/solana_place";
 import {expect} from "chai";
 import {
-  CHANGE_COLOR_ENCODING_LENGTH,
   changeColor,
   ChangeColorRequest,
   emptyBoard,
