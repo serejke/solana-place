@@ -23,7 +23,7 @@ export default class AnchorService implements CloseableService {
     const anchorProvider = new anchor.AnchorProvider(
       connection,
       wallet,
-      anchor.AnchorProvider.defaultOptions()
+      {commitment: "confirmed", preflightCommitment: "confirmed"}
     );
 
     return Program.at(programId, anchorProvider)

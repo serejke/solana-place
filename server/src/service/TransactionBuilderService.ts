@@ -30,7 +30,7 @@ export class TransactionBuilderService implements CloseableService {
       })
       .instruction()
     const transaction = new Transaction();
-    const latestBlockhash = await this.anchorService.anchorProvider.connection.getLatestBlockhash();
+    const latestBlockhash = await this.anchorService.anchorProvider.connection.getLatestBlockhash("finalized");
     transaction.feePayer = feePayer;
     transaction.recentBlockhash = latestBlockhash.blockhash;
     transaction.add(instruction);
