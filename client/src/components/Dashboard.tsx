@@ -155,29 +155,29 @@ function BoardHistoryTable() {
   </div>;
 }
 
+const SECONDS_PER_MINUTE = 60;
+const SECONDS_PER_HOUR = 60 * 60;
+const SECONDS_PER_DAY = 24 * 60 * 60;
+
 function formatTime(timestamp: number): string {
   const date = new Date();
   const elapsedSeconds = Math.abs(Math.floor(date.getTime() / 1000) - timestamp);
-  if (elapsedSeconds < 10) {
-    return "< 10 sec ago"
-  }
-  if (elapsedSeconds < 60) {
-    return "< 1 min ago"
-  }
-  if (elapsedSeconds < 60 * 5) {
-    return "< 5 min ago"
-  }
-  if (elapsedSeconds < 60 * 60) {
-    return "< 1h ago"
-  }
-  if (elapsedSeconds < 6 * 60 * 60) {
-    return "< 6h ago"
-  }
-  if (elapsedSeconds < 24 * 60 * 60) {
-    return "< 1 day ago"
-  }
-  if (elapsedSeconds < 3 * 24 * 60 * 60) {
-    return "< 3 days ago"
+  const timeRanges: [number, string][] = [
+    [10, "10 sec"],
+    [SECONDS_PER_MINUTE, "1 min"],
+    [5 * SECONDS_PER_MINUTE, "5 min"],
+    [10 * SECONDS_PER_MINUTE, "10 min"],
+    [30 * SECONDS_PER_MINUTE, "30 min"],
+    [SECONDS_PER_HOUR, "1 hour"],
+    [3 * SECONDS_PER_HOUR, "3 hour"],
+    [6 * SECONDS_PER_HOUR, "6 hour"],
+    [SECONDS_PER_DAY, "1 day"],
+    [3 * SECONDS_PER_DAY, "3 day"],
+  ]
+  for (const [time, timeString] of timeRanges) {
+    if (time < elapsedSeconds) {
+      return "< " + timeString + " ago";
+    }
   }
   return displayTimestamp(timestamp * 1000);
 }
