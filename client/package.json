@@ -11,14 +11,17 @@
     "format": "prettier -c \"**/*.+(js|jsx|ts|tsx|json|css|scss|md)\"",
     "format:fix": "prettier --write \"**/*.+(js|jsx|ts|tsx|json|css|scss|md)\""
   },
+  "engines": {
+    "node": "16.x"
+  },
   "testnetDefaultChannel": "edge",
   "dependencies": {
     "@project-serum/anchor": "^0.25.0",
     "@react-hook/throttle": "^2.2.0",
-    "@solana/wallet-adapter-base": "^0.9.9",
-    "@solana/wallet-adapter-react": "^0.15.8",
-    "@solana/wallet-adapter-react-ui": "^0.9.11",
-    "@solana/wallet-adapter-wallets": "^0.16.9",
+    "@solana/wallet-adapter-base": "^0.9.15",
+    "@solana/wallet-adapter-react": "^0.15.17",
+    "@solana/wallet-adapter-react-ui": "^0.9.15",
+    "@solana/wallet-adapter-wallets": "^0.17.2",
     "@solana/web3.js": "^1.50.1",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",

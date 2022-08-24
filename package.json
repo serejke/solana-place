@@ -4,6 +4,9 @@
     "client/node_modules",
     "server/node_modules"
   ],
+  "engines": {
+    "node": "16.x"
+  },
   "scripts": {
     "client:build": "./package.sh client run build",
     "client:install": "./package.sh client install",
