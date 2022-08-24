@@ -11,3 +11,5 @@ export type EventsHistory = {
 }
 
 export type BoardHistory = EventsHistory;
+
+export const BOARD_HISTORY_MAX_LENGTH = 100;
