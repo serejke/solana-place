@@ -7,7 +7,7 @@ import {TransactionSignature} from "@solana/web3.js";
 import {CreateTransactionRequestDto} from "../dto/transactionDto";
 import {ChangedPixel} from "../model/changedPixel";
 
-export const MAX_CHANGES_PER_TRANSACTION = 20;
+export const MAX_CHANGES_PER_TRANSACTION = 150;
 
 export async function changePixels(
   httpUrl: string,
@@ -15,7 +15,7 @@ export async function changePixels(
   wallet: WalletContextState
 ): Promise<TransactionSignature> {
   if (changedPixels.length > MAX_CHANGES_PER_TRANSACTION) {
-    throw Error("More changes in a single transaction than allowed.")
+    throw Error(`Too many ${changedPixels.length} changes in a single transaction.`)
   }
   const changePixelsRequestDto: CreateTransactionRequestDto<ChangePixelRequestDto[]> = {
     feePayer: wallet.publicKey!.toBase58()!,

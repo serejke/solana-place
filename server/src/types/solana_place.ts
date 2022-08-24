@@ -59,6 +59,32 @@ export type SolanaPlace = {
           "type": "u8"
         }
       ]
+    },
+    {
+      "name": "changeColors",
+      "accounts": [
+        {
+          "name": "gameAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "encodedChanges",
+          "type": "bytes"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -81,6 +107,9 @@ export type SolanaPlace = {
           },
           {
             "name": "changeCost",
+            "docs": [
+              "Cost of changing a single color, in micro-lamports."
+            ],
             "type": "u32"
           },
           {
@@ -136,8 +165,8 @@ export type SolanaPlace = {
     },
     {
       "code": 6002,
-      "name": "BalanceIsNotEnoughForChange",
-      "msg": "Balance is not enough for change"
+      "name": "IncorrectGameChangesEncoding",
+      "msg": "Game changes are encoded incorrectly, must be 5 bytes: <row 2><column 2><color 1>"
     }
   ]
 };
@@ -203,6 +232,32 @@ export const IDL: SolanaPlace = {
           "type": "u8"
         }
       ]
+    },
+    {
+      "name": "changeColors",
+      "accounts": [
+        {
+          "name": "gameAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "encodedChanges",
+          "type": "bytes"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -225,6 +280,9 @@ export const IDL: SolanaPlace = {
           },
           {
             "name": "changeCost",
+            "docs": [
+              "Cost of changing a single color, in micro-lamports."
+            ],
             "type": "u32"
           },
           {
@@ -280,8 +338,8 @@ export const IDL: SolanaPlace = {
     },
     {
       "code": 6002,
-      "name": "BalanceIsNotEnoughForChange",
-      "msg": "Balance is not enough for change"
+      "name": "IncorrectGameChangesEncoding",
+      "msg": "Game changes are encoded incorrectly, must be 5 bytes: <row 2><column 2><color 1>"
     }
   ]
 };

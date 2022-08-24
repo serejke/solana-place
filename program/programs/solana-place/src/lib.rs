@@ -30,4 +30,12 @@ pub mod solana_place {
     ) -> Result<()> {
         return instructions::change_color(ctx, row, column, color)
     }
+
+    pub fn change_colors(
+        ctx: Context<ChangeColors>,
+        encoded_changes: Vec<u8>
+    ) -> Result<()> {
+        return instructions::change_colors(ctx, encoded_changes);
+    }
+
 }

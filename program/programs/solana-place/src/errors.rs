@@ -6,5 +6,8 @@ pub enum GameError {
     GameSizeIsNotSupported,
 
     #[msg("Pixel is not within the game's bounds")]
-    PixelOutOfBounds
+    PixelOutOfBounds,
+
+    #[msg("Game changes are encoded incorrectly, must be 5 bytes: <row 2><column 2><color 1>")]
+    IncorrectGameChangesEncoding,
 }

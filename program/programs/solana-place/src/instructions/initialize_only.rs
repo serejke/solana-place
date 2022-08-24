@@ -1,4 +1,4 @@
-use crate::state::{GameAccount, MAX_HEIGHT, MAX_WIDTH};
+use crate::state::{GameAccount};
 use crate::errors::{GameError};
 use anchor_lang::prelude::*;
 
@@ -8,13 +8,7 @@ pub fn initialize_only(
     width: u16,
     change_cost: u32
 ) -> Result<()> {
-    require!(
-        height > 0 &&
-        width > 0 &&
-        (height as usize) <= MAX_HEIGHT &&
-        (width as usize) <= MAX_WIDTH,
-        GameError::GameSizeIsNotSupported
-    );
+    require!(height > 0 && width > 0, GameError::GameSizeIsNotSupported);
     let game_account = &mut ctx.accounts.game_account;
     game_account.state = 0;
     game_account.height = height;
