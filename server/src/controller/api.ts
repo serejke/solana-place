@@ -11,7 +11,7 @@ import {PublicKey, Transaction} from "@solana/web3.js";
 import {CreateTransactionRequestDto, SerializedTransactionDto} from "../dto/transactionDto";
 import base58 from "bs58";
 import {TransactionService} from "../service/TransactionService";
-import {ServerError} from "../errors/serverError";
+import {SERVER_ERROR_PREFIX, ServerError} from "../errors/serverError";
 
 export default class ApiServer implements CloseableService {
 
@@ -66,7 +66,7 @@ export default class ApiServer implements CloseableService {
 
   static errorHandler(error: Error, req: Request, res: Response, next: NextFunction): void {
     console.error("Handled error", error);
-    if (error.name.startsWith("serverError")) {
+    if (error.name.startsWith(SERVER_ERROR_PREFIX)) {
       const serverError = error as ServerError
       res.status(serverError.statusCode).json(serverError.toJson())
     } else {
