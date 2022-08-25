@@ -69,6 +69,7 @@ export function Dashboard({onMouseDown}: DashboardProps) {
               className={`online-circle ${!isOnline ? "online-circle-offline" : ""}`}>
               {!isOnline && <ClipLoader cssOverride={{width: "22px", height: "22px"}} speedMultiplier={0.5}/>}
             </div>
+            <span className="online-circle-label">{isOnline ? "Online" : "Connecting..."}</span>
             <ReactTooltip
               class="online-circle-tooltip"
               id="online-circle-tooltip-id"

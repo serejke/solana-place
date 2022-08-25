@@ -68,6 +68,10 @@
   background-color: #512da8;
 }
 
+.react-toggle--checked .react-toggle-thumb {
+  border-color: #512da8;
+}
+
 .react-toggle--checked:hover:not(.react-toggle--disabled) .react-toggle-track {
   background-color: #351e75;
 }
@@ -76,10 +80,15 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background-color: rgba(105, 255, 49, 0.96);
+  background-color: #76d583;
 
   &-holder {
     justify-content: end;
+    align-items: center;
+  }
+
+  &-label {
+    padding-left: 0.2rem;
   }
 
   &.online-circle-offline {
