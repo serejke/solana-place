@@ -2,7 +2,7 @@ import {Program} from "@project-serum/anchor";
 import {IDL as SolanaPlaceGameIDL, SolanaPlace} from "../target/types/solana_place";
 import solanaPlaceProgramKeypair from "../target/deploy/solana_place-keypair.json";
 import {createGameAccount} from "./game-account-util";
-// import copyPicture from "./copy-picture";
+import copyPicture from "./copy-picture";
 import * as anchor from "@project-serum/anchor";
 import * as web3 from "@solana/web3.js";
 import * as fs from "fs";
@@ -13,8 +13,8 @@ const GAME_WIDTH = 196;
 const CHANGE_COST = 1000; // 1000 micro-lamports = 1/1000 SOL.
 
 module.exports = async function (provider) {
-  // copyPicture(provider);
-  // return;
+  copyPicture(provider);
+  return;
 
   // Configure client to use the provider.
   anchor.setProvider(provider);

@@ -2,6 +2,10 @@
   position: absolute;
 }
 
+.color-picker-triangle {
+  pointer-events: none;
+}
+
 .popup-max-changes-per-transaction {
   background-color: rgba(138, 138, 138, 0.3);
   display: flex;

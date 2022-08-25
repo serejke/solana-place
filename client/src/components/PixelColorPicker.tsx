@@ -56,10 +56,12 @@ export function PixelColorPicker({selectedPixel, close}: PixelColorPickerProps) 
   const styles: Partial<Classes<GithubPickerStylesProps>> = {
     'top-left-triangle': {
       triangle: {
-        left: 1
+        left: 1,
+        pointerEvents: "none"
       },
       triangleShadow: {
-        left: 0
+        left: 0,
+        pointerEvents: "none"
       }
     }
   }

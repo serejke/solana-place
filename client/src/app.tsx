@@ -13,6 +13,7 @@ import {useBoardHistoryDispatch} from "./providers/board/boardHistory";
 import {fetchBoard} from "./request/fetchBoard";
 import {serverUrl} from "./request/serverUrls";
 import {fetchBoardHistory} from "./request/fetchBoardHistory";
+import {areEqual} from "./model/boardState";
 
 export default function App() {
   const gameState = useGameState();
@@ -25,7 +26,13 @@ export default function App() {
 
   return (
     <div className="main-content">
-      <GameCanvas onPixelClicked={(pixel) => setSelectedPixel(pixel)}/>
+      <GameCanvas onPixelClicked={(pixel) => {
+        if (selectedPixel && areEqual(selectedPixel.pixelCoordinates, pixel.pixelCoordinates)) {
+          setSelectedPixel(undefined);
+        } else {
+          setSelectedPixel(pixel)
+        }
+      }}/>
       <Dashboard onMouseDown={() => setSelectedPixel(undefined)}/>
       <PixelColorPicker selectedPixel={selectedPixel} close={() => setSelectedPixel(undefined)}/>
       <LoadingModal show={showLoadingModal} phase={gameState.loadingPhase}/>
