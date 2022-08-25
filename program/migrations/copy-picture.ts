@@ -27,7 +27,8 @@ async function copyPicture(provider) {
 
   const imageBuffer = fs.readFileSync(PICTURE_PATH)
   const png = PNG.sync.read(imageBuffer);
-  const baseCoordinates = 5;
+  const baseRow = 25;
+  const baseColumn = 25;
 
   const changes: ChangeColorRequest[] = [];
   for (let row = 0; row < png.height; row++) {
@@ -37,10 +38,14 @@ async function copyPicture(provider) {
       const g = png.data[index + 1];
       const b = png.data[index + 2];
 
-      const colorIndex = findBestColorIndex(r, g, b) + 1;
+      const baseColorIndex = findBestColorIndex(r, g, b);
+      if (baseColorIndex === 0) {
+        continue;
+      }
+      const colorIndex = baseColorIndex + 1;
       changes.push({
-        row: baseCoordinates + row,
-        column: baseCoordinates + column,
+        row: baseRow + row,
+        column: baseColumn + column,
         color: colorIndex
       })
     }
