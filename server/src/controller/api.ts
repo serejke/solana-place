@@ -1,6 +1,6 @@
 import {cluster} from "../program/urls";
 import {GAME_PROGRAM_ACCOUNT, PROGRAM_ID} from "../program/program";
-import {Express} from "express";
+import {Express, NextFunction, Request, Response} from "express";
 import {toEventsWithTransactionDetailsDto, toBoardStateDto} from "../dto-converter/converter";
 import {BoardService} from "../service/BoardService";
 import {BoardHistoryService} from "../service/BoardHistoryService";
@@ -11,6 +11,7 @@ import {PublicKey, Transaction} from "@solana/web3.js";
 import {CreateTransactionRequestDto, SerializedTransactionDto} from "../dto/transactionDto";
 import base58 from "bs58";
 import {TransactionService} from "../service/TransactionService";
+import {ServerError} from "../errors/serverError";
 
 export default class ApiServer implements CloseableService {
 
@@ -57,7 +58,26 @@ export default class ApiServer implements CloseableService {
       res.json(transactionSignature)
     })
 
+    app.use(ApiServer.errorHandler)
+    app.use(ApiServer.failSafeHandler)
+
     return new ApiServer();
+  }
+
+  static errorHandler(error: Error, req: Request, res: Response, next: NextFunction): void {
+    console.error("Handled error", error);
+    if (error.name.startsWith("serverError")) {
+      const serverError = error as ServerError
+      res.status(serverError.statusCode).json(serverError.toJson())
+    } else {
+      next(error);
+    }
+  }
+
+  static failSafeHandler(error: Error, req: Request, res: Response, next: NextFunction): void {
+    res.status(500).send(error)
+    // noinspection BadExpressionStatementJS
+    next
   }
 
   async close(): Promise<void> {

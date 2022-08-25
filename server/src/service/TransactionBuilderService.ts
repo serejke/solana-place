@@ -6,6 +6,7 @@ import {ChangePixelRequestDto} from "../dto/changePixelRequestDto";
 import {SerializedMessageDto} from "../dto/transactionDto";
 import {toSerializedMessageDto} from "../dto-converter/converter";
 import {encodeChangePixelColorRequests} from "../program/encoder";
+import {rethrowRpcError} from "../errors/serverError";
 
 export class TransactionBuilderService implements CloseableService {
 
@@ -29,8 +30,12 @@ export class TransactionBuilderService implements CloseableService {
         systemProgram: SystemProgram.programId
       })
       .instruction()
+      .catch((e) => rethrowRpcError(e))
     const transaction = new Transaction();
-    const latestBlockhash = await this.anchorService.anchorProvider.connection.getLatestBlockhash("finalized");
+    const latestBlockhash = await this.anchorService.anchorProvider.connection
+      .getLatestBlockhash("finalized")
+      .catch((e) => rethrowRpcError(e));
+
     transaction.feePayer = feePayer;
     transaction.recentBlockhash = latestBlockhash.blockhash;
     transaction.add(instruction);

@@ -5,6 +5,7 @@ import {CloseableService} from "./CloseableService";
 import {EventsHistory} from "../model/eventsHistory";
 import {parseProgramPixelColorChangedEvent} from "../program/board";
 import {TransactionDetails} from "../model/transactionDetails";
+import {rethrowRpcError} from "../errors/serverError";
 
 export class BoardHistoryService implements CloseableService {
 
@@ -26,7 +27,7 @@ export class BoardHistoryService implements CloseableService {
       GAME_PROGRAM_ACCOUNT,
       {limit},
       "confirmed"
-    );
+    ).catch((e) => rethrowRpcError(e));
 
     const eventsWithDetails = await Promise.all(
       signaturesForAddress.map(async (confirmedSignatureInfo) => {
@@ -57,7 +58,7 @@ export class BoardHistoryService implements CloseableService {
           .map(log => parseProgramPixelColorChangedEvent(log.data))
           .map(event => ({event, transactionDetails}))
       })
-    );
+    ).catch((e) => rethrowRpcError(e));
 
     return {
       events: eventsWithDetails.flatMap(e => e ?? []),

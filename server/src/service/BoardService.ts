@@ -4,6 +4,7 @@ import {BoardState} from "../model/boardState";
 import {parseBoardStateFromAccount} from "../program/board";
 import {CloseableService} from "./CloseableService";
 import {Commitment} from "@solana/web3.js";
+import {rethrowRpcError} from "../errors/serverError";
 
 export class BoardService implements CloseableService {
 
@@ -20,6 +21,7 @@ export class BoardService implements CloseableService {
     return this.anchorState.solanaPlaceProgram.account.gameAccount
       .fetch(GAME_PROGRAM_ACCOUNT, commitment)
       .then(parseBoardStateFromAccount)
+      .catch((e) => rethrowRpcError(e))
   }
 
   async close(): Promise<void> {

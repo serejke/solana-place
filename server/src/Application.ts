@@ -1,4 +1,5 @@
 import express, {Express} from "express";
+import 'express-async-errors'; // Enable error handling for async routes: https://github.com/davidbanham/express-async-errors/
 import http from "http";
 import cors from "cors";
 import {createTerminus} from "@godaddy/terminus";
