@@ -1,7 +1,7 @@
 use std::ops::{Div, Rem};
 use crate::state::GameAccount;
 use crate::errors::GameError;
-use crate::events::PixelColorChangedEvent;
+use crate::events::{PixelColorsChangedEvent, PixelColorChange};
 use anchor_lang::prelude::*;
 use crate::fee_helper::charge_game_fees;
 use crate::index_helper::get_game_index;
@@ -25,6 +25,7 @@ pub fn change_colors(
         )?;
     }
 
+    let mut pixel_color_changes: Vec<PixelColorChange> = vec![];
     let game_account = &mut ctx.accounts.game_account;
     for i in 0..number_of_changes {
         let start_index = i * ChangeColors::CHANGE_ENCODING_SIZE;
@@ -33,13 +34,21 @@ pub fn change_colors(
         let color = encoded_changes[start_index + 4];
 
         require!(row < game_account.height && column < game_account.width, GameError::PixelOutOfBounds);
-        let state = game_account.state;
         let index = get_game_index(game_account, row, column);
         let old_color = game_account.colors[index as usize];
         game_account.colors[index as usize] = color;
-        game_account.state = state + 1;
-        emit!(PixelColorChangedEvent { state, row, column, old_color, new_color: color });
+        pixel_color_changes.push(PixelColorChange { row, column, old_color, new_color: color } )
     }
+
+    let state = game_account.state;
+    let new_state = state + number_of_changes as u32;
+    game_account.state = new_state;
+
+    emit!(PixelColorsChangedEvent {
+        state,
+        new_state,
+        changes: pixel_color_changes
+    });
 
     Ok(())
 }

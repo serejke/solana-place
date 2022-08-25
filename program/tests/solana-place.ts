@@ -33,11 +33,11 @@ describe("solana-place", () => {
     code: () => Promise<void>
   ): Promise<any[]> {
     const events = [];
-    const listenerId = program.addEventListener("PixelColorChangedEvent", (e) => {
+    const listenerId = program.addEventListener(eventName, (e) => {
       events.push(e)
     });
     await code();
-    await waitUntil(() => events.length > 0, 30000);
+    await waitUntil(() => events.length === eventsNumber, 30000);
     await program.removeEventListener(listenerId);
     return events;
   }
@@ -90,23 +90,23 @@ describe("solana-place", () => {
   })
 
   it("change colors", async () => {
-    const gameKeypair = await createGameAccount(program, programProvider, 10, 15, changeCost);
+    const boardHeight = 150;
+    const boardWidth = 150;
+
+    const gameKeypair = await createGameAccount(program, programProvider, boardHeight, boardWidth, changeCost);
 
     let gameState = await program.account.gameAccount.fetch(gameKeypair.publicKey);
-    let expectedBoard = emptyBoard(10, 15, changeCost);
+    let expectedBoard = emptyBoard(boardHeight, boardWidth, changeCost);
     expect(gameState).to.eql(expectedBoard);
 
     const balanceBefore = await getBalance(programProvider.wallet.publicKey);
     let transactionSignature;
 
-    const changeColorRequests: ChangeColorRequest[] = [
-      { row: 0, column: 0, color: 255 },
-      { row: 1, column: 1, color: 1 },
-      { row: 3, column: 3, color: 3 },
-      { row: 9, column: 9, color: 9 },
-    ]
+    const changeColorRequests: ChangeColorRequest[] = new Array(boardHeight).fill(0).map((_, index) => (
+      {row: index, column: index, color: index}
+    ));
 
-    const events = await catchEvent(program, "PixelColorChangedEvent", changeColorRequests.length, async () => {
+    const [event] = await catchEvent(program, "PixelColorsChangedEvent", 1, async () => {
       transactionSignature = await program.methods
         .changeColors(encodeChangeColorRequests(changeColorRequests))
         .accounts({
@@ -117,14 +117,18 @@ describe("solana-place", () => {
         .rpc()
     })
 
-    const expectedEvents = changeColorRequests.map((request, index) => ({
-      state: index,
-      row: request.row,
-      column: request.column,
-      oldColor: 0,
-      newColor: request.color
-    }));
-    expect(events).to.eql(expectedEvents);
+    const expectedEvent = {
+      state: 0,
+      newState: changeColorRequests.length,
+      changes: changeColorRequests.map((change) => ({
+        row: change.row,
+        column: change.column,
+        oldColor: 0,
+        newColor: change.color
+      }))
+    };
+
+    expect(event).to.eql(expectedEvent);
 
     gameState = await program.account.gameAccount.fetch(gameKeypair.publicKey);
     expectedBoard = changeColorRequests.reduce(

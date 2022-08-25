@@ -1,4 +1,4 @@
-import {Program} from "@project-serum/anchor";
+import {AnchorProvider, Program} from "@project-serum/anchor";
 import * as anchor from "@project-serum/anchor";
 import * as web3 from "@solana/web3.js";
 import * as fs from "fs";
@@ -6,6 +6,8 @@ import {PNG} from "pngjs";
 import {IDL as SolanaPlaceGameIDL, SolanaPlace} from "../target/types/solana_place";
 import solanaPlaceProgramKeypair from "../target/deploy/solana_place-keypair.json";
 import gameAccountKeypair from "../target/deploy/game_account_keypair.json";
+import {ChangeColorRequest, encodeChangeColorRequests} from "../tests/test-board-utils";
+import {SystemProgram} from "@solana/web3.js";
 
 const PICTURE_PATH = "../target/pictures/img.png";
 
@@ -25,7 +27,9 @@ async function copyPicture(provider) {
 
   const imageBuffer = fs.readFileSync(PICTURE_PATH)
   const png = PNG.sync.read(imageBuffer);
-  let finished = 0;
+  const baseCoordinates = 5;
+
+  const changes: ChangeColorRequest[] = [];
   for (let row = 0; row < png.height; row++) {
     for (let column = 0; column < png.width; column++) {
       const index = (png.width * row + column) * 4;
@@ -34,21 +38,28 @@ async function copyPicture(provider) {
       const b = png.data[index + 2];
 
       const colorIndex = findBestColorIndex(r, g, b) + 1;
-      const baseCoordinates = 20;
-      program.methods
-        .changeColor(baseCoordinates + row, baseCoordinates + column, colorIndex)
-        .accounts({
-          gameAccount
-        })
-        .rpc()
-        .then(() => {
-          finished++;
-          if (finished % 100 === 0) {
-            console.log("Finished change #" + finished);
-          }
-        })
-        .catch(console.error);
+      changes.push({
+        row: baseCoordinates + row,
+        column: baseCoordinates + column,
+        color: colorIndex
+      })
     }
+  }
+
+  const sliceSize = 100;
+  let sliceStart = 0;
+  while (sliceStart < changes.length) {
+    const encodedRequests = encodeChangeColorRequests(changes.slice(sliceStart, sliceStart + sliceSize));
+    await program.methods
+      .changeColors(encodedRequests)
+      .accounts({
+        gameAccount,
+        payer: (provider as AnchorProvider).wallet.publicKey,
+        systemProgram: SystemProgram.programId
+      })
+      .rpc()
+      .then(() => console.log(`Finished slice ${sliceStart / sliceSize}`));
+    sliceStart += sliceSize;
   }
 }
 

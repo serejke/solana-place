@@ -11,23 +11,20 @@ export class BoardSubscriberService implements CloseableService {
     private protocol: Protocol<GameEvent>
   ) {
     this.listenerId = anchorState.solanaPlaceProgram.addEventListener(
-      "PixelColorChangedEvent",
+      "PixelColorsChangedEvent",
       async (event, slot, signature) => {
-        console.log(event, slot, signature);
-        const state = event.state as number;
-        const row = event.row as number;
-        const column = event.column as number;
-        const oldColor = event.oldColor as number;
-        const newColor = event.newColor as number;
-        const pixelChangedEvent: GameEvent = {
+        // eslint-disable-next-line
+        const changes: GameEvent[] = event.changes.map((change: any, index: number) => ({
           type: "pixelChangedEvent",
-          row,
-          column,
-          oldColor,
-          newColor,
-          state
+          state: event.state + index,
+          row: change.row,
+          column: change.column,
+          oldColor: change.oldColor,
+          newColor: change.newColor,
+        }));
+        for (const change of changes) {
+          await this.protocol.onEvent(change, slot, signature)
         }
-        await this.protocol.onEvent(pixelChangedEvent, slot, signature);
       });
   }
 
