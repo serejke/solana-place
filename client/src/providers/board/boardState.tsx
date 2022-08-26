@@ -15,7 +15,7 @@ export function BoardStateProvider({children}: { children: React.ReactNode }) {
     changed: []
   });
 
-  const [throttledBoardState, setThrottledBoardState] = useThrottle<BoardState>(boardState, 1);
+  const [throttledBoardState, setThrottledBoardState] = useThrottle<BoardState>(boardState, 1, true);
   React.useEffect(() => {
     setThrottledBoardState(boardState);
   }, [boardState, setThrottledBoardState]);
