@@ -6,7 +6,7 @@ type State = [BoardConfig, SetState];
 const Context = React.createContext<State | undefined>(undefined);
 
 export function BoardConfigProvider({children}: { children: React.ReactNode }) {
-  const initialState = {showGrid: true};
+  const initialState = {showGrid: true, showHistory: true};
   const state: State = React.useState<BoardConfig>(initialState);
   return (
     <Context.Provider value={state}>

@@ -1,3 +1,4 @@
 export type BoardConfig = {
-  showGrid: boolean
+  showGrid: boolean,
+  showHistory: boolean
 }

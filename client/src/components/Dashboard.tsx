@@ -22,19 +22,22 @@ type DashboardProps = {
 }
 
 export function Dashboard({onMouseDown}: DashboardProps) {
+  const {showHistory} = useBoardConfig();
+
   return (
     <Draggable onMouseDown={onMouseDown}>
       <div className="dashboard">
         <div className="dashboard-row">
           <SendActionButton/>
           <ShowGridToggle/>
+          <ShowHistoryToggle/>
           <OnlineStatusCircle/>
         </div>
-        <div className="dashboard-row">
+        {showHistory && <div className="dashboard-row">
           <div className="dashboard-item">
             <BoardHistoryTable/>
           </div>
-        </div>
+        </div>}
       </div>
     </Draggable>
   );
@@ -89,7 +92,28 @@ function ShowGridToggle() {
           }
         })
       }}/>
-    <label className="grid-toggle-label" htmlFor="grid-toggle-id">Show grid</label>
+    <label className="grid-toggle-label" htmlFor="grid-toggle-id">Grid</label>
+  </div>;
+}
+
+function ShowHistoryToggle() {
+  const boardConfig = useBoardConfig();
+  const setBoardConfig = useSetBoardConfig();
+
+  return <div className="dashboard-item grid-toggle">
+    <Toggle
+      id="history-toggle-id"
+      defaultChecked={boardConfig.showHistory}
+      icons={false}
+      onChange={(e) => {
+        setBoardConfig((prevConfig) => {
+          return {
+            ...prevConfig,
+            showHistory: e.target.checked
+          }
+        })
+      }}/>
+    <label className="history-toggle-label" htmlFor="grid-toggle-id">History</label>
   </div>;
 }
 

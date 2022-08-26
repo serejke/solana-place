@@ -22,7 +22,7 @@
 }
 
 .dashboard-item {
-  margin: 0.5rem 0.5rem;
+  margin: 0.3rem 0.3rem;
   flex-grow: 1;
   display: flex;
 }
@@ -102,4 +102,16 @@
     font-size: 1rem !important;
     white-space: nowrap;
   }
+}
+
+.grid-toggle {
+  display: flex;
+}
+
+.grid-toggle-label {
+  margin-left: 0.2rem;
+}
+
+.history-toggle-label {
+  margin-left: 0.2rem;
 }
