@@ -22,69 +22,13 @@ type DashboardProps = {
 }
 
 export function Dashboard({onMouseDown}: DashboardProps) {
-  const boardConfig = useBoardConfig();
-  const setBoardConfig = useSetBoardConfig();
-
-  const isOnline = useIsOnline();
-  const activeUsers = useActiveUsers();
-
-  const changedPixels = useBoardState()?.changed ?? [];
-
-  const wallet = useWallet();
-
   return (
     <Draggable onMouseDown={onMouseDown}>
       <div className="dashboard">
         <div className="dashboard-row">
-          <div className="dashboard-item">
-            {!wallet.connected && <WalletMultiButton className="action-button"/>}
-            {wallet.connected
-              && <button
-                className="action-button"
-                disabled={changedPixels.length === 0}
-                onClick={() => {
-                  changePixels(serverUrl, changedPixels, wallet)
-                    .catch(console.error);
-                }}>Send{changedPixels.length > 0 ? ` (${changedPixels.length})` : ""}</button>}
-          </div>
-          <div className="dashboard-item grid-toggle">
-            <Toggle
-              id="grid-toggle-id"
-              defaultChecked={boardConfig.showGrid}
-              icons={false}
-              onChange={(e) => {
-                setBoardConfig((prevConfig) => {
-                  return {
-                    ...prevConfig,
-                    showGrid: e.target.checked
-                  }
-                })
-              }}/>
-            <label className="grid-toggle-label" htmlFor="grid-toggle-id">Show grid</label>
-          </div>
-          <div className="dashboard-item online-circle-holder">
-            <div
-              data-tip={true}
-              data-for="online-circle-tooltip-id"
-              className={`online-circle ${!isOnline ? "online-circle-offline" : ""}`}>
-            </div>
-            <span className="online-circle-label">{isOnline
-              ? "Online"
-              : "Connecting"
-            }</span>
-            {!isOnline && <ClipLoader cssOverride={{marginLeft: "0.2rem"}} size={12} speedMultiplier={0.5}/>}
-            <ReactTooltip
-              class="online-circle-tooltip"
-              id="online-circle-tooltip-id"
-              type={isOnline ? "success" : "info"}
-              effect="solid"
-            >
-              {isOnline
-                ? <>Connected<br/>Users online: {activeUsers}</>
-                : <>You are connecting to the server...</>
-              }
-            </ReactTooltip>
-          </div>
+          <SendActionButton/>
+          <ShowGridToggle/>
+          <OnlineStatusCircle/>
         </div>
         <div className="dashboard-row">
           <div className="dashboard-item">
@@ -94,6 +38,88 @@ export function Dashboard({onMouseDown}: DashboardProps) {
       </div>
     </Draggable>
   );
+}
+
+function SendActionButton() {
+  const changedPixels = useBoardState()?.changed ?? [];
+  const wallet = useWallet();
+  const isDisabled = changedPixels.length === 0;
+
+  return <div className="dashboard-item">
+    <div
+      data-tip={true}
+      data-for="action-button-tooltip-id"
+    >
+      {!wallet.connected && <WalletMultiButton className="action-button"/>}
+      {wallet.connected
+        && <button
+          className="action-button"
+          disabled={isDisabled}
+          onClick={() => {
+            changePixels(serverUrl, changedPixels, wallet)
+              .catch(console.error);
+          }}>
+          Send{!isDisabled ? ` (${changedPixels.length})` : ""}
+        </button>
+      }
+    </div>
+    <ReactTooltip
+      className="action-button-tooltip"
+      id="action-button-tooltip-id"
+      type="info"
+      effect="solid"
+    >Change colors of pixels</ReactTooltip>
+  </div>;
+}
+
+function ShowGridToggle() {
+  const boardConfig = useBoardConfig();
+  const setBoardConfig = useSetBoardConfig();
+
+  return <div className="dashboard-item grid-toggle">
+    <Toggle
+      id="grid-toggle-id"
+      defaultChecked={boardConfig.showGrid}
+      icons={false}
+      onChange={(e) => {
+        setBoardConfig((prevConfig) => {
+          return {
+            ...prevConfig,
+            showGrid: e.target.checked
+          }
+        })
+      }}/>
+    <label className="grid-toggle-label" htmlFor="grid-toggle-id">Show grid</label>
+  </div>;
+}
+
+function OnlineStatusCircle() {
+  const isOnline = useIsOnline();
+  const activeUsers = useActiveUsers();
+
+  return <div className="dashboard-item online-circle-holder">
+    <div
+      data-tip={true}
+      data-for="online-circle-tooltip-id"
+      className={`online-circle ${!isOnline ? "online-circle-offline" : ""}`}>
+    </div>
+    <span className="online-circle-label">{isOnline
+      ? "Online"
+      : "Connecting"
+    }</span>
+    {!isOnline && <ClipLoader cssOverride={{marginLeft: "0.2rem"}} size={12} speedMultiplier={0.5}/>}
+    <ReactTooltip
+      class="online-circle-tooltip"
+      id="online-circle-tooltip-id"
+      type={isOnline ? "success" : "info"}
+      effect="solid"
+    >
+      {isOnline
+        ? <>Connected<br/>Users online: {activeUsers}</>
+        : <>You are connecting to the server...</>
+      }
+    </ReactTooltip>
+  </div>;
 }
 
 function BoardHistoryExplorerLink({signature}: { signature: string }) {

@@ -13,6 +13,10 @@
   height: 2rem;
   min-width: 12rem;
   justify-content: center;
+
+  &-tooltip {
+    font-size: 1rem !important;
+  }
 }
 
 .action-button:not([disabled]):focus-visible {
