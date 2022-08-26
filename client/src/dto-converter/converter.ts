@@ -1,8 +1,8 @@
 import {Transaction} from "@solana/web3.js";
 import {SerializedTransactionDto} from "../dto/transactionDto";
 import base58 from "bs58";
-import {BoardHistory, EventWithTransactionDetails} from "../model/model";
-import {EventsWithTransactionDetailsDto} from "../dto/eventsWithTransactionDetailsDto";
+import {BoardHistory, GameEventWithTransactionDetails} from "../model/model";
+import {EventsWithTransactionDetailsDto, EventWithTransactionDetailsDto} from "../dto/eventsWithTransactionDetailsDto";
 
 export function toSerializedTransactionDto(transaction: Transaction): SerializedTransactionDto {
   return {
@@ -10,13 +10,32 @@ export function toSerializedTransactionDto(transaction: Transaction): Serialized
   }
 }
 
-export function parseEventWithTransactionDetailsDtoFromSocketMessage(data: any): EventWithTransactionDetails | null {
+export function parseGameEventWithTransactionDetailsFromDto(data: EventWithTransactionDetailsDto): GameEventWithTransactionDetails[] | null {
   if ("event" in data && "transactionDetails" in data) {
-    return data;
+    // eslint-disable-next-line
+    return data.event.changes.map((change, index: number) => (
+        {
+          event: {
+            type: "pixelChangedEvent",
+            state: data.event.state + index,
+            row: change.row,
+            column: change.column,
+            oldColor: change.oldColor,
+            newColor: change.newColor,
+          },
+          transactionDetails: data.transactionDetails
+        }
+      )
+    );
   }
   return null;
 }
 
 export function parseBoardHistory(eventsWithTransactionDetailsDto: EventsWithTransactionDetailsDto): BoardHistory {
-  return eventsWithTransactionDetailsDto;
+  const gameEventWithTransactionDetails = eventsWithTransactionDetailsDto.events.flatMap((eventWithTransactionDetailsDto) =>
+    parseGameEventWithTransactionDetailsFromDto(eventWithTransactionDetailsDto) ?? []
+  );
+  return {
+    events: gameEventWithTransactionDetails
+  };
 }

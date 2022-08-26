@@ -22,15 +22,6 @@ pub mod solana_place {
         return instructions::initialize_only(ctx, height, width, change_cost);
     }
 
-    pub fn change_color(
-        ctx: Context<ChangeColor>,
-        row: u16,
-        column: u16,
-        color: u8
-    ) -> Result<()> {
-        return instructions::change_color(ctx, row, column, color)
-    }
-
     pub fn change_colors(
         ctx: Context<ChangeColors>,
         encoded_changes: Vec<u8>

@@ -1,4 +1,5 @@
-export type GameEvent = { type: "pixelChangedEvent" } & PixelChangedEvent;
+export type GameEvent =
+  { type: "pixelChangedEvent" } & PixelChangedEvent;
 
 export type PixelChangedEvent = {
   state: number,

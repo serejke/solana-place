@@ -3,9 +3,9 @@ import {GAME_PROGRAM_ACCOUNT, PROGRAM_ID} from "../program/program";
 import {EventParser} from "@project-serum/anchor";
 import {CloseableService} from "./CloseableService";
 import {EventsHistory} from "../model/eventsHistory";
-import {parseProgramPixelColorChangedEvent} from "../program/board";
 import {TransactionDetails} from "../model/transactionDetails";
 import {rethrowRpcError} from "../errors/serverError";
+import {parseProgramGameEvent} from "../program/parser";
 
 export class BoardHistoryService implements CloseableService {
 
@@ -54,8 +54,7 @@ export class BoardHistoryService implements CloseableService {
         // eslint-disable-next-line
         const logs: any[] = Array.from(this.eventParser.parseLogs(logMessages));
         return logs
-          .filter(log => log.name === "PixelColorChangedEvent")
-          .map(log => parseProgramPixelColorChangedEvent(log.data))
+          .map(log => parseProgramGameEvent(log))
           .map(event => ({event, transactionDetails}))
       })
     ).catch((e) => rethrowRpcError(e));

@@ -2,6 +2,7 @@ import AnchorService from "./AnchorService";
 import {CloseableService} from "./CloseableService";
 import {GameEvent} from "../model/gameEvent";
 import {Protocol} from "../protocol/protocol";
+import {parseProgramGameEvent, PIXEL_COLORS_CHANGED_EVENT_NAME} from "../program/parser";
 
 export class BoardSubscriberService implements CloseableService {
   private readonly listenerId: number;
@@ -11,20 +12,10 @@ export class BoardSubscriberService implements CloseableService {
     private protocol: Protocol<GameEvent>
   ) {
     this.listenerId = anchorState.solanaPlaceProgram.addEventListener(
-      "PixelColorsChangedEvent",
+      PIXEL_COLORS_CHANGED_EVENT_NAME,
       async (event, slot, signature) => {
-        // eslint-disable-next-line
-        const changes: GameEvent[] = event.changes.map((change: any, index: number) => ({
-          type: "pixelChangedEvent",
-          state: event.state + index,
-          row: change.row,
-          column: change.column,
-          oldColor: change.oldColor,
-          newColor: change.newColor,
-        }));
-        for (const change of changes) {
-          await this.protocol.onEvent(change, slot, signature)
-        }
+        const gameEvent = parseProgramGameEvent({ name: PIXEL_COLORS_CHANGED_EVENT_NAME, data: event});
+        await this.protocol.onEvent(gameEvent, slot, signature)
       });
   }
 

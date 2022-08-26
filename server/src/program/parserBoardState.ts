@@ -1,7 +1,6 @@
 // noinspection DuplicatedCode
 
 import {BoardState} from "../model/boardState";
-import {GameEvent, PixelChangedEvent} from "../model/gameEvent";
 
 type AccountBoardState = {
   colors: unknown,
@@ -10,14 +9,6 @@ type AccountBoardState = {
   width: number,
   changeCost: number
 };
-
-type ProgramPixelColorChangedEvent = {
-  state: number,
-  row: number,
-  column: number,
-  oldColor: number,
-  newColor: number
-}
 
 export function parseBoardStateFromAccount(accountState: AccountBoardState): BoardState {
   const colorsBuffer: Buffer = accountState.colors as Buffer;
@@ -38,8 +29,4 @@ export function parseBoardStateFromAccount(accountState: AccountBoardState): Boa
     changeCost,
     colors
   };
-}
-
-export function parseProgramPixelColorChangedEvent(event: ProgramPixelColorChangedEvent): GameEvent {
-  return {type: "pixelChangedEvent", ...event};
 }

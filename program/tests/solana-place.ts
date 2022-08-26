@@ -46,49 +46,6 @@ describe("solana-place", () => {
     return new BN(await programProvider.connection.getBalance(key) + "", 10);
   }
 
-  it("change color", async () => {
-    const gameKeypair = await createGameAccount(program, programProvider, 10, 15, changeCost);
-
-    let gameState = await program.account.gameAccount.fetch(gameKeypair.publicKey);
-    let expectedBoard = emptyBoard(10, 15, changeCost);
-    expect(gameState).to.eql(expectedBoard);
-
-    const balanceBefore = await getBalance(programProvider.wallet.publicKey);
-    let transactionSignature;
-
-    const [event] = await catchEvent(program, "PixelColorChangedEvent", 1, async () => {
-      transactionSignature = await program.methods
-        .changeColor(3, 4, 42)
-        .accounts({
-          gameAccount: gameKeypair.publicKey,
-          payer: programProvider.wallet.publicKey,
-          systemProgram: SystemProgram.programId
-        })
-        .rpc()
-    })
-
-    expect(event).to.eql({
-      state: 0,
-      row: 3,
-      column: 4,
-      oldColor: 0,
-      newColor: 42
-    })
-
-    gameState = await program.account.gameAccount.fetch(gameKeypair.publicKey);
-    expectedBoard = changeColor(expectedBoard, 3, 4, 42);
-    expect(gameState).to.eql(expectedBoard);
-
-    const balanceAfter = await getBalance(programProvider.wallet.publicKey);
-    const transactionFee = new BN(5000);
-    const expectedChange = transactionFee.add(new BN(changeCost * 1000));
-    const actualChange = balanceBefore.sub(balanceAfter);
-
-    // TODO[tests]: use a dedicated (not root) wallet to create the game, to have predictable balance changes.
-    //  The root wallet is used for voting and is being withdrawn during the test, leading to instability.
-    expect(actualChange.sub(expectedChange).lte(new BN(10000)));
-  })
-
   it("change colors", async () => {
     const boardHeight = 150;
     const boardWidth = 150;
@@ -152,7 +109,7 @@ describe("solana-place", () => {
     let gameKeypair = await createGameAccount(program, programProvider, 5, 5, changeCost);
     try {
       await program.methods
-        .changeColor(10, 10, 42)
+        .changeColors(encodeChangeColorRequests([{row: 10, column: 10, color: 42}]))
         .accounts({
           gameAccount: gameKeypair.publicKey,
           payer: programProvider.wallet.publicKey,

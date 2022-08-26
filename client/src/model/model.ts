@@ -1,15 +1,13 @@
 import {GameEvent} from "./gameEvent";
 import {TransactionDetails} from "./transactionDetails";
 
-export type EventWithTransactionDetails = {
+export type GameEventWithTransactionDetails = {
   event: GameEvent,
   transactionDetails: TransactionDetails
 }
 
-export type EventsHistory = {
-  events: EventWithTransactionDetails[];
-}
-
-export type BoardHistory = EventsHistory;
+export type BoardHistory = {
+  events: GameEventWithTransactionDetails[];
+};
 
 export const BOARD_HISTORY_MAX_LENGTH = 100;

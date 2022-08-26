@@ -6,7 +6,7 @@ import {GameCanvas} from "./components/GameCanvas";
 import {PixelColorPicker, SelectedPixel} from "./components/PixelColorPicker";
 import {Dashboard} from "components/Dashboard";
 import {useState} from "react";
-import {parseEventWithTransactionDetailsDtoFromSocketMessage} from "./dto-converter/converter";
+import {parseGameEventWithTransactionDetailsFromDto} from "./dto-converter/converter";
 import {useAddSocketMessageHandler} from "./providers/server/webSocket";
 import {useBoardDispatch} from "./providers/board/boardState";
 import {useBoardHistoryDispatch} from "./providers/board/boardHistory";
@@ -74,21 +74,22 @@ function useSubscribeToBoardEvents() {
 
   // Subscribe to pixel updates via web-socket.
   const messageHandler = React.useCallback((message: any) => {
-    const eventWithTransactionDetails = parseEventWithTransactionDetailsDtoFromSocketMessage(message);
-    if (eventWithTransactionDetails) {
-      const event = eventWithTransactionDetails.event;
-      console.log("Received event", eventWithTransactionDetails.transactionDetails.confirmation, event, eventWithTransactionDetails.transactionDetails);
-      if (event.type === "pixelChangedEvent") {
-        boardDispatch({
-          type: "updateSinglePixel",
-          coordinates: {row: event.row, column: event.column},
-          newColor: event.newColor
-        });
+    const gameEventsWithTransactionDetails = parseGameEventWithTransactionDetailsFromDto(message);
+    if (gameEventsWithTransactionDetails) {
+      for (const {event, transactionDetails} of gameEventsWithTransactionDetails) {
+        console.log("Received event", transactionDetails.confirmation, event, transactionDetails);
+        if (event.type === "pixelChangedEvent") {
+          boardDispatch({
+            type: "updateSinglePixel",
+            coordinates: {row: event.row, column: event.column},
+            newColor: event.newColor
+          });
+        }
+        boardHistoryDispatch({
+          type: "addHistoryEntry",
+          gameEventWithTransactionDetails: {event, transactionDetails}
+        })
       }
-      boardHistoryDispatch({
-        type: "addHistoryEntry",
-        eventWithTransactionDetails
-      })
     }
   }, [boardDispatch, boardHistoryDispatch]);
 

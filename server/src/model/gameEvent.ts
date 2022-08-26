@@ -1,9 +1,14 @@
-export type GameEvent = { type: "pixelChangedEvent" } & PixelChangedEvent;
+export type GameEvent = { type: "pixelsChangedEvent" } & PixelsChangedEvent;
 
-export type PixelChangedEvent = {
+export type PixelsChangedEvent = {
   state: number,
+  newState: number,
+  changes: PixelColorChange[]
+};
+
+export type PixelColorChange = {
   row: number,
   column: number,
   oldColor: number,
   newColor: number
-}
+};

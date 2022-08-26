@@ -1,4 +1,4 @@
-import {BOARD_HISTORY_MAX_LENGTH, BoardHistory, EventWithTransactionDetails} from "../model/model";
+import {BOARD_HISTORY_MAX_LENGTH, BoardHistory, GameEventWithTransactionDetails} from "../model/model";
 
 type InitialBoardHistoryAction = {
   type: "initialHistory",
@@ -7,7 +7,7 @@ type InitialBoardHistoryAction = {
 
 type AddHistoryEntryAction = {
   type: "addHistoryEntry",
-  eventWithTransactionDetails: EventWithTransactionDetails
+  gameEventWithTransactionDetails: GameEventWithTransactionDetails
 };
 
 export type BoardHistoryAction = InitialBoardHistoryAction | AddHistoryEntryAction;
@@ -21,7 +21,7 @@ export function boardHistoryReducer(state: BoardHistory, action: BoardHistoryAct
     }
     case "addHistoryEntry": {
       const events = state.events;
-      const newEvents = [action.eventWithTransactionDetails, ...events].slice(0, BOARD_HISTORY_MAX_LENGTH);
+      const newEvents = [action.gameEventWithTransactionDetails, ...events].slice(0, BOARD_HISTORY_MAX_LENGTH);
       return {
         events: newEvents
       };

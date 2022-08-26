@@ -27,40 +27,6 @@ export type SolanaPlace = {
       ]
     },
     {
-      "name": "changeColor",
-      "accounts": [
-        {
-          "name": "gameAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "payer",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "row",
-          "type": "u16"
-        },
-        {
-          "name": "column",
-          "type": "u16"
-        },
-        {
-          "name": "color",
-          "type": "u8"
-        }
-      ]
-    },
-    {
       "name": "changeColors",
       "accounts": [
         {
@@ -120,9 +86,35 @@ export type SolanaPlace = {
       }
     }
   ],
+  "types": [
+    {
+      "name": "PixelColorChange",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "row",
+            "type": "u16"
+          },
+          {
+            "name": "column",
+            "type": "u16"
+          },
+          {
+            "name": "oldColor",
+            "type": "u8"
+          },
+          {
+            "name": "newColor",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ],
   "events": [
     {
-      "name": "PixelColorChangedEvent",
+      "name": "PixelColorsChangedEvent",
       "fields": [
         {
           "name": "state",
@@ -130,23 +122,17 @@ export type SolanaPlace = {
           "index": false
         },
         {
-          "name": "row",
-          "type": "u16",
+          "name": "newState",
+          "type": "u32",
           "index": false
         },
         {
-          "name": "column",
-          "type": "u16",
-          "index": false
-        },
-        {
-          "name": "oldColor",
-          "type": "u8",
-          "index": false
-        },
-        {
-          "name": "newColor",
-          "type": "u8",
+          "name": "changes",
+          "type": {
+            "vec": {
+              "defined": "PixelColorChange"
+            }
+          },
           "index": false
         }
       ]
@@ -200,40 +186,6 @@ export const IDL: SolanaPlace = {
       ]
     },
     {
-      "name": "changeColor",
-      "accounts": [
-        {
-          "name": "gameAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "payer",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "row",
-          "type": "u16"
-        },
-        {
-          "name": "column",
-          "type": "u16"
-        },
-        {
-          "name": "color",
-          "type": "u8"
-        }
-      ]
-    },
-    {
       "name": "changeColors",
       "accounts": [
         {
@@ -293,9 +245,35 @@ export const IDL: SolanaPlace = {
       }
     }
   ],
+  "types": [
+    {
+      "name": "PixelColorChange",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "row",
+            "type": "u16"
+          },
+          {
+            "name": "column",
+            "type": "u16"
+          },
+          {
+            "name": "oldColor",
+            "type": "u8"
+          },
+          {
+            "name": "newColor",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ],
   "events": [
     {
-      "name": "PixelColorChangedEvent",
+      "name": "PixelColorsChangedEvent",
       "fields": [
         {
           "name": "state",
@@ -303,23 +281,17 @@ export const IDL: SolanaPlace = {
           "index": false
         },
         {
-          "name": "row",
-          "type": "u16",
+          "name": "newState",
+          "type": "u32",
           "index": false
         },
         {
-          "name": "column",
-          "type": "u16",
-          "index": false
-        },
-        {
-          "name": "oldColor",
-          "type": "u8",
-          "index": false
-        },
-        {
-          "name": "newColor",
-          "type": "u8",
+          "name": "changes",
+          "type": {
+            "vec": {
+              "defined": "PixelColorChange"
+            }
+          },
           "index": false
         }
       ]
