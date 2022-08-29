@@ -6,9 +6,7 @@ import {createGameAccount} from "./game-account-util";
 import copyPicture from "./copy-picture";
 import * as anchor from "@project-serum/anchor";
 import * as web3 from "@solana/web3.js";
-import * as fs from "fs";
 
-const GAME_ACCOUNT_KEYPAIR_PATH = "../target/deploy/game_account_keypair.json";
 const GAME_HEIGHT = 300;
 const GAME_WIDTH = 500;
 const CHANGE_COST = 1000; // 1000 micro-lamports = 1/1000 SOL.
