@@ -28,7 +28,5 @@ module.exports = async function (provider) {
   const gameKeypair = web3.Keypair.fromSecretKey(Uint8Array.from(gameAccountKeypairFile));
 
   const gameAccountKeypair = await createGameAccount(program, provider, GAME_HEIGHT, GAME_WIDTH, CHANGE_COST, gameKeypair);
-  fs.writeFileSync(GAME_ACCOUNT_KEYPAIR_PATH, JSON.stringify(Array.from(gameAccountKeypair.secretKey)));
-
   console.log("Game program account", gameAccountKeypair.publicKey.toBase58());
 };
