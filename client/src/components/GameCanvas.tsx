@@ -5,8 +5,7 @@ import {
   GRID_COLOR,
   HIGHLIGHTED_COLOR,
   HIGHLIGHTED_STROKE_WIDTH,
-  HOVERED_PIXEL_COLOR,
-  UNOCCUPIED_COLOR
+  HOVERED_PIXEL_COLOR
 } from "../utils/colorUtils";
 import {useBoardConfig} from "../providers/board/boardConfig";
 import {BoardState, getColor, isWithinBounds} from "../model/boardState";
@@ -82,7 +81,6 @@ export function GameCanvas({onPixelClicked}: GameCanvasProps) {
     if (!boardState) return;
     if (!canvasSize) return;
     drawBoard(ctx, boardState, canvasSize, currentBoardState.current);
-    drawUnoccupiedFiller(ctx, boardState, canvasSize);
     currentBoardState.current = boardState;
   }, [boardState, canvasSize, showGrid, zoomingState]);
 
@@ -256,11 +254,11 @@ function clearHighlightedOrHoveredPixel(ctx: CanvasRenderingContext2D, pixelCoor
 function drawGrid(ctx: CanvasRenderingContext2D, rows: number, columns: number) {
   ctx.lineWidth = 1;
   ctx.strokeStyle = GRID_COLOR;
-  for (let column = 0; column < columns; column++) {
+  for (let column = 0; column <= columns; column++) {
     ctx.moveTo(column * PIXEL_SIZE, 0);
     ctx.lineTo(column * PIXEL_SIZE, rows * PIXEL_SIZE);
   }
-  for (let row = 0; row < rows; row++) {
+  for (let row = 0; row <= rows; row++) {
     ctx.moveTo(0, row * PIXEL_SIZE);
     ctx.lineTo(columns * PIXEL_SIZE, row * PIXEL_SIZE);
   }
@@ -298,23 +296,6 @@ function drawBoard(
         colorPixel(ctx, {row, column}, color);
       }
     }
-  }
-}
-
-function drawUnoccupiedFiller(
-  ctx: CanvasRenderingContext2D,
-  boardState: BoardState,
-  canvasSize: CanvasSize,
-) {
-  ctx.fillStyle = UNOCCUPIED_COLOR;
-  const unoccupiedWidth = canvasSize.width - boardState.width * PIXEL_SIZE;
-  if (unoccupiedWidth > 0) {
-    ctx.fillRect(boardState.width * PIXEL_SIZE, 0, unoccupiedWidth, canvasSize.height);
-  }
-
-  const unoccupiedHeight = canvasSize.height - boardState.height * PIXEL_SIZE;
-  if (unoccupiedHeight > 0) {
-    ctx.fillRect(0, boardState.height * PIXEL_SIZE, canvasSize.width, unoccupiedHeight);
   }
 }
 

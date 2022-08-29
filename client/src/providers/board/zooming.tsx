@@ -35,10 +35,9 @@ export function ZoomingProvider({children}: { children: React.ReactNode }) {
       newZoom = ZOOMING_OPTIONS[index - 1];
     }
     if (newZoom !== zoom) {
-      const newZoomPivot = newZoom <= 1 ? EMPTY_ZOOM_PIVOT : pivot;
       isUpdatingRef.current = true;
       setZoom(newZoom);
-      setZoomPivot(newZoomPivot);
+      setZoomPivot(pivot);
     }
   }, [zoom]);
   const zoomIn = useCallback((pivot: ZoomPivot) => zoomInOrOut(pivot, true), [zoomInOrOut]);
@@ -79,4 +78,4 @@ export function useZooming(): ZoomingState {
 export type ClientPosition = { clientX: number, clientY: number };
 export type ZoomPivot = CanvasPosition & ClientPosition;
 
-const ZOOMING_OPTIONS = [0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4];
+const ZOOMING_OPTIONS = [0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.25, 4.5, 4.75, 5];

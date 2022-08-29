@@ -100,8 +100,9 @@ function ShowGridToggle() {
 
 function ShowZoom() {
   const {zoom} = useZooming();
+  const zoomString = zoom * 100;
   return <div className="dashboard-item">
-    <span>Zoom {zoom}</span>
+    <span>Zoom {zoomString}%</span>
   </div>;
 }
 
