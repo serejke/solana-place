@@ -1,11 +1,10 @@
 import * as React from "react";
+import {useState} from "react";
 
 import {LoadingModal} from "components/LoadingModal";
-import {useGameState} from "providers/gameState";
 import {GameCanvas} from "./components/GameCanvas";
 import {PixelColorPicker, SelectedPixel} from "./components/PixelColorPicker";
 import {Dashboard} from "components/Dashboard";
-import {useState} from "react";
 import {parseGameEventWithTransactionDetailsFromDto} from "./dto-converter/converter";
 import {useAddSocketMessageHandler} from "./providers/server/webSocket";
 import {useBoardDispatch} from "./providers/board/boardState";
@@ -14,10 +13,9 @@ import {fetchBoard} from "./request/fetchBoard";
 import {serverUrl} from "./request/serverUrls";
 import {fetchBoardHistory} from "./request/fetchBoardHistory";
 import {areEqual} from "./model/boardState";
+import {AboutModal} from "./components/AboutModal";
 
 export default function App() {
-  const gameState = useGameState();
-  const showLoadingModal = gameState.loadingPhase !== "complete";
   const [selectedPixel, setSelectedPixel] = useState<SelectedPixel>();
 
   useRequestInitialBoardState();
@@ -35,7 +33,8 @@ export default function App() {
       }}/>
       <Dashboard onMouseDown={() => setSelectedPixel(undefined)}/>
       <PixelColorPicker selectedPixel={selectedPixel} close={() => setSelectedPixel(undefined)}/>
-      <LoadingModal show={showLoadingModal} phase={gameState.loadingPhase}/>
+      <LoadingModal/>
+      <AboutModal/>
     </div>
   );
 }

@@ -1,17 +1,16 @@
 import React from "react";
 
-import {GameStateLoadingPhase} from "providers/gameState";
+import {useGameState} from "providers/gameState";
 import {ClipLoader} from "react-spinners";
 
-export function LoadingModal({show, phase}: { show: boolean; phase?: GameStateLoadingPhase; }) {
-  if (!show) {
+export function LoadingModal() {
+  const phase = useGameState().loadingPhase;
+  if (phase === "complete") {
     return null;
   }
 
-  let loadingText: string = "";
+  let loadingText: string;
   switch (phase) {
-    case "complete":
-      return null;
     case "config":
       loadingText = "Initializing";
       break;

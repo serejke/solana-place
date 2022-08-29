@@ -1,0 +1,50 @@
+.about-modal {
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1001;
+  overflow: hidden;
+  outline: 0;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+
+  &-dialog {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: lightgray;
+    z-index: 1002;
+    border-radius: 5px;
+  }
+
+  &-dialog-row {
+    padding: 1rem;
+    max-width: 400px;
+  }
+
+  &-dialog-text {
+    text-align: justify;
+  }
+
+  &-social-icon {
+    margin: 0 0.3rem;
+    width: 2rem !important;
+    height: 2rem !important;
+  }
+
+  &-fade {
+    z-index: 1000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #000;
+    opacity: 0.5;
+    transition: opacity .15s linear;
+  }
+}

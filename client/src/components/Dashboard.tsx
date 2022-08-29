@@ -12,11 +12,13 @@ import {useBoardHistory} from "../providers/board/boardHistory";
 import {useHighlightPixel} from "../providers/board/highlightedPixel";
 import {getColorByIndex} from "../utils/colorUtils";
 import SolanaExplorerLogo from '../styles/icons/dark-solana-logo.svg';
+import AboutIconLogo from '../styles/icons/about.svg';
 import {serverUrl} from "../request/serverUrls";
 import {displayTimestamp} from "../utils/date";
 import {ClipLoader} from "react-spinners";
 import ReactTooltip from "react-tooltip";
 import {useZooming} from "../providers/board/zooming";
+import {useSetAbout} from "../providers/about/about";
 
 type DashboardProps = {
   onMouseDown: () => void
@@ -34,6 +36,7 @@ export function Dashboard({onMouseDown}: DashboardProps) {
           <ShowHistoryToggle/>
           <ShowZoom/>
           <OnlineStatusCircle/>
+          <ShowAbout/>
         </div>
         {showHistory && <div className="dashboard-row">
           <div className="dashboard-item">
@@ -101,7 +104,7 @@ function ShowGridToggle() {
 function ShowZoom() {
   const {zoom} = useZooming();
   const zoomString = zoom * 100;
-  return <div className="dashboard-item">
+  return <div className="dashboard-item show-zoom">
     <span>Zoom {zoomString}%</span>
   </div>;
 }
@@ -154,6 +157,17 @@ function OnlineStatusCircle() {
         : <>You are connecting to the server...</>
       }
     </ReactTooltip>
+  </div>;
+}
+
+function ShowAbout() {
+  const setAbout = useSetAbout();
+  return <div className="dashboard-item show-about">
+    <img
+      src={AboutIconLogo}
+      alt={"About"}
+      onClick={() => setAbout(prevState => ({...prevState, showAboutModal: true}))}
+    />
   </div>;
 }
 
