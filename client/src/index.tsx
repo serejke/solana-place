@@ -12,6 +12,7 @@ import {BoardConfigProvider} from "./providers/board/boardConfig";
 import {BoardHistoryProvider} from "./providers/board/boardHistory";
 import { WebSocketProvider } from "providers/server/webSocket";
 import {ClusterConfigProvider} from "./providers/server/clusterConfig";
+import {ZoomingProvider} from "./providers/board/zooming";
 
 ReactDOM.render(
   <BrowserRouter>
@@ -22,7 +23,9 @@ ReactDOM.render(
             <BoardStateProvider>
               <BoardHistoryProvider>
                 <GameStateProvider>
-                  <App/>
+                  <ZoomingProvider>
+                    <App/>
+                  </ZoomingProvider>
                 </GameStateProvider>
               </BoardHistoryProvider>
             </BoardStateProvider>

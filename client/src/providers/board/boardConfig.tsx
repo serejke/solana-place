@@ -5,9 +5,13 @@ type SetState = React.Dispatch<React.SetStateAction<BoardConfig>>;
 type State = [BoardConfig, SetState];
 const Context = React.createContext<State | undefined>(undefined);
 
+const EMPTY_BOARD_CONFIG: BoardConfig = {
+  showGrid: true,
+  showHistory: true,
+};
+
 export function BoardConfigProvider({children}: { children: React.ReactNode }) {
-  const initialState = {showGrid: true, showHistory: true};
-  const state: State = React.useState<BoardConfig>(initialState);
+  const state: State = React.useState<BoardConfig>(EMPTY_BOARD_CONFIG);
   return (
     <Context.Provider value={state}>
       {children}

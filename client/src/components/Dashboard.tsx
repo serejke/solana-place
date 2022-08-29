@@ -16,6 +16,7 @@ import {serverUrl} from "../request/serverUrls";
 import {displayTimestamp} from "../utils/date";
 import {ClipLoader} from "react-spinners";
 import ReactTooltip from "react-tooltip";
+import {useZooming} from "../providers/board/zooming";
 
 type DashboardProps = {
   onMouseDown: () => void
@@ -31,6 +32,7 @@ export function Dashboard({onMouseDown}: DashboardProps) {
           <SendActionButton/>
           <ShowGridToggle/>
           <ShowHistoryToggle/>
+          <ShowZoom/>
           <OnlineStatusCircle/>
         </div>
         {showHistory && <div className="dashboard-row">
@@ -95,6 +97,14 @@ function ShowGridToggle() {
     <label className="grid-toggle-label" htmlFor="grid-toggle-id">Grid</label>
   </div>;
 }
+
+function ShowZoom() {
+  const {zoom} = useZooming();
+  return <div className="dashboard-item">
+    <span>Zoom {zoom}</span>
+  </div>;
+}
+
 
 function ShowHistoryToggle() {
   const boardConfig = useBoardConfig();

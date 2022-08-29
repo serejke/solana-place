@@ -7,14 +7,14 @@ import {GithubPickerStylesProps} from "react-color/lib/components/github/Github"
 import {useBoardDispatch, useBoardState} from "../providers/board/boardState";
 import {areEqual} from "../model/boardState";
 import {MAX_CHANGES_PER_TRANSACTION} from "request/changePixels";
-import {CanvasPosition} from "./GameCanvas";
 import {PixelCoordinates} from "../model/pixelCoordinates";
+import { ClientPosition } from "providers/board/zooming";
 
 const GITHUB_PICKER_TRIANGLE_SIZE = 16;
 
 export type SelectedPixel = {
   pixelCoordinates: PixelCoordinates,
-  canvasPosition: CanvasPosition
+  popupPosition: ClientPosition
 }
 
 type PixelColorPickerProps = {
@@ -49,8 +49,8 @@ export function PixelColorPicker({selectedPixel, close}: PixelColorPickerProps) 
   const popover: CSSProperties = {
     position: 'absolute',
     zIndex: 2,
-    left: selectedPixel.canvasPosition.x - GITHUB_PICKER_TRIANGLE_SIZE / 2,
-    top: selectedPixel.canvasPosition.y + GITHUB_PICKER_TRIANGLE_SIZE / 2
+    left: selectedPixel.popupPosition.clientX - GITHUB_PICKER_TRIANGLE_SIZE / 2,
+    top: selectedPixel.popupPosition.clientY + GITHUB_PICKER_TRIANGLE_SIZE / 2
   }
 
   const styles: Partial<Classes<GithubPickerStylesProps>> = {
