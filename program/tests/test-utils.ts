@@ -1,3 +1,6 @@
+import {Program} from "@project-serum/anchor";
+import {PublicKey, Connection} from "@solana/web3.js";
+import BN = require("bn.js");
 
 export function waitUntil(
   checkFn: () => boolean,
@@ -23,4 +26,24 @@ export function waitUntil(
 
 export async function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+export async function catchEvent(
+  program: Program<any>,
+  eventName: string,
+  eventsNumber: number = 1,
+  code: () => Promise<void>
+): Promise<any[]> {
+  const events = [];
+  const listenerId = program.addEventListener(eventName, (e) => {
+    events.push(e)
+  });
+  await code();
+  await waitUntil(() => events.length === eventsNumber, 30000);
+  await program.removeEventListener(listenerId);
+  return events;
+}
+
+export async function getBalance(connection: Connection, key: PublicKey): Promise<BN> {
+  return new BN(await connection.getBalance(key) + "", 10);
 }

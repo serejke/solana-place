@@ -14,6 +14,7 @@ pub fn initialize_only(
     game_account.height = height;
     game_account.width = width;
     game_account.change_cost = change_cost;
+    game_account.authority = *ctx.accounts.authority.key;
     Ok(())
 }
 
@@ -21,4 +22,6 @@ pub fn initialize_only(
 pub struct InitializeOnly<'info> {
     #[account(zero, signer)]
     pub game_account: AccountLoader<'info, GameAccount>,
+    /// CHECK: Used only as a public key to set the GameAccount's authority.
+    pub authority: UncheckedAccount<'info>
 }

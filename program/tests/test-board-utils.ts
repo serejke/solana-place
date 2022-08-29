@@ -1,7 +1,9 @@
 import {Buffer} from "buffer";
 import {MAX_HEIGHT, MAX_WIDTH} from "../migrations/game-account-util";
+import {PublicKey} from "@solana/web3.js";
 
 type Board = {
+  authority: PublicKey,
   state: number,
   height: number,
   width: number,
@@ -10,12 +12,14 @@ type Board = {
 }
 
 export function emptyBoard(
+  authority: PublicKey,
   height: number,
   width: number,
   changeCost: number
 ): Board {
   const colors = Array(MAX_HEIGHT * MAX_WIDTH).fill(0);
   return {
+    authority,
     state: 0,
     height,
     width,
@@ -48,6 +52,7 @@ export function changeColor(
 ): Board {
   const newBoard: Board = JSON.parse(JSON.stringify(board));
   const index = row * board.width + column;
+  newBoard.authority = board.authority;
   newBoard.colors[index] = color;
   newBoard.state = board.state + 1;
   return newBoard;

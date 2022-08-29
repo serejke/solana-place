@@ -14,14 +14,20 @@ pub fn change_colors(
     require_eq!(0usize, encoded_changes.len().rem(ChangeColors::CHANGE_ENCODING_SIZE), GameError::IncorrectGameChangesEncoding);
     let number_of_changes = encoded_changes.len().div(ChangeColors::CHANGE_ENCODING_SIZE);
 
-    if ctx.accounts.payer.key.ne(&game_account.key()) {
-        let game_fee = game_account.load()?.change_cost as u64 * 1000 * number_of_changes as u64;
-        charge_game_fees(
-            game_fee,
-            ctx.accounts.payer.to_account_info(),
-            game_account.to_account_info(),
-            ctx.accounts.system_program.to_account_info()
-        )?;
+    {
+        let game_account_data = game_account.load()?;
+        let game_authority = game_account_data.authority;
+        let change_cost = game_account_data.change_cost;
+        drop(game_account_data);
+        if ctx.accounts.payer.key.ne(&game_authority) {
+            let game_fee = change_cost as u64 * 1000 * number_of_changes as u64;
+            charge_game_fees(
+                game_fee,
+                ctx.accounts.payer.to_account_info(),
+                game_account.to_account_info(),
+                ctx.accounts.system_program.to_account_info()
+            )?;
+        }
     }
 
     let game_account_data = &mut game_account.load_mut()?;

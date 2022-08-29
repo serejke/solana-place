@@ -1,4 +1,4 @@
-import {Program} from "@project-serum/anchor";
+import {AnchorProvider, Program} from "@project-serum/anchor";
 import {IDL as SolanaPlaceGameIDL, SolanaPlace} from "../target/types/solana_place";
 import solanaPlaceProgramKeypair from "../target/deploy/solana_place-keypair.json";
 import gameAccountKeypairFile from "../target/deploy/game_account_keypair.json";
@@ -25,6 +25,8 @@ module.exports = async function (provider) {
   const program = new Program<SolanaPlace>(SolanaPlaceGameIDL, programId, provider);
   const gameKeypair = web3.Keypair.fromSecretKey(Uint8Array.from(gameAccountKeypairFile));
 
-  const gameAccountKeypair = await createGameAccount(program, provider, GAME_HEIGHT, GAME_WIDTH, CHANGE_COST, gameKeypair);
-  console.log("Game program account", gameAccountKeypair.publicKey.toBase58());
+  const gameAuthority = (program.provider as AnchorProvider).wallet.publicKey;
+  await createGameAccount(program, provider, gameAuthority, GAME_HEIGHT, GAME_WIDTH, CHANGE_COST, gameKeypair);
+  console.log(`Initialized a game account ${gameKeypair.publicKey.toBase58()}`);
+  console.log(`Authority of the game account ${gameAuthority.toBase58()}`);
 };

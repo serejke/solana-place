@@ -9,6 +9,11 @@ export type SolanaPlace = {
           "name": "gameAccount",
           "isMut": true,
           "isSigner": true
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
         }
       ],
       "args": [
@@ -60,15 +65,31 @@ export type SolanaPlace = {
         "kind": "struct",
         "fields": [
           {
+            "name": "authority",
+            "docs": [
+              "Authority granted with game management permissions."
+            ],
+            "type": "publicKey"
+          },
+          {
             "name": "state",
+            "docs": [
+              "ID of the current state of the board, which gets incremented by 1 on every change."
+            ],
             "type": "u32"
           },
           {
             "name": "height",
+            "docs": [
+              "Height of the game board, number of rows."
+            ],
             "type": "u16"
           },
           {
             "name": "width",
+            "docs": [
+              "Width of the game board, number of columns."
+            ],
             "type": "u16"
           },
           {
@@ -81,9 +102,7 @@ export type SolanaPlace = {
           {
             "name": "colors",
             "docs": [
-              "Flattened map of colors. Pixel <row> <column> is at `index = <row> * width + <column>`.",
-              "Currently, the max game size is 300x500 but it may be increased in future.",
-              "Anchor does not allow constants be specified as array size (leads to an IDL parsing error)."
+              "Flattened map of colors. Pixel `<row> <column>` is at `index = <row> * width + <column>`."
             ],
             "type": {
               "array": [
@@ -178,6 +197,11 @@ export const IDL: SolanaPlace = {
           "name": "gameAccount",
           "isMut": true,
           "isSigner": true
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
         }
       ],
       "args": [
@@ -229,15 +253,31 @@ export const IDL: SolanaPlace = {
         "kind": "struct",
         "fields": [
           {
+            "name": "authority",
+            "docs": [
+              "Authority granted with game management permissions."
+            ],
+            "type": "publicKey"
+          },
+          {
             "name": "state",
+            "docs": [
+              "ID of the current state of the board, which gets incremented by 1 on every change."
+            ],
             "type": "u32"
           },
           {
             "name": "height",
+            "docs": [
+              "Height of the game board, number of rows."
+            ],
             "type": "u16"
           },
           {
             "name": "width",
+            "docs": [
+              "Width of the game board, number of columns."
+            ],
             "type": "u16"
           },
           {
@@ -250,9 +290,7 @@ export const IDL: SolanaPlace = {
           {
             "name": "colors",
             "docs": [
-              "Flattened map of colors. Pixel <row> <column> is at `index = <row> * width + <column>`.",
-              "Currently, the max game size is 300x500 but it may be increased in future.",
-              "Anchor does not allow constants be specified as array size (leads to an IDL parsing error)."
+              "Flattened map of colors. Pixel `<row> <column>` is at `index = <row> * width + <column>`."
             ],
             "type": {
               "array": [
