@@ -2,13 +2,16 @@ import {AnchorProvider, Program} from "@project-serum/anchor";
 import {Keypair, SystemProgram, Transaction} from "@solana/web3.js";
 import {SolanaPlace} from "../target/types/solana_place";
 
-function calculateGameAccountSpace(height: number, width: number): number {
+export const MAX_HEIGHT = 300;
+export const MAX_WIDTH = 500;
+
+function calculateGameAccountSpace(): number {
   return 8 // Discriminator
     + 4 // State
     + 2 // Height
     + 2 // Width
     + 4 // Change cost
-    + (4 + height * width) // Vec of colors ;
+    + MAX_HEIGHT * MAX_WIDTH
 }
 
 export async function createGameAccount(
@@ -16,12 +19,13 @@ export async function createGameAccount(
   programProvider: AnchorProvider,
   height: number,
   width: number,
-  changeCost: number
+  changeCost: number,
+  gameKeypair0?: Keypair
 ) {
-  let gameKeypair = Keypair.generate();
+  let gameKeypair = gameKeypair0 ?? Keypair.generate();
 
   const tx = new Transaction();
-  const gameAccountSpace = calculateGameAccountSpace(height, width);
+  const gameAccountSpace = calculateGameAccountSpace();
   const rentExempt = await programProvider.connection.getMinimumBalanceForRentExemption(gameAccountSpace);
 
   tx.add(
@@ -42,10 +46,7 @@ export async function createGameAccount(
       gameAccount: gameKeypair.publicKey
     })
     .signers([gameKeypair])
-    .rpc()
-    .catch((e) => {
-      console.log("Error initializing the game", e);
-    });
+    .rpc({skipPreflight: true});
 
   return gameKeypair;
 }

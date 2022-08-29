@@ -1,20 +1,28 @@
 import {Buffer} from "buffer";
+import {MAX_HEIGHT, MAX_WIDTH} from "../migrations/game-account-util";
 
 type Board = {
   state: number,
   height: number,
   width: number,
-  colors: Buffer
+  changeCost: number,
+  colors: number[]
 }
 
-export const emptyBoard: (height, width, changeCost) => Board =
-  (height: number, width: number, changeCost: number) => ({
+export function emptyBoard(
+  height: number,
+  width: number,
+  changeCost: number
+): Board {
+  const colors = Array(MAX_HEIGHT * MAX_WIDTH).fill(0);
+  return {
     state: 0,
     height,
     width,
     changeCost,
-    colors: Buffer.from(Array(height * width).fill(0))
-  })
+    colors: colors
+  }
+}
 
 export const CHANGE_COLOR_ENCODING_LENGTH = 5;
 export type ChangeColorRequest = { row: number, column: number, color: number };
@@ -39,8 +47,8 @@ export function changeColor(
   color: number
 ): Board {
   const newBoard: Board = JSON.parse(JSON.stringify(board));
-  newBoard.colors = Buffer.from(newBoard.colors);
-  newBoard.colors.writeUInt8(color, row * board.width + column);
+  const index = row * board.width + column;
+  newBoard.colors[index] = color;
   newBoard.state = board.state + 1;
   return newBoard;
 }

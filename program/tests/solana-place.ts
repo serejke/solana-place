@@ -47,8 +47,8 @@ describe("solana-place", () => {
   }
 
   it("change colors", async () => {
-    const boardHeight = 150;
-    const boardWidth = 150;
+    const boardHeight = 300;
+    const boardWidth = 500;
 
     const gameKeypair = await createGameAccount(program, programProvider, boardHeight, boardWidth, changeCost);
 
@@ -59,7 +59,7 @@ describe("solana-place", () => {
     const balanceBefore = await getBalance(programProvider.wallet.publicKey);
     let transactionSignature;
 
-    const changeColorRequests: ChangeColorRequest[] = new Array(boardHeight).fill(0).map((_, index) => (
+    const changeColorRequests: ChangeColorRequest[] = new Array(150).fill(0).map((_, index) => (
       {row: index, column: index, color: index}
     ));
 
@@ -71,7 +71,7 @@ describe("solana-place", () => {
           payer: programProvider.wallet.publicKey,
           systemProgram: SystemProgram.programId
         })
-        .rpc()
+        .rpc({skipPreflight: true})
     })
 
     const expectedEvent = {

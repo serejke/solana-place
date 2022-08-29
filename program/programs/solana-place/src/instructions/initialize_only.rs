@@ -9,17 +9,16 @@ pub fn initialize_only(
     change_cost: u32
 ) -> Result<()> {
     require!(height > 0 && width > 0, GameError::GameSizeIsNotSupported);
-    let game_account = &mut ctx.accounts.game_account;
+    let game_account = &mut ctx.accounts.game_account.load_init()?;
     game_account.state = 0;
     game_account.height = height;
     game_account.width = width;
     game_account.change_cost = change_cost;
-    game_account.colors = vec![0; (height * width) as usize];
     Ok(())
 }
 
 #[derive(Accounts)]
 pub struct InitializeOnly<'info> {
     #[account(zero, signer)]
-    pub game_account: Account<'info, GameAccount>,
+    pub game_account: AccountLoader<'info, GameAccount>,
 }

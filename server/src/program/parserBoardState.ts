@@ -11,7 +11,7 @@ type AccountBoardState = {
 };
 
 export function parseBoardStateFromAccount(accountState: AccountBoardState): BoardState {
-  const colorsBuffer: Buffer = accountState.colors as Buffer;
+  const allColors: number[] = accountState.colors as number[];
   const state = accountState.state;
   const height = accountState.height;
   const width = accountState.width;
@@ -19,7 +19,7 @@ export function parseBoardStateFromAccount(accountState: AccountBoardState): Boa
   const colors: number[][] = new Array(height).fill(0).map(() => new Array(width).fill(0));
   for (let row = 0; row < height; row++) {
     for (let column = 0; column < width; column++) {
-      colors[row][column] = colorsBuffer.readUint8(row * width + column);
+      colors[row][column] = allColors[row * width + column];
     }
   }
   return {

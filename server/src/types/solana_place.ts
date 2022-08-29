@@ -80,7 +80,17 @@ export type SolanaPlace = {
           },
           {
             "name": "colors",
-            "type": "bytes"
+            "docs": [
+              "Flattened map of colors. Pixel <row> <column> is at `index = <row> * width + <column>`.",
+              "Currently, the max game size is 300x500 but it may be increased in future.",
+              "Anchor does not allow constants be specified as array size (leads to an IDL parsing error)."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                150000
+              ]
+            }
           }
         ]
       }
@@ -239,7 +249,17 @@ export const IDL: SolanaPlace = {
           },
           {
             "name": "colors",
-            "type": "bytes"
+            "docs": [
+              "Flattened map of colors. Pixel <row> <column> is at `index = <row> * width + <column>`.",
+              "Currently, the max game size is 300x500 but it may be increased in future.",
+              "Anchor does not allow constants be specified as array size (leads to an IDL parsing error)."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                150000
+              ]
+            }
           }
         ]
       }
