@@ -34,7 +34,7 @@ export function Dashboard({onMouseDown}: DashboardProps) {
   const {showHistory} = useBoardConfig();
 
   return (
-    <Draggable cancel=".dashboard-cancel-draggable">
+    <Draggable onMouseDown={onMouseDown} cancel=".dashboard-cancel-draggable">
       <div className="dashboard">
         <div className="dashboard-row">
           <SendActionButton/>
