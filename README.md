@@ -16,3 +16,5 @@ Integrate with NFTs: owner of a pixel can receive royalty fees when his/her pixe
 # Feedback
 
 Join our [Discord](https://discord.gg/eSvvbHe86R) with feedback, suggestions and contributions!
+
+Follow us on [Twitter](https://twitter.com/place_solana) to be notified on the updates.
