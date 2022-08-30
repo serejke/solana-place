@@ -12,13 +12,19 @@ import {useBoardHistory} from "../providers/board/boardHistory";
 import {useHighlightPixel} from "../providers/board/highlightedPixel";
 import {getColorByIndex} from "../utils/colorUtils";
 import SolanaExplorerLogo from '../styles/icons/dark-solana-logo.svg';
-import AboutIconLogo from '../styles/icons/about.svg';
 import {serverUrl} from "../request/serverUrls";
 import {displayTimestamp} from "../utils/date";
 import {ClipLoader} from "react-spinners";
 import ReactTooltip from "react-tooltip";
 import {useZooming} from "../providers/board/zooming";
 import {useSetAbout} from "../providers/about/about";
+import {
+  Squares2X2Icon,
+  InformationCircleIcon,
+  ClockIcon as HistoryIconNotChecked,
+  MagnifyingGlassIcon,
+  WifiIcon
+} from '@heroicons/react/24/outline'
 
 type DashboardProps = {
   onMouseDown: () => void
@@ -35,7 +41,7 @@ export function Dashboard({onMouseDown}: DashboardProps) {
           <ShowGridToggle/>
           <ShowHistoryToggle/>
           <ShowZoom/>
-          <OnlineStatusCircle/>
+          <OnlineStatus/>
           <ShowAbout/>
         </div>
         {showHistory && <div className="dashboard-row">
@@ -72,7 +78,7 @@ function SendActionButton() {
       }
     </div>
     <ReactTooltip
-      className="action-button-tooltip"
+      className="dashboard-tooltip"
       id="action-button-tooltip-id"
       type="info"
       effect="solid"
@@ -83,29 +89,45 @@ function SendActionButton() {
 function ShowGridToggle() {
   const boardConfig = useBoardConfig();
   const setBoardConfig = useSetBoardConfig();
+  const isChecked = boardConfig.showGrid;
+  const onClick = React.useCallback(() => {
+    setBoardConfig((prevConfig) => ({
+      ...prevConfig,
+      showGrid: !isChecked
+    }))
+  }, [isChecked, setBoardConfig]);
+  return (
+    <div className="dashboard-item">
+      <div
+        className={`dashboard-icon-holder ${isChecked ? "checked-toggle" : ""}`}
+        data-tip={true}
+        data-for="grid-tooltip-id"
+      >
+        <Squares2X2Icon
+          className="grid-icon"
+          onClick={onClick}
+        />
+      </div>
+      <ReactTooltip
+        className="dashboard-tooltip"
+        id="grid-tooltip-id"
+        type="info"
+        effect="solid"
+      >Show grid
+      </ReactTooltip>
+    </div>
 
-  return <div className="dashboard-item grid-toggle">
-    <Toggle
-      id="grid-toggle-id"
-      defaultChecked={boardConfig.showGrid}
-      icons={false}
-      onChange={(e) => {
-        setBoardConfig((prevConfig) => {
-          return {
-            ...prevConfig,
-            showGrid: e.target.checked
-          }
-        })
-      }}/>
-    <label className="grid-toggle-label" htmlFor="grid-toggle-id">Grid</label>
-  </div>;
+  );
 }
 
 function ShowZoom() {
   const {zoom} = useZooming();
   const zoomString = zoom * 100;
-  return <div className="dashboard-item show-zoom">
-    <span>Zoom {zoomString}%</span>
+  return <div className="dashboard-item">
+    <div className="dashboard-icon-holder">
+      <MagnifyingGlassIcon className="show-zoom-icon"/>
+    </div>
+    {zoomString}%
   </div>;
 }
 
@@ -113,59 +135,72 @@ function ShowZoom() {
 function ShowHistoryToggle() {
   const boardConfig = useBoardConfig();
   const setBoardConfig = useSetBoardConfig();
-
-  return <div className="dashboard-item grid-toggle">
-    <Toggle
-      id="history-toggle-id"
-      defaultChecked={boardConfig.showHistory}
-      icons={false}
-      onChange={(e) => {
-        setBoardConfig((prevConfig) => {
-          return {
-            ...prevConfig,
-            showHistory: e.target.checked
-          }
-        })
-      }}/>
-    <label className="history-toggle-label" htmlFor="grid-toggle-id">History</label>
-  </div>;
+  const isChecked = boardConfig.showHistory;
+  const onClick = React.useCallback(() => {
+    setBoardConfig((prevConfig) => ({
+      ...prevConfig,
+      showHistory: !isChecked
+    }))
+  }, [isChecked, setBoardConfig]);
+  return (
+    <div className="dashboard-item">
+      <div
+        className={`dashboard-icon-holder ${isChecked ? "checked-toggle" : ""}`}
+        data-tip={true}
+        data-for="history-tooltip-id"
+      >
+        <HistoryIconNotChecked
+          className="history-icon"
+          onClick={onClick}
+        />
+      </div>
+      <ReactTooltip
+        className="dashboard-tooltip"
+        id="history-tooltip-id"
+        type="info"
+        effect="solid"
+      >Show history of changes
+      </ReactTooltip>
+    </div>
+  );
 }
 
-function OnlineStatusCircle() {
+function OnlineStatus() {
   const isOnline = useIsOnline();
   const activeUsers = useActiveUsers();
 
-  return <div className="dashboard-item online-circle-holder">
-    <div
-      data-tip={true}
-      data-for="online-circle-tooltip-id"
-      className={`online-circle ${!isOnline ? "online-circle-offline" : ""}`}>
+  return (
+    <div className="dashboard-item">
+      <div
+        className="dashboard-icon-holder"
+        data-tip={true}
+        data-for="online-status-tooltip-id"
+      >
+        {isOnline
+          ? <WifiIcon className="online-status-icon"/>
+          : <ClipLoader size="1.5rem" speedMultiplier={0.5}/>
+        }
+      </div>
+      <ReactTooltip
+        class={`dashboard-tooltip online-status-tooltip online-status-tooltip-${isOnline ? "success" : "connecting"}`}
+        id="online-status-tooltip-id"
+        type={isOnline ? "success" : "info"}
+        effect="solid"
+      >
+        {isOnline
+          ? <>Connected<br/>Users online: {activeUsers}</>
+          : <>You are connecting to the server...</>
+        }
+      </ReactTooltip>
     </div>
-    <span className="online-circle-label">{isOnline
-      ? "Online"
-      : "Connecting"
-    }</span>
-    {!isOnline && <ClipLoader cssOverride={{marginLeft: "0.2rem"}} size={12} speedMultiplier={0.5}/>}
-    <ReactTooltip
-      class="online-circle-tooltip"
-      id="online-circle-tooltip-id"
-      type={isOnline ? "success" : "info"}
-      effect="solid"
-    >
-      {isOnline
-        ? <>Connected<br/>Users online: {activeUsers}</>
-        : <>You are connecting to the server...</>
-      }
-    </ReactTooltip>
-  </div>;
+  );
 }
 
 function ShowAbout() {
   const setAbout = useSetAbout();
-  return <div className="dashboard-item show-about">
-    <img
-      src={AboutIconLogo}
-      alt={"About"}
+  return <div className="dashboard-item">
+    <InformationCircleIcon
+      className="show-zoom-icon"
       onClick={() => setAbout(prevState => ({...prevState, showAboutModal: true}))}
     />
   </div>;

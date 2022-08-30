@@ -16,6 +16,7 @@
   },
   "testnetDefaultChannel": "edge",
   "dependencies": {
+    "@heroicons/react": "^2.0.8",
     "@project-serum/anchor": "^0.25.0",
     "@react-hook/throttle": "^2.2.0",
     "@solana/wallet-adapter-base": "^0.9.15",

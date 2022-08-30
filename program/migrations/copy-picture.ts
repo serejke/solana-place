@@ -27,8 +27,8 @@ async function copyPicture(provider) {
 
   const imageBuffer = fs.readFileSync(PICTURE_PATH)
   const png = PNG.sync.read(imageBuffer);
-  const baseRow = 150;
-  const baseColumn = 150;
+  const baseRow = 0;
+  const baseColumn = 0;
 
   const changes: ChangeColorRequest[] = [];
   for (let row = 0; row < png.height; row++) {
@@ -51,7 +51,7 @@ async function copyPicture(provider) {
     }
   }
 
-  const sliceSize = 100;
+  const sliceSize = 150;
   let sliceStart = 0;
   while (sliceStart < changes.length) {
     const encodedRequests = encodeChangeColorRequests(changes.slice(sliceStart, sliceStart + sliceSize));
