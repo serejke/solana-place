@@ -1,6 +1,7 @@
 import * as React from "react";
 import {useCallback, useRef, useState} from "react";
 import {CanvasPosition} from "../../model/canvasPosition";
+import {PIXEL_SIZE} from "../../components/GameCanvas";
 
 export type ZoomingState = {
   zoom: number,
@@ -15,13 +16,24 @@ export type ZoomingState = {
 
 const Context = React.createContext<ZoomingState | undefined>(undefined);
 
-const EMPTY_ZOOM_PIVOT: ZoomPivot = {x: 0, y: 0, clientX: 0, clientY: 0}
+const ZERO_ZOOM_PIVOT: ZoomPivot = {x: 0, y: 0, clientX: 0, clientY: 0}
 
 export function ZoomingProvider({children}: { children: React.ReactNode }) {
   const dpr = window.devicePixelRatio;
   const [zoom, setZoom] = useState<number>(1);
-  const [zoomPivot, setZoomPivot] = useState<ZoomPivot>(EMPTY_ZOOM_PIVOT);
+  const [zoomPivot, setZoomPivot] = useState<ZoomPivot>(ZERO_ZOOM_PIVOT);
   const isUpdatingRef = useRef<boolean>(false);
+
+  /*
+    When the pivot is close to the left or top border we don't want to lose the very beginning pixels.
+    We want them to stick on the borders, thus make the pivot's corresponding coordinate 0 in this case.
+   */
+  function stickPivotToBeginning(pivot: ZoomPivot): ZoomPivot {
+    const threshold = 10;
+    const { x, clientX } = pivot.x > threshold * PIXEL_SIZE ? { ...pivot } : { x: 0, clientX: 0 };
+    const { y, clientY } = pivot.y > threshold * PIXEL_SIZE ? { ...pivot } : { y: 0, clientY: 0 };
+    return { x, y, clientX, clientY};
+  }
 
   const zoomInOrOut = useCallback((pivot: ZoomPivot, inOrOut: boolean) => {
     if (isUpdatingRef.current) {
@@ -35,7 +47,7 @@ export function ZoomingProvider({children}: { children: React.ReactNode }) {
       newZoom = ZOOMING_OPTIONS[index - 1];
     }
     if (newZoom !== zoom) {
-      const newZoomPivot = newZoom < 1 ? EMPTY_ZOOM_PIVOT : pivot;
+      const newZoomPivot = newZoom < 1 ? ZERO_ZOOM_PIVOT : stickPivotToBeginning(pivot);
       isUpdatingRef.current = true;
       setZoom(newZoom);
       setZoomPivot(newZoomPivot);

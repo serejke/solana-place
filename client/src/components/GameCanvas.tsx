@@ -15,7 +15,7 @@ import {PixelCoordinates} from "../model/pixelCoordinates";
 import {ClientPosition, useZooming, ZoomingState, ZoomPivot} from "providers/board/zooming";
 import {CanvasPosition} from "../model/canvasPosition";
 
-const PIXEL_SIZE = 4;
+export const PIXEL_SIZE = 4;
 
 type GameCanvasProps = {
   onPixelClicked: (selectedPixel: SelectedPixel) => void
