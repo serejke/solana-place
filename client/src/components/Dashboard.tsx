@@ -124,12 +124,25 @@ function ShowGridToggle() {
 function ShowZoom() {
   const {zoom} = useZooming();
   const zoomString = zoom * 100;
-  return <div className="dashboard-item">
-    <div className={`dashboard-cancel-draggable dashboard-icon-holder`}>
-      <MagnifyingGlassIcon className="show-zoom-icon"/>
+  return (
+    <div className="dashboard-item">
+      <div
+        className={`dashboard-cancel-draggable dashboard-icon-holder`}
+        data-tip={true}
+        data-for="zoom-tooltip-id"
+      >
+        <MagnifyingGlassIcon className="show-zoom-icon"/>
+      </div>
+      <ReactTooltip
+        className="dashboard-tooltip"
+        id="zoom-tooltip-id"
+        type="info"
+        effect="solid"
+      >Use mouse wheel or +/- keys to zoom in/out
+      </ReactTooltip>
+      {zoomString}%
     </div>
-    {zoomString}%
-  </div>;
+  );
 }
 
 
