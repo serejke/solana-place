@@ -146,3 +146,7 @@
 .show-about-icon {
   @include dashboard-icon;
 }
+
+// Phantom class used by React Draggable on some elements to prevent dragging
+.dashboard-cancel-draggable {
+}

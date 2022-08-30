@@ -34,7 +34,7 @@ export function Dashboard({onMouseDown}: DashboardProps) {
   const {showHistory} = useBoardConfig();
 
   return (
-    <Draggable onMouseDown={onMouseDown}>
+    <Draggable cancel=".dashboard-cancel-draggable">
       <div className="dashboard">
         <div className="dashboard-row">
           <SendActionButton/>
@@ -63,6 +63,7 @@ function SendActionButton() {
     <div
       data-tip={true}
       data-for="action-button-tooltip-id"
+      className="dashboard-cancel-draggable"
     >
       {!wallet.connected && <WalletMultiButton className="action-button"/>}
       {wallet.connected
@@ -99,7 +100,7 @@ function ShowGridToggle() {
   return (
     <div className="dashboard-item">
       <div
-        className={`dashboard-icon-holder ${isChecked ? "checked-toggle" : ""}`}
+        className={`dashboard-cancel-draggable dashboard-icon-holder ${isChecked ? "checked-toggle" : ""}`}
         data-tip={true}
         data-for="grid-tooltip-id"
       >
@@ -124,7 +125,7 @@ function ShowZoom() {
   const {zoom} = useZooming();
   const zoomString = zoom * 100;
   return <div className="dashboard-item">
-    <div className="dashboard-icon-holder">
+    <div className={`dashboard-cancel-draggable dashboard-icon-holder`}>
       <MagnifyingGlassIcon className="show-zoom-icon"/>
     </div>
     {zoomString}%
@@ -145,7 +146,7 @@ function ShowHistoryToggle() {
   return (
     <div className="dashboard-item">
       <div
-        className={`dashboard-icon-holder ${isChecked ? "checked-toggle" : ""}`}
+        className={`dashboard-cancel-draggable dashboard-icon-holder ${isChecked ? "checked-toggle" : ""}`}
         data-tip={true}
         data-for="history-tooltip-id"
       >
@@ -172,7 +173,7 @@ function OnlineStatus() {
   return (
     <div className="dashboard-item">
       <div
-        className="dashboard-icon-holder"
+        className={`dashboard-cancel-draggable dashboard-icon-holder`}
         data-tip={true}
         data-for="online-status-tooltip-id"
       >
@@ -200,7 +201,7 @@ function ShowAbout() {
   const setAbout = useSetAbout();
   return <div className="dashboard-item">
     <InformationCircleIcon
-      className="show-zoom-icon"
+      className={`dashboard-cancel-draggable show-zoom-icon`}
       onClick={() => setAbout(prevState => ({...prevState, showAboutModal: true}))}
     />
   </div>;
