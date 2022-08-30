@@ -74,7 +74,7 @@ export function GameCanvas({onPixelClicked}: GameCanvasProps) {
     currentBoardState.current = undefined;
   }, [canvasSize, zoomingState]);
 
-  // Draw board state and unoccupied filler.
+  // Draw board state.
   React.useEffect(() => {
     const ctx = canvasRef.current?.getContext("2d");
     if (!ctx) return;
@@ -265,7 +265,7 @@ function drawGrid(ctx: CanvasRenderingContext2D, rows: number, columns: number) 
   ctx.stroke();
 }
 
-function colorPixel(ctx: CanvasRenderingContext2D, pixelCoordinates: PixelCoordinates, color: string | null) {
+function drawPixel(ctx: CanvasRenderingContext2D, pixelCoordinates: PixelCoordinates, color: string | null) {
   const {x: px, y: py} = getPixelBeginningCanvasPosition(pixelCoordinates);
   if (color) {
     ctx.fillStyle = color;
@@ -293,7 +293,7 @@ function drawBoard(
         continue;
       }
       if (color !== undefined) {
-        colorPixel(ctx, {row, column}, color);
+        drawPixel(ctx, {row, column}, color);
       }
     }
   }

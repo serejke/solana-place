@@ -27,8 +27,8 @@ async function copyPicture(provider) {
 
   const imageBuffer = fs.readFileSync(PICTURE_PATH)
   const png = PNG.sync.read(imageBuffer);
-  const baseRow = 25;
-  const baseColumn = 25;
+  const baseRow = 150;
+  const baseColumn = 150;
 
   const changes: ChangeColorRequest[] = [];
   for (let row = 0; row < png.height; row++) {

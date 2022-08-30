@@ -35,9 +35,10 @@ export function ZoomingProvider({children}: { children: React.ReactNode }) {
       newZoom = ZOOMING_OPTIONS[index - 1];
     }
     if (newZoom !== zoom) {
+      const newZoomPivot = newZoom < 1 ? EMPTY_ZOOM_PIVOT : pivot;
       isUpdatingRef.current = true;
       setZoom(newZoom);
-      setZoomPivot(pivot);
+      setZoomPivot(newZoomPivot);
     }
   }, [zoom]);
   const zoomIn = useCallback((pivot: ZoomPivot) => zoomInOrOut(pivot, true), [zoomInOrOut]);

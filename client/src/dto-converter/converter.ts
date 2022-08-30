@@ -32,9 +32,10 @@ export function parseGameEventWithTransactionDetailsFromDto(data: EventWithTrans
 }
 
 export function parseBoardHistory(eventsWithTransactionDetailsDto: EventsWithTransactionDetailsDto): BoardHistory {
-  const gameEventWithTransactionDetails = eventsWithTransactionDetailsDto.events.flatMap((eventWithTransactionDetailsDto) =>
-    parseGameEventWithTransactionDetailsFromDto(eventWithTransactionDetailsDto) ?? []
-  );
+  const gameEventWithTransactionDetails = eventsWithTransactionDetailsDto.events
+    .flatMap((eventWithTransactionDetailsDto) =>
+      parseGameEventWithTransactionDetailsFromDto(eventWithTransactionDetailsDto) ?? []
+    );
   return {
     events: gameEventWithTransactionDetails
   };

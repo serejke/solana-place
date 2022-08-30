@@ -2,7 +2,6 @@ import * as React from "react";
 import {BoardStateDispatch, boardStateReducer} from "../../reducers/boardStateReducer";
 import {BoardState} from "../../model/boardState";
 import {HighlightedPixelProvider} from "./highlightedPixel";
-import {useThrottle} from "@react-hook/throttle";
 
 const Context = React.createContext<BoardState | undefined>(undefined);
 const DispatchContext = React.createContext<BoardStateDispatch | undefined>(undefined);
@@ -15,13 +14,8 @@ export function BoardStateProvider({children}: { children: React.ReactNode }) {
     changed: []
   });
 
-  const [throttledBoardState, setThrottledBoardState] = useThrottle<BoardState>(boardState, 1, true);
-  React.useEffect(() => {
-    setThrottledBoardState(boardState);
-  }, [boardState, setThrottledBoardState]);
-
   return (
-    <Context.Provider value={throttledBoardState}>
+    <Context.Provider value={boardState}>
       <DispatchContext.Provider value={boardDispatch}>
         <HighlightedPixelProvider>
           {children}

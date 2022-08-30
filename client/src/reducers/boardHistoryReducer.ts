@@ -5,26 +5,30 @@ type InitialBoardHistoryAction = {
   history: BoardHistory
 };
 
-type AddHistoryEntryAction = {
-  type: "addHistoryEntry",
-  gameEventWithTransactionDetails: GameEventWithTransactionDetails
+type AddHistoryEntriesAction = {
+  type: "addHistoryEntries",
+  gameEventsWithTransactionDetails: GameEventWithTransactionDetails[]
 };
 
-export type BoardHistoryAction = InitialBoardHistoryAction | AddHistoryEntryAction;
+export type BoardHistoryAction = InitialBoardHistoryAction | AddHistoryEntriesAction;
 
 export type BoardHistoryDispatch = (action: BoardHistoryAction) => void;
 
 export function boardHistoryReducer(state: BoardHistory, action: BoardHistoryAction): BoardHistory {
   switch (action.type) {
     case "initialHistory": {
-      return action.history;
-    }
-    case "addHistoryEntry": {
-      const events = state.events;
-      const newEvents = [action.gameEventWithTransactionDetails, ...events].slice(0, BOARD_HISTORY_MAX_LENGTH);
       return {
-        events: newEvents
+        events: action.history.events.slice(0, BOARD_HISTORY_MAX_LENGTH)
       };
     }
+    case "addHistoryEntries":
+      const events: GameEventWithTransactionDetails[] = [];
+      events.push(...action.gameEventsWithTransactionDetails);
+      events.reverse();
+      const remainingSpace = BOARD_HISTORY_MAX_LENGTH - events.length;
+      if (remainingSpace > 0) {
+        events.push(...state.events.slice(0, remainingSpace));
+      }
+      return { events };
   }
 }

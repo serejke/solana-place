@@ -17,21 +17,18 @@ type DeleteChangedPixelAction = {
   coordinates: PixelCoordinates
 };
 
-type ClearChangedPixelsAction = {
-  type: "clearChangedPixels"
-};
-
-type UpdateSinglePixel = {
-  type: "updateSinglePixel",
-  coordinates: PixelCoordinates,
-  newColor: number
+type UpdatePixels = {
+  type: "updatePixels",
+  updatedPixels: {
+    coordinates: PixelCoordinates,
+    newColor: number
+  }[]
 }
 
 export type BoardStateAction = InitialBoardStateAction
   | ChangePixelAction
   | DeleteChangedPixelAction
-  | ClearChangedPixelsAction
-  | UpdateSinglePixel;
+  | UpdatePixels;
 
 export type BoardStateDispatch = (action: BoardStateAction) => void;
 
@@ -40,15 +37,19 @@ export function boardStateReducer(state: BoardState, action: BoardStateAction): 
     case "initialState": {
       return action.newState;
     }
-    case "updateSinglePixel":
-      const coordinates = action.coordinates;
-      const newColors = JSON.parse(JSON.stringify(state.colors));
-      newColors[coordinates.row][coordinates.column] = action.newColor;
-      const newChanged = state.changed.filter(changedPixel => !areEqual(changedPixel.coordinates, coordinates))
+    case "updatePixels":
+      const updatedPixels = action.updatedPixels;
+      const updatedColors = JSON.parse(JSON.stringify(state.colors));
+      updatedPixels.forEach(({coordinates, newColor}) => {
+        updatedColors[coordinates.row][coordinates.column] = newColor;
+      });
+      const updatedChanged = state.changed.filter(changedPixel =>
+        !updatedPixels.some(({coordinates}) => areEqual(coordinates, changedPixel.coordinates))
+      )
       return {
         ...state,
-        changed: newChanged,
-        colors: newColors
+        changed: updatedChanged,
+        colors: updatedColors
       }
     case "changePixel": {
       const coordinates = action.coordinates;
@@ -71,9 +72,6 @@ export function boardStateReducer(state: BoardState, action: BoardStateAction): 
     case "deleteChangedPixel": {
       const newChangedPixels = state.changed.filter(pixel => !areEqual(pixel.coordinates, action.coordinates));
       return {...state, changed: newChangedPixels}
-    }
-    case "clearChangedPixels": {
-      return {...state, changed: []}
     }
   }
 }

@@ -1,4 +1,4 @@
-import {BoardHistory} from "../model/model";
+import {BOARD_HISTORY_MAX_LENGTH, BoardHistory} from "../model/model";
 import {EventsWithTransactionDetailsDto} from "../dto/eventsWithTransactionDetailsDto";
 import {parseBoardHistory} from "../dto-converter/converter";
 import {reportError, sleep} from "../utils";
@@ -17,7 +17,7 @@ export async function fetchBoardHistory(httpUrl: string): Promise<BoardHistory> 
 async function fetchBoardHistoryOrRetry(httpUrl: string): Promise<BoardHistory | "retry"> {
   try {
     const response = await fetch(
-      new Request(httpUrl + "/api/board-history", {
+      new Request(`${httpUrl}/api/board-history?limit=${BOARD_HISTORY_MAX_LENGTH}`, {
         method: "GET",
         headers: {"Content-Type": "application/json"}
       })

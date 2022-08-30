@@ -75,18 +75,20 @@ function useSubscribeToBoardEvents() {
   const messageHandler = React.useCallback((message: any) => {
     const gameEventsWithTransactionDetails = parseGameEventWithTransactionDetailsFromDto(message);
     if (gameEventsWithTransactionDetails) {
-      for (const {event, transactionDetails} of gameEventsWithTransactionDetails) {
-        console.log("Received event", transactionDetails.confirmation, event, transactionDetails);
-        if (event.type === "pixelChangedEvent") {
-          boardDispatch({
-            type: "updateSinglePixel",
-            coordinates: {row: event.row, column: event.column},
-            newColor: event.newColor
-          });
-        }
+      const pixelChangedEvents = gameEventsWithTransactionDetails
+        .filter(({event}) => event.type === "pixelChangedEvent");
+      if (pixelChangedEvents.length > 0) {
+        boardDispatch({
+          type: "updatePixels",
+          updatedPixels: pixelChangedEvents
+            .map(({event}) => ({
+              coordinates: {row: event.row, column: event.column},
+              newColor: event.newColor
+            }))
+        })
         boardHistoryDispatch({
-          type: "addHistoryEntry",
-          gameEventWithTransactionDetails: {event, transactionDetails}
+          type: "addHistoryEntries",
+          gameEventsWithTransactionDetails
         })
       }
     }
