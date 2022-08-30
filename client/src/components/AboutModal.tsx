@@ -18,7 +18,8 @@ export function AboutModal() {
         <div className="about-modal-dialog-row about-modal-dialog-text">
           Place is a common pixel board for Solana users where anyone can draw an image by changing colors of pixels.<br/><br/>
           The board is 300x500 pixels wide. In future it might be extended if the game attracts enough attention.<br/><br/>
-          Service fee to change a pixel is 0.001 SOL.
+          Service fee to change a pixel is 0.001 SOL.<br/><br/>
+          Welcome to the <a rel="noopener noreferrer" target="_blank" href="https://discord.gg/eSvvbHe86R">Discord</a> with feedback, suggestions and contributions!
         </div>
         <div className="about-modal-dialog-row">
           <SocialIcon
