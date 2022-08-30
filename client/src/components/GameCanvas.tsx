@@ -172,8 +172,15 @@ export function GameCanvas({onPixelClicked}: GameCanvasProps) {
     canvasSize ?? {width: 0, height: 0}, [canvasSize]
   )
 
+  const gameStageRef = useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    // Focus the game-stage to enable the onKeyDown event listener on rendering.
+    gameStageRef.current!.focus();
+  }, [])
+
   return (
     <div
+      ref={gameStageRef}
       tabIndex={0}
       className="game-stage"
       onKeyDown={onZoomKeyDown}
