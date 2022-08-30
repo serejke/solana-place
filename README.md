@@ -4,12 +4,15 @@ Pixel canvas for Solana users inspired by [r/place](https://www.reddit.com/r/pla
 ![Screenshot](docs/images/main.png)
 
 # How it works
-On-chain board of 128x196 pixels. Anyone can send a transaction to change a pixel to one of the 36 colors.
-
-Currently, transactions are not charged any fees.
+On-chain board of 300x500 pixels. Anyone can send a transaction to change a pixel to one of the 36 colors.
+Service fee is 0.001 SOL.
 
 # Further development
 
 Lock recently-changed pixels for N seconds, or charge more SOLs to change them.
 
-Integrate with NFTs: owner of a pixel can receive royalty fees when his/her pixel is changed. 
+Integrate with NFTs: owner of a pixel can receive royalty fees when his/her pixel is changed.
+
+# Feedback
+
+Join our [Discord](https://discord.gg/eSvvbHe86R) with feedback, suggestions and contributions!
