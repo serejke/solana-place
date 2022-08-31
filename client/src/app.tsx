@@ -75,6 +75,7 @@ function useSubscribeToBoardEvents() {
   const messageHandler = React.useCallback((message: any) => {
     const gameEventsWithTransactionDetails = parseGameEventWithTransactionDetailsFromDto(message);
     if (gameEventsWithTransactionDetails) {
+      console.log("Received event", message);
       const pixelChangedEvents = gameEventsWithTransactionDetails
         .filter(({event}) => event.type === "pixelChangedEvent");
       if (pixelChangedEvents.length > 0) {

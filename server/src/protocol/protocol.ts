@@ -3,14 +3,43 @@ import {GameEvent} from "../model/gameEvent";
 import {EventListener} from "./eventListener";
 import {TransactionDetails} from "../model/transactionDetails";
 import {EventWithTransactionDetails} from "../model/eventsHistory";
+import {CloseableService} from "../service/CloseableService";
 
-export class Protocol<T extends GameEvent> {
+const PENDING_TRANSACTIONS_PROCESSING_INTERVAL = 5000;
+const PENDING_TRANSACTION_TIMEOUT = 90000;
+
+export class Protocol<T extends GameEvent> implements CloseableService {
 
   private listeners: EventListener[] = [];
+
+  // Transactions received with status 'processed' instead of 'confirmed' or 'finalized'.
+  //  We need to periodically poll the transaction's info and send the update to clients on success.
+  //  Max timeout for a pending transaction is [PENDING_TRANSACTION_TIMEOUT].
+  private pendingTransactions: {
+    event: T,
+    slot: number,
+    signature: string,
+    receivedAt: number
+  }[] = [];
+
+  private readonly pendingTransactionProcessorId: NodeJS.Timeout;
+
+  private isProcessingPendingTransactions = false;
 
   constructor(
     private connection: Connection
   ) {
+    this.pendingTransactionProcessorId = setTimeout(
+      () => {
+        this.isProcessingPendingTransactions = true;
+        this.processPendingTransactions()
+          .catch((e) => console.error("Failed to process pending transactions", e))
+          .finally(() => {
+            this.isProcessingPendingTransactions = false;
+          });
+      },
+      PENDING_TRANSACTIONS_PROCESSING_INTERVAL
+    )
   }
 
   addListener(listener: EventListener): void {
@@ -37,11 +66,20 @@ export class Protocol<T extends GameEvent> {
     }
 
     if (confirmation !== "confirmed" && confirmation !== "finalized") {
-      console.warn(`Transaction ${signature} is not confirmed nor finalized yet`);
+      console.warn(`Transaction ${signature} is not confirmed nor finalized but ${confirmation}`);
       return this.onEventWithoutTransaction(event, slot, signature);
     }
 
-    const transaction = await this.connection.getTransaction(signature, { commitment: confirmation });
+    return await this.handleEvent(event, slot, signature, confirmation);
+  }
+
+  private async handleEvent(
+    event: T,
+    slot: number,
+    signature: string,
+    commitment: "confirmed" | "finalized"
+  ): Promise<void> {
+    const transaction = await this.connection.getTransaction(signature, {commitment});
     if (!transaction) {
       console.warn(`Transaction ${signature} status is received but transaction is not yet available via RPC`)
       return this.onEventWithoutTransaction(event, slot, signature);
@@ -54,17 +92,18 @@ export class Protocol<T extends GameEvent> {
     }
 
     const sender = transaction.transaction.message.accountKeys[0];
-    const transactionDetails: TransactionDetails = { signature, confirmation, sender, timestamp }
+    const transactionDetails: TransactionDetails = {signature, confirmation: commitment, sender, timestamp}
     return this.onEventConfirmation(event, slot, signature, transactionDetails);
   }
 
-  async onEventWithoutTransaction(
+  private async onEventWithoutTransaction(
     event: T,
     slot: number,
     signature: string,
   ): Promise<void> {
     console.info(`Transaction ${signature} must be processed later.`);
-    // Add this change to a pending queue and periodically query the RPC Node on its status up until N times.
+    const receivedAt = Date.now();
+    this.pendingTransactions.push({event, slot, signature, receivedAt});
   }
 
   async onEventError(
@@ -88,5 +127,20 @@ export class Protocol<T extends GameEvent> {
       transactionDetails
     }
     this.listeners.forEach((listener) => listener(eventWithTransactionDetails));
+  }
+
+  private async processPendingTransactions() {
+    for (let i = 0; i < this.pendingTransactions.length; i++) {
+      const {event, slot, signature, receivedAt} = this.pendingTransactions.splice(0, 1)[0];
+      if (Date.now() - receivedAt > PENDING_TRANSACTION_TIMEOUT) {
+        console.log(`Drop pending transaction by timeout ${signature}`);
+        continue;
+      }
+      await this.onEvent(event, slot, signature)
+    }
+  }
+
+  async close(): Promise<void> {
+    clearTimeout(this.pendingTransactionProcessorId);
   }
 }
