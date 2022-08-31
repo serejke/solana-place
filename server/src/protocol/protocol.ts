@@ -29,7 +29,7 @@ export class Protocol<T extends GameEvent> implements CloseableService {
   constructor(
     private connection: Connection
   ) {
-    this.pendingTransactionProcessorId = setTimeout(
+    this.pendingTransactionProcessorId = setInterval(
       () => {
         this.isProcessingPendingTransactions = true;
         this.processPendingTransactions()
