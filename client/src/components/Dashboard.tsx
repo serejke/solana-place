@@ -294,10 +294,13 @@ const timeRanges: [number, string][] = [
   [10 * SECONDS_PER_MINUTE, "10 min"],
   [30 * SECONDS_PER_MINUTE, "30 min"],
   [SECONDS_PER_HOUR, "1 hour"],
-  [3 * SECONDS_PER_HOUR, "3 hour"],
-  [6 * SECONDS_PER_HOUR, "6 hour"],
+  [2 * SECONDS_PER_HOUR, "2 hours"],
+  [3 * SECONDS_PER_HOUR, "3 hours"],
+  [6 * SECONDS_PER_HOUR, "6 hours"],
+  [12 * SECONDS_PER_HOUR, "12 hours"],
   [SECONDS_PER_DAY, "1 day"],
-  [3 * SECONDS_PER_DAY, "3 day"]
+  [2 * SECONDS_PER_DAY, "2 days"],
+  [3 * SECONDS_PER_DAY, "3 days"]
 ]
 
 function formatTime(timestamp: number): string {
