@@ -1,8 +1,7 @@
 import * as React from "react";
 import {useClusterConfig} from "../providers/server/clusterConfig";
-import {useBoardState} from "../providers/board/boardState";
+import {useBoardDispatch, useBoardState} from "../providers/board/boardState";
 import {useBoardConfig, useSetBoardConfig} from "../providers/board/boardConfig";
-import Toggle from "react-toggle";
 import {useWallet} from "@solana/wallet-adapter-react";
 import {WalletMultiButton} from "@solana/wallet-adapter-react-ui";
 import Draggable from "react-draggable"
@@ -55,9 +54,12 @@ export function Dashboard({onMouseDown}: DashboardProps) {
 }
 
 function SendActionButton() {
-  const changedPixels = useBoardState()?.changed ?? [];
+  const boardState = useBoardState();
+  const boardDispatch = useBoardDispatch();
+  const changedPixels = boardState?.changed ?? [];
   const wallet = useWallet();
-  const isDisabled = changedPixels.length === 0;
+  const isPendingTransaction = boardState && boardState.pendingTransaction !== null;
+  const isDisabled = !boardState || boardState.changed.length === 0 || isPendingTransaction;
 
   return <div className="dashboard-item">
     <div
@@ -72,9 +74,19 @@ function SendActionButton() {
           disabled={isDisabled}
           onClick={() => {
             changePixels(serverUrl, changedPixels, wallet)
+              .then((transactionSignature) =>
+                boardDispatch({
+                  type: "setPendingTransaction",
+                  pendingTransaction: transactionSignature
+                })
+              )
               .catch(console.error);
           }}>
-          Send{!isDisabled ? ` (${changedPixels.length})` : ""}
+          {
+            isPendingTransaction
+              ? `Sending ${changedPixels.length}...`
+              : isDisabled ? 'Send' : `Send (${changedPixels.length})`
+          }
         </button>
       }
     </div>

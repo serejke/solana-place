@@ -63,5 +63,6 @@ export const HIGHLIGHTED_STROKE_WIDTH = 2;
 
 export const HIGHLIGHTED_COLOR = "#75d8ff";
 export const GRID_COLOR = "lightgray";
-export const CHANGED_COLOR = "black";
+export const CHANGED_COLOR = "green";
+export const PENDING_COLOR = "yellow";
 export const HOVERED_PIXEL_COLOR = "#d13115";

@@ -1,5 +1,6 @@
 import {areEqual, BoardState} from "../model/boardState";
 import {PixelCoordinates} from "../model/pixelCoordinates";
+import {TransactionSignature} from "@solana/web3.js";
 
 type InitialBoardStateAction = {
   type: "initialState",
@@ -17,6 +18,11 @@ type DeleteChangedPixelAction = {
   coordinates: PixelCoordinates
 };
 
+type SetPendingTransactionAction = {
+  type: "setPendingTransaction",
+  pendingTransaction: TransactionSignature
+}
+
 type UpdatePixels = {
   type: "updatePixels",
   updatedPixels: {
@@ -28,6 +34,7 @@ type UpdatePixels = {
 export type BoardStateAction = InitialBoardStateAction
   | ChangePixelAction
   | DeleteChangedPixelAction
+  | SetPendingTransactionAction
   | UpdatePixels;
 
 export type BoardStateDispatch = (action: BoardStateAction) => void;
@@ -46,10 +53,18 @@ export function boardStateReducer(state: BoardState, action: BoardStateAction): 
       const updatedChanged = state.changed.filter(changedPixel =>
         !updatedPixels.some(({coordinates}) => areEqual(coordinates, changedPixel.coordinates))
       )
+      const newPendingTransaction = updatedChanged.length === 0 ? null : state.pendingTransaction;
       return {
         ...state,
         changed: updatedChanged,
-        colors: updatedColors
+        colors: updatedColors,
+        pendingTransaction: newPendingTransaction
+      }
+    case "setPendingTransaction":
+      const pendingTransaction = action.pendingTransaction;
+      return {
+        ...state,
+        pendingTransaction
       }
     case "changePixel": {
       const coordinates = action.coordinates;

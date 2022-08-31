@@ -1,12 +1,14 @@
 import {getColorByIndex} from "../utils/colorUtils";
 import {PixelCoordinates} from "./pixelCoordinates";
 import {ChangedPixel} from "./changedPixel";
+import {TransactionSignature} from "@solana/web3.js";
 
 export type BoardState = {
   height: number,
   width: number,
   colors: number[][],
-  changed: ChangedPixel[];
+  changed: ChangedPixel[],
+  pendingTransaction: TransactionSignature | null;
 };
 
 export function areEqual(one: PixelCoordinates, two: PixelCoordinates) {

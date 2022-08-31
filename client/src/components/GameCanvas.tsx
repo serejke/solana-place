@@ -5,7 +5,8 @@ import {
   GRID_COLOR,
   HIGHLIGHTED_COLOR,
   HIGHLIGHTED_STROKE_WIDTH,
-  HOVERED_PIXEL_COLOR
+  HOVERED_PIXEL_COLOR,
+  PENDING_COLOR
 } from "../utils/colorUtils";
 import {useBoardConfig} from "../providers/board/boardConfig";
 import {BoardState, getColor, isWithinBounds} from "../model/boardState";
@@ -97,6 +98,7 @@ export function GameCanvas({onPixelClicked}: GameCanvasProps) {
   }, [canvasSize, zoomingState]);
 
   // Draw hovered, highlighted and changed pixels, if any.
+  const isPendingTransaction = boardState?.pendingTransaction != null;
   React.useEffect(() => {
     const helperCtx = canvasHelperRef.current?.getContext("2d");
     if (!helperCtx) return;
@@ -107,8 +109,9 @@ export function GameCanvas({onPixelClicked}: GameCanvasProps) {
       hoverPixel(helperCtx, hoveredPixel, HOVERED_PIXEL_COLOR);
     }
     if (boardState?.changed) {
+      const color = isPendingTransaction ? PENDING_COLOR : CHANGED_COLOR;
       boardState.changed.forEach((changedPixel) => {
-        hoverPixel(helperCtx, changedPixel.coordinates, CHANGED_COLOR);
+        hoverPixel(helperCtx, changedPixel.coordinates, color);
       });
     }
     return () => {
@@ -118,7 +121,7 @@ export function GameCanvas({onPixelClicked}: GameCanvasProps) {
         clearHighlightedOrHoveredPixel(helperCtx, changedPixel.coordinates);
       })
     }
-  }, [hoveredPixel, highlightedPixel, boardState?.changed])
+  }, [hoveredPixel, highlightedPixel, boardState?.changed, isPendingTransaction])
 
   const onClickCallback: CanvasCallback = React.useCallback(({canvasPosition, eventPosition}) => {
     if (!boardState) return;

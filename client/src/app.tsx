@@ -47,7 +47,7 @@ function useRequestInitialBoardState() {
       .then(boardStateDto => {
         boardDispatch({
           type: "initialState",
-          newState: {...boardStateDto, changed: []}
+          newState: {...boardStateDto, changed: [], pendingTransaction: null}
         })
       });
   }, [boardDispatch]);

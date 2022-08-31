@@ -11,7 +11,8 @@ export function BoardStateProvider({children}: { children: React.ReactNode }) {
     height: 0,
     width: 0,
     colors: [],
-    changed: []
+    changed: [],
+    pendingTransaction: null
   });
 
   return (
