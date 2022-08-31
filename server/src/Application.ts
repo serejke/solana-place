@@ -67,7 +67,9 @@ export class Application {
       // clusterStateService,
 
       webSocketServer,
-      apiServer
+      apiServer,
+
+      protocol
     ]
 
     const application = new Application(allServices);
