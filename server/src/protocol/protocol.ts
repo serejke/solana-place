@@ -130,7 +130,9 @@ export class Protocol<T extends GameEvent> implements CloseableService {
   }
 
   private async processPendingTransactions() {
-    for (let i = 0; i < this.pendingTransactions.length; i++) {
+    // Fix the length in a const. The [pendingTransactions] array might be appended.
+    const length = this.pendingTransactions.length;
+    for (let i = 0; i < length; i++) {
       const {event, slot, signature, receivedAt} = this.pendingTransactions.splice(0, 1)[0];
       if (Date.now() - receivedAt > PENDING_TRANSACTION_TIMEOUT) {
         console.log(`Drop pending transaction by timeout ${signature}`);
