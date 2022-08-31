@@ -30,19 +30,21 @@ export function PixelColorPicker({selectedPixel, close}: PixelColorPickerProps) 
     && selectedPixel
     && boardState.changed.some(pixel => areEqual(pixel.coordinates, selectedPixel.pixelCoordinates));
 
+  const isPendingTransaction = boardState && boardState.pendingTransaction !== null
+
   React.useEffect(() => {
-    if (isAlreadyChanged) {
+    if (isAlreadyChanged && !isPendingTransaction) {
       boardDispatch({
         type: "deleteChangedPixel",
         coordinates: selectedPixel.pixelCoordinates
       })
       close();
     }
-  }, [isAlreadyChanged, selectedPixel, boardDispatch, close])
+  }, [isAlreadyChanged, isPendingTransaction, selectedPixel, boardDispatch, close])
 
   const canChangeMore = boardState && boardState.changed.length < MAX_CHANGES_PER_TRANSACTION;
 
-  if (!selectedPixel || isAlreadyChanged) {
+  if (!selectedPixel || isAlreadyChanged || isPendingTransaction) {
     return null;
   }
 
