@@ -17,8 +17,9 @@ export type BoardHistoryDispatch = (action: BoardHistoryAction) => void;
 export function boardHistoryReducer(state: BoardHistory, action: BoardHistoryAction): BoardHistory {
   switch (action.type) {
     case "initialHistory": {
-      const events = [...action.history.events];
-      events.sort((event1, event2) => -compareGameEvent(event1, event2))
+      const allEvents = [...action.history.events];
+      allEvents.sort((event1, event2) => -compareGameEvent(event1, event2))
+      const events = deduplicateEvents(allEvents);
       return {events};
     }
     case "addHistoryEntries":
