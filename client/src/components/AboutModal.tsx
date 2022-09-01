@@ -12,7 +12,7 @@ export function AboutModal() {
   return (
     <div className="about-modal">
       <div className="about-modal-dialog">
-        <div className="about-modal-dialog-row">
+        <div className="about-modal-dialog-row about-modal-dialog-logo">
           <img src={SolanaPlaceLogo} alt="Place | Solana"/>
         </div>
         <div className="about-modal-dialog-row about-modal-dialog-text">

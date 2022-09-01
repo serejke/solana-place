@@ -1,6 +1,6 @@
 import * as React from "react";
 import {useClusterConfig} from "../providers/server/clusterConfig";
-import {useBoardDispatch, useBoardState} from "../providers/board/boardState";
+import {useBoardState} from "../providers/board/boardState";
 import {useBoardConfig, useSetBoardConfig} from "../providers/board/boardConfig";
 import {useWallet} from "@solana/wallet-adapter-react";
 import {WalletMultiButton} from "@solana/wallet-adapter-react-ui";
