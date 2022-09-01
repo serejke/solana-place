@@ -59,8 +59,8 @@ export function ZoomingProvider({children}: { children: React.ReactNode }) {
 
   const state: ZoomingState = React.useMemo(() => {
     const scale = dpr * zoom;
-    const canvasTranslateX = -Math.max(0, zoomPivot.x * scale - dpr * zoomPivot.clientX);
-    const canvasTranslateY = -Math.max(0, zoomPivot.y * scale - dpr * zoomPivot.clientY);
+    const canvasTranslateX = -Math.max(0, Math.floor(zoomPivot.x * scale - dpr * zoomPivot.clientX));
+    const canvasTranslateY = -Math.max(0, Math.floor(zoomPivot.y * scale - dpr * zoomPivot.clientY));
     return {
       zoomPivot,
       dpr,
