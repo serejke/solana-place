@@ -1,7 +1,11 @@
 import {cluster} from "../program/urls";
 import {GAME_PROGRAM_ACCOUNT, PROGRAM_ID} from "../program/program";
 import {Express, NextFunction, Request, Response} from "express";
-import {toEventsWithTransactionDetailsDto, toBoardStateDto} from "../dto-converter/converter";
+import {
+  toEventsWithTransactionDetailsDto,
+  toBoardStateDto,
+  parseTransactionConfirmationStatus
+} from "../dto-converter/converter";
 import {BoardService} from "../service/BoardService";
 import {BoardHistoryService} from "../service/BoardHistoryService";
 import {CloseableService} from "../service/CloseableService";
@@ -11,7 +15,7 @@ import {PublicKey, Transaction} from "@solana/web3.js";
 import {CreateTransactionRequestDto, SerializedTransactionDto} from "../dto/transactionDto";
 import base58 from "bs58";
 import {TransactionService} from "../service/TransactionService";
-import {SERVER_ERROR_PREFIX, ServerError} from "../errors/serverError";
+import {InvalidRequest, NotFound, SERVER_ERROR_PREFIX, ServerError} from "../errors/serverError";
 
 export default class ApiServer implements CloseableService {
 
@@ -39,7 +43,7 @@ export default class ApiServer implements CloseableService {
       res.json(toBoardStateDto(boardState));
     })
 
-    app.get("/api/board-history", async (req, res) => {
+    app.get("/api/board/history", async (req, res) => {
       const limitString = req.query["limit"]?.toString() ?? "100"
       const limit = parseInt(limitString);
       res.json(toEventsWithTransactionDetailsDto(await boardHistoryService.getBoardHistory(limit)));
@@ -50,6 +54,23 @@ export default class ApiServer implements CloseableService {
       const feePayer = new PublicKey(requestsDto.feePayer);
       const serializedMessageDto = await transactionBuilderService.createTransactionToChangePixels(feePayer, requestsDto.data);
       res.json(serializedMessageDto);
+    })
+
+    app.get("/api/board/changePixels/status", async (req, res) => {
+      const transactionSignature = req.query["transactionSignature"]?.toString()
+      if (!transactionSignature) {
+        throw new InvalidRequest("transactionSignature is not provided in the query");
+      }
+      const commitmentString = req.query["commitment"]?.toString();
+      const commitment = parseTransactionConfirmationStatus(commitmentString) ?? "confirmed";
+      if (commitment === "processed") {
+        throw new InvalidRequest("processed confirmation is not supported");
+      }
+      const eventsHistory = await boardHistoryService.getTransactionEventsIfFound(transactionSignature);
+      if (eventsHistory === null) {
+        throw new NotFound(`Transaction ${transactionSignature} is not found`);
+      }
+      res.json(toEventsWithTransactionDetailsDto(eventsHistory));
     })
 
     app.post("/api/transaction/send", async (req, res) => {

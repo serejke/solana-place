@@ -22,9 +22,9 @@ export function boardHistoryReducer(state: BoardHistory, action: BoardHistoryAct
       return {events};
     }
     case "addHistoryEntries":
-      const events = [...action.gameEventsWithTransactionDetails, ...state.events];
-      events.sort((event1, event2) => -compareGameEvent(event1, event2))
-      events.splice(BOARD_HISTORY_MAX_LENGTH);
+      const allEvents = [...action.gameEventsWithTransactionDetails, ...state.events];
+      allEvents.sort((event1, event2) => -compareGameEvent(event1, event2))
+      const events = deduplicateEvents(allEvents);
       return {events};
   }
 }
@@ -34,6 +34,23 @@ function compareNumbers(a: number, b: number): number {
     return 0;
   }
   return a < b ? -1 : 1;
+}
+
+function deduplicateEvents(events: GameEventWithTransactionDetails[]) {
+  const result: GameEventWithTransactionDetails[] = [];
+  for (const event of events) {
+    const lastEvent = result.length > 0 ? result[result.length - 1] : null;
+    if (lastEvent === null
+      || lastEvent.transactionDetails.signature !== event.transactionDetails.signature
+      || lastEvent.event.state !== event.event.state
+    ) {
+      result.push(event);
+    }
+    if (result.length >= BOARD_HISTORY_MAX_LENGTH) {
+      break;
+    }
+  }
+  return result;
 }
 
 function compareGameEvent(event1: GameEventWithTransactionDetails, event2: GameEventWithTransactionDetails): number {

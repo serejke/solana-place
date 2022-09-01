@@ -20,7 +20,12 @@ type DeleteChangedPixelAction = {
 
 type SetPendingTransactionAction = {
   type: "setPendingTransaction",
-  pendingTransaction: TransactionSignature
+  pendingTransaction: TransactionSignature,
+  pendingTransactionIntervalId: number
+}
+
+type UnsetPendingTransactionAction = {
+  type: "unsetPendingTransaction"
 }
 
 type UpdatePixels = {
@@ -35,6 +40,7 @@ export type BoardStateAction = InitialBoardStateAction
   | ChangePixelAction
   | DeleteChangedPixelAction
   | SetPendingTransactionAction
+  | UnsetPendingTransactionAction
   | UpdatePixels;
 
 export type BoardStateDispatch = (action: BoardStateAction) => void;
@@ -46,26 +52,41 @@ export function boardStateReducer(state: BoardState, action: BoardStateAction): 
     }
     case "updatePixels":
       const updatedPixels = action.updatedPixels;
-      const updatedColors = JSON.parse(JSON.stringify(state.colors));
+      const newColors = JSON.parse(JSON.stringify(state.colors));
       updatedPixels.forEach(({coordinates, newColor}) => {
-        updatedColors[coordinates.row][coordinates.column] = newColor;
+        newColors[coordinates.row][coordinates.column] = newColor;
       });
-      const updatedChanged = state.changed.filter(changedPixel =>
+      const newChanged = state.changed.filter(changedPixel =>
         !updatedPixels.some(({coordinates}) => areEqual(coordinates, changedPixel.coordinates))
       )
-      const newPendingTransaction = updatedChanged.length === 0 ? null : state.pendingTransaction;
+      if (state.pendingTransactionIntervalId) {
+        clearInterval(state.pendingTransactionIntervalId);
+      }
       return {
         ...state,
-        changed: updatedChanged,
-        colors: updatedColors,
-        pendingTransaction: newPendingTransaction
+        changed: newChanged,
+        colors: newColors,
+        pendingTransaction: null,
+        pendingTransactionIntervalId: null
       }
     case "setPendingTransaction":
-      const pendingTransaction = action.pendingTransaction;
+      if (state.pendingTransactionIntervalId) {
+        clearInterval(state.pendingTransactionIntervalId)
+      }
       return {
         ...state,
-        pendingTransaction
+        pendingTransaction: action.pendingTransaction,
+        pendingTransactionIntervalId: action.pendingTransactionIntervalId
       }
+    case "unsetPendingTransaction":
+      if (state.pendingTransactionIntervalId) {
+        clearInterval(state.pendingTransactionIntervalId)
+      }
+      return {
+        ...state,
+        pendingTransaction: null,
+        pendingTransactionIntervalId: null
+      };
     case "changePixel": {
       const coordinates = action.coordinates;
       const newColor = action.newColor;

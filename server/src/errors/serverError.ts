@@ -16,6 +16,22 @@ export class ServerError implements Error {
   }
 }
 
+export class InvalidRequest extends ServerError {
+  name = SERVER_ERROR_PREFIX + ":InvalidRequest";
+  statusCode = 400;
+  constructor(message: string) {
+    super(message);
+  }
+}
+
+export class NotFound extends ServerError {
+  name = SERVER_ERROR_PREFIX + ":NotFound";
+  statusCode = 404;
+  constructor(message: string) {
+    super(message);
+  }
+}
+
 export class RpcError extends ServerError {
   name = SERVER_ERROR_PREFIX + ":RpcError";
   statusCode = 409;

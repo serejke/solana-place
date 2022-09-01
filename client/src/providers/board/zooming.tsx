@@ -29,7 +29,7 @@ export function ZoomingProvider({children}: { children: React.ReactNode }) {
     We want them to stick on the borders, thus make the pivot's corresponding coordinate 0 in this case.
    */
   function stickPivotToBeginning(pivot: ZoomPivot): ZoomPivot {
-    const threshold = 50;
+    const threshold = 25;
     const { x, clientX } = pivot.x > threshold * PIXEL_SIZE ? { ...pivot } : { x: 0, clientX: 0 };
     const { y, clientY } = pivot.y > threshold * PIXEL_SIZE ? { ...pivot } : { y: 0, clientY: 0 };
     return { x, y, clientX, clientY};

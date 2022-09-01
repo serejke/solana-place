@@ -24,6 +24,7 @@ import {
   MagnifyingGlassIcon,
   WifiIcon
 } from '@heroicons/react/24/outline'
+import {useSetPendingTransaction} from "../providers/transactions/pendingTransaction";
 
 type DashboardProps = {
   onMouseDown: () => void
@@ -55,11 +56,11 @@ export function Dashboard({onMouseDown}: DashboardProps) {
 
 function SendActionButton() {
   const boardState = useBoardState();
-  const boardDispatch = useBoardDispatch();
   const changedPixels = boardState?.changed ?? [];
   const wallet = useWallet();
   const isPendingTransaction = boardState && boardState.pendingTransaction !== null;
   const isDisabled = !boardState || boardState.changed.length === 0 || isPendingTransaction;
+  const setPendingTransaction = useSetPendingTransaction();
 
   return <div className="dashboard-item">
     <div
@@ -74,12 +75,7 @@ function SendActionButton() {
           disabled={isDisabled}
           onClick={() => {
             changePixels(serverUrl, changedPixels, wallet)
-              .then((transactionSignature) =>
-                boardDispatch({
-                  type: "setPendingTransaction",
-                  pendingTransaction: transactionSignature
-                })
-              )
+              .then(setPendingTransaction)
               .catch(console.error);
           }}>
           {

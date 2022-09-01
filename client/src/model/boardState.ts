@@ -8,7 +8,8 @@ export type BoardState = {
   width: number,
   colors: number[][],
   changed: ChangedPixel[],
-  pendingTransaction: TransactionSignature | null;
+  pendingTransaction: TransactionSignature | null,
+  pendingTransactionIntervalId: number | null;
 };
 
 export function areEqual(one: PixelCoordinates, two: PixelCoordinates) {

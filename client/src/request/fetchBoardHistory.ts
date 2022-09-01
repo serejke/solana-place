@@ -17,7 +17,7 @@ export async function fetchBoardHistory(httpUrl: string): Promise<BoardHistory> 
 async function fetchBoardHistoryOrRetry(httpUrl: string): Promise<BoardHistory | "retry"> {
   try {
     const response = await fetch(
-      new Request(`${httpUrl}/api/board-history?limit=${BOARD_HISTORY_MAX_LENGTH}`, {
+      new Request(`${httpUrl}/api/board/history?limit=${BOARD_HISTORY_MAX_LENGTH}`, {
         method: "GET",
         headers: {"Content-Type": "application/json"}
       })
@@ -25,7 +25,7 @@ async function fetchBoardHistoryOrRetry(httpUrl: string): Promise<BoardHistory |
     const eventsWithTransactionDetails: EventsWithTransactionDetailsDto = await response.json();
     return parseBoardHistory(eventsWithTransactionDetails);
   } catch (err) {
-    reportError(err, "/board-history failed");
+    reportError(err, "/api/board/history failed");
     return "retry";
   }
 }

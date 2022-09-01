@@ -14,6 +14,9 @@ import {serverUrl} from "./request/serverUrls";
 import {fetchBoardHistory} from "./request/fetchBoardHistory";
 import {areEqual} from "./model/boardState";
 import {AboutModal} from "./components/AboutModal";
+import {GameEventWithTransactionDetails} from "./model/model";
+import {BoardStateDispatch} from "./reducers/boardStateReducer";
+import {BoardHistoryDispatch} from "./reducers/boardHistoryReducer";
 
 export default function App() {
   const [selectedPixel, setSelectedPixel] = useState<SelectedPixel>();
@@ -47,7 +50,12 @@ function useRequestInitialBoardState() {
       .then(boardStateDto => {
         boardDispatch({
           type: "initialState",
-          newState: {...boardStateDto, changed: [], pendingTransaction: null}
+          newState: {
+            ...boardStateDto,
+            changed: [],
+            pendingTransaction: null,
+            pendingTransactionIntervalId: null
+          }
         })
       });
   }, [boardDispatch]);
@@ -76,24 +84,32 @@ function useSubscribeToBoardEvents() {
     const gameEventsWithTransactionDetails = parseGameEventWithTransactionDetailsFromDto(message);
     if (gameEventsWithTransactionDetails) {
       console.log("Received event", message);
-      const pixelChangedEvents = gameEventsWithTransactionDetails
-        .filter(({event}) => event.type === "pixelChangedEvent");
-      if (pixelChangedEvents.length > 0) {
-        boardDispatch({
-          type: "updatePixels",
-          updatedPixels: pixelChangedEvents
-            .map(({event}) => ({
-              coordinates: {row: event.row, column: event.column},
-              newColor: event.newColor
-            }))
-        })
-        boardHistoryDispatch({
-          type: "addHistoryEntries",
-          gameEventsWithTransactionDetails
-        })
-      }
+      updateBoardStateAndHistory(gameEventsWithTransactionDetails, boardDispatch, boardHistoryDispatch);
     }
   }, [boardDispatch, boardHistoryDispatch]);
 
   useAddSocketMessageHandler(messageHandler);
+}
+
+export function updateBoardStateAndHistory(
+  gameEventsWithTransactionDetails: GameEventWithTransactionDetails[],
+  boardDispatch: BoardStateDispatch,
+  boardHistoryDispatch: BoardHistoryDispatch
+) {
+  const pixelChangedEvents = gameEventsWithTransactionDetails
+    .filter(({event}) => event.type === "pixelChangedEvent");
+  if (pixelChangedEvents.length > 0) {
+    boardDispatch({
+      type: "updatePixels",
+      updatedPixels: pixelChangedEvents
+        .map(({event}) => ({
+          coordinates: {row: event.row, column: event.column},
+          newColor: event.newColor
+        }))
+    })
+    boardHistoryDispatch({
+      type: "addHistoryEntries",
+      gameEventsWithTransactionDetails
+    })
+  }
 }

@@ -1,6 +1,6 @@
 import {EventsWithTransactionDetailsDto, EventWithTransactionDetailsDto} from "../dto/eventsWithTransactionDetailsDto";
 import {BoardState} from "../model/boardState";
-import {Transaction} from "@solana/web3.js";
+import {Transaction, TransactionConfirmationStatus} from "@solana/web3.js";
 import {SerializedMessageDto, TransactionDetailsDto} from "../dto/transactionDto";
 import base58 from "bs58";
 import {BoardStateDto} from "../dto/boardStateDto";
@@ -44,4 +44,14 @@ export function toTransactionDetailsDto(transactionDetails: TransactionDetails):
 export function toSerializedMessageDto(transaction: Transaction): SerializedMessageDto {
   const base58Buffer = base58.encode(transaction.serializeMessage());
   return {messageBase58: base58Buffer}
+}
+
+export function parseTransactionConfirmationStatus(string: string | undefined): TransactionConfirmationStatus | undefined {
+  switch (string) {
+    case "confirmed":
+    case "processed":
+    case "finalized":
+      return string;
+  }
+  return undefined;
 }
