@@ -15,7 +15,7 @@ import {PublicKey, Transaction} from "@solana/web3.js";
 import {CreateTransactionRequestDto, SerializedTransactionDto} from "../dto/transactionDto";
 import base58 from "bs58";
 import {TransactionService} from "../service/TransactionService";
-import {InvalidRequest, NotFound, SERVER_ERROR_PREFIX, ServerError} from "../errors/serverError";
+import {InvalidRequest, NotFound, rethrowRpcError, SERVER_ERROR_PREFIX, ServerError} from "../errors/serverError";
 
 export default class ApiServer implements CloseableService {
 
@@ -66,7 +66,8 @@ export default class ApiServer implements CloseableService {
       if (commitment === "processed") {
         throw new InvalidRequest("processed confirmation is not supported");
       }
-      const eventsHistory = await boardHistoryService.getTransactionEventsIfFound(transactionSignature);
+      const eventsHistory = await boardHistoryService.getTransactionEventsIfFound(transactionSignature)
+        .catch((e) => rethrowRpcError(e));
       if (eventsHistory === null) {
         throw new NotFound(`Transaction ${transactionSignature} is not found`);
       }
