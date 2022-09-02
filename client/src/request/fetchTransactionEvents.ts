@@ -1,15 +1,16 @@
 import {BoardHistory} from "../model/model";
-import {reportError, sleep} from "../utils";
+import {sleep} from "../utils";
 import {EventsWithTransactionDetailsDto} from "../dto/eventsWithTransactionDetailsDto";
 import {parseBoardHistory} from "../dto-converter/converter";
 import {TransactionSignature} from "@solana/web3.js";
 import {serverUrl} from "./serverUrls";
+import {RequestError} from "./requestError";
 
 export async function fetchTransactionEvents(
-  transactionSignature: TransactionSignature
+  signature: TransactionSignature
 ): Promise<BoardHistory | null> {
   while (true) {
-    const response: BoardHistory | null | "retry" = await fetchTransactionEventsOrRetry(transactionSignature);
+    const response: BoardHistory | null | "retry" = await fetchTransactionEventsOrRetry(signature);
     if (response === "retry") {
       await sleep(2000);
     } else {
@@ -34,10 +35,13 @@ async function fetchTransactionEventsOrRetry(
     if (response.status === 404) {
       return null;
     }
+    if (!response.ok) {
+      throw new RequestError(response.status, await response.json());
+    }
     const eventsWithTransactionDetails: EventsWithTransactionDetailsDto = await response.json();
     return parseBoardHistory(eventsWithTransactionDetails);
   } catch (err) {
-    reportError(err, "/api/board/history failed");
+    console.error("/api/board/changePixels/status failed", err);
     return "retry";
   }
 }

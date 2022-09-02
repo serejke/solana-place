@@ -74,7 +74,7 @@ function SendActionButton() {
           className="action-button"
           disabled={isDisabled}
           onClick={() => {
-            changePixels(serverUrl, changedPixels, wallet)
+            changePixels(changedPixels, wallet)
               .then(setPendingTransaction)
               .catch(console.error);
           }}>

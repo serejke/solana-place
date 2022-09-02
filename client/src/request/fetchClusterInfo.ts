@@ -1,6 +1,7 @@
-import {reportError, sleep} from "utils";
+import {sleep} from "utils";
 import {PublicKey} from "@solana/web3.js";
 import {Action, ConfigStatus, Dispatch} from "../reducers/clusterConfigReducer";
+import {RequestError} from "./requestError";
 
 export async function fetchClusterInfo(
   dispatch: Dispatch,
@@ -29,6 +30,9 @@ async function fetchClusterInfoOrRetry(httpUrl: string): Promise<Action | "retry
         headers: { "Content-Type": "application/json" }
       })
     );
+    if (!response.ok) {
+      throw new RequestError(response.status, await response.json());
+    }
     const data = await response.json();
     if (!("cluster" in data) || !("programId" in data)) {
       console.error(`/api/init failed because of invalid response ${JSON.stringify(data)}`)
@@ -44,7 +48,7 @@ async function fetchClusterInfoOrRetry(httpUrl: string): Promise<Action | "retry
       },
     };
   } catch (err) {
-    reportError(err, "/api/init failed");
+    console.error("/api/init failed", err);
     return "retry";
   }
 }

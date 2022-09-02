@@ -10,7 +10,6 @@ import {ChangedPixel} from "../model/changedPixel";
 export const MAX_CHANGES_PER_TRANSACTION = 150;
 
 export async function changePixels(
-  httpUrl: string,
   changedPixels: ChangedPixel[],
   wallet: WalletContextState
 ): Promise<TransactionSignature> {
@@ -25,9 +24,9 @@ export async function changePixels(
       newColor: changedPixel.newColor
     }))
   }
-  const transaction = await createTransactionToChangePixels(httpUrl, changePixelsRequestDto);
+  const transaction = await createTransactionToChangePixels(changePixelsRequestDto);
   const signTransaction = wallet.signTransaction!;
   const signedTransaction = await signTransaction(transaction);
   const serializedTransactionDto = toSerializedTransactionDto(signedTransaction);
-  return await sendTransaction(httpUrl, serializedTransactionDto)
+  return await sendTransaction(serializedTransactionDto)
 }

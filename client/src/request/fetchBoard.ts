@@ -1,5 +1,6 @@
-import {reportError, sleep} from "../utils";
+import {sleep} from "../utils";
 import {BoardStateDto} from "../dto/boardStateDto";
+import {RequestError} from "./requestError";
 
 export async function fetchBoard(httpUrl: string): Promise<BoardStateDto> {
   while (true) {
@@ -20,6 +21,9 @@ async function fetchBoardOrRetry(httpUrl: string): Promise<BoardStateDto | "retr
         headers: {"Content-Type": "application/json"}
       })
     );
+    if (!response.ok) {
+      throw new RequestError(response.status, await response.json());
+    }
     const data = await response.json();
 
     return {
@@ -29,7 +33,7 @@ async function fetchBoardOrRetry(httpUrl: string): Promise<BoardStateDto | "retr
       colors: data.colors
     }
   } catch (err) {
-    reportError(err, "/board failed");
+    console.error("/board failed", err);
     return "retry";
   }
 }

@@ -1,7 +1,8 @@
 import {BoardHistory} from "../model/model";
 import {EventsWithTransactionDetailsDto} from "../dto/eventsWithTransactionDetailsDto";
 import {parseBoardHistory} from "../dto-converter/converter";
-import {reportError, sleep} from "../utils";
+import {sleep} from "../utils";
+import {RequestError} from "./requestError";
 
 const BOARD_HISTORY_TRANSACTIONS_LIMIT = 10;
 
@@ -24,10 +25,13 @@ async function fetchBoardHistoryOrRetry(httpUrl: string): Promise<BoardHistory |
         headers: {"Content-Type": "application/json"}
       })
     );
+    if (!response.ok) {
+      throw new RequestError(response.status, await response.json());
+    }
     const eventsWithTransactionDetails: EventsWithTransactionDetailsDto = await response.json();
     return parseBoardHistory(eventsWithTransactionDetails);
   } catch (err) {
-    reportError(err, "/api/board/history failed");
+    console.error("/api/board/history failed", err);
     return "retry";
   }
 }
