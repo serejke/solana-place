@@ -20,7 +20,7 @@ const ZERO_ZOOM_PIVOT: ZoomPivot = {x: 0, y: 0, clientX: 0, clientY: 0}
 
 export function ZoomingProvider({children}: { children: React.ReactNode }) {
   const dpr = window.devicePixelRatio;
-  const [zoom, setZoom] = useState<number>(1);
+  const [zoom, setZoom] = useState<number>(ZOOMING_OPTIONS[0]);
   const [zoomPivot, setZoomPivot] = useState<ZoomPivot>(ZERO_ZOOM_PIVOT);
   const isUpdatingRef = useRef<boolean>(false);
 
