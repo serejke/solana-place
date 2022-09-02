@@ -6,12 +6,13 @@ import {EventsHistory, EventWithTransactionDetails} from "../model/eventsHistory
 import {TransactionDetails} from "../model/transactionDetails";
 import {rethrowRpcError} from "../errors/serverError";
 import {parseProgramGameEvent} from "../program/parser";
-import {ConfirmedSignatureInfo, Connection, Finality, TransactionSignature} from "@solana/web3.js";
+import {ConfirmedSignatureInfo, Connection, Finality, TransactionResponse, TransactionSignature} from "@solana/web3.js";
 
 export class BoardHistoryService implements CloseableService {
 
   private readonly eventParser: EventParser;
   private readonly connection: Connection;
+  private finalizedTransactionCache: Map<TransactionSignature, TransactionResponse> = new Map<TransactionSignature, TransactionResponse>();
 
   constructor(
     private anchorState: AnchorService
@@ -68,8 +69,13 @@ export class BoardHistoryService implements CloseableService {
     signature: string,
     confirmation: Finality
   ): Promise<EventWithTransactionDetails[] | null> {
-    const transaction = await this.connection.getTransaction(signature, {commitment: confirmation});
+    const cachedTransaction = this.finalizedTransactionCache.get(signature);
+    const transaction = cachedTransaction ?? await this.connection.getTransaction(signature, {commitment: confirmation});
     if (!transaction) return null;
+    if (confirmation === "finalized") {
+      this.finalizedTransactionCache.set(signature, transaction);
+    }
+
     const meta = transaction.meta;
     if (!meta) return null;
     if (meta.err) return [];
