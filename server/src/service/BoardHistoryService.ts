@@ -6,7 +6,7 @@ import {EventsHistory, EventWithTransactionDetails} from "../model/eventsHistory
 import {TransactionDetails} from "../model/transactionDetails";
 import {rethrowRpcError} from "../errors/serverError";
 import {parseProgramGameEvent} from "../program/parser";
-import {Connection, TransactionSignature} from "@solana/web3.js";
+import {ConfirmedSignatureInfo, Connection, Finality, TransactionSignature} from "@solana/web3.js";
 
 export class BoardHistoryService implements CloseableService {
 
@@ -25,14 +25,22 @@ export class BoardHistoryService implements CloseableService {
   }
 
   async getBoardHistory(limit: number): Promise<EventsHistory> {
-    const signaturesForAddress = await this.connection.getSignaturesForAddress(
+    const confirmedSignatures: ConfirmedSignatureInfo[] = await this.connection.getSignaturesForAddress(
       GAME_PROGRAM_ACCOUNT,
       {limit},
       "confirmed"
     ).catch((e) => rethrowRpcError(e));
 
     const eventsWithDetails = await Promise.all(
-      signaturesForAddress.map(async (confirmedSignatureInfo) => this.getTransactionEvents(confirmedSignatureInfo.signature))
+      confirmedSignatures.map(async (confirmedSignatureInfo) => {
+        if (confirmedSignatureInfo.err) {
+          return null;
+        }
+        // Undocumented field https://github.com/solana-labs/solana/issues/27569
+        // eslint-disable-next-line
+        const confirmationStatus = (confirmedSignatureInfo as any).confirmationStatus
+        return this.getConfirmedTransactionEvents(confirmedSignatureInfo.signature, confirmationStatus);
+      })
     ).catch((e) => rethrowRpcError(e));
 
     return {
@@ -41,29 +49,30 @@ export class BoardHistoryService implements CloseableService {
   }
 
   async getTransactionEventsIfFound(
-    transactionSignature: TransactionSignature
+    signature: TransactionSignature
   ): Promise<EventsHistory | null> {
-    const events = await this.getTransactionEvents(transactionSignature);
+    const signatureStatus = await this.connection.getSignatureStatus(signature, {searchTransactionHistory: true});
+    if (!signatureStatus.value) return null;
+    if (signatureStatus.value.err) return {events: []};
+    const confirmation = signatureStatus.value.confirmationStatus;
+    if (!confirmation) return null;
+    if (confirmation !== "confirmed" && confirmation !== "finalized") return null;
+    const events = await this.getConfirmedTransactionEvents(signature, confirmation);
     if (events === null) {
       return null;
     }
     return {events}
   }
 
-  private async getTransactionEvents(
-    signature: TransactionSignature
+  private async getConfirmedTransactionEvents(
+    signature: string,
+    confirmation: Finality
   ): Promise<EventWithTransactionDetails[] | null> {
-    const signatureStatus = await this.connection.getSignatureStatus(signature, { searchTransactionHistory: true });
-    if (!signatureStatus.value) return null;
-    const confirmation = signatureStatus.value.confirmationStatus;
-    if (!confirmation) return null;
-    if (confirmation !== "confirmed" && confirmation !== "finalized") return null;
-
     const transaction = await this.connection.getTransaction(signature, {commitment: confirmation});
     if (!transaction) return null;
     const meta = transaction.meta;
     if (!meta) return null;
-    if (meta.err) return null;
+    if (meta.err) return [];
     const sender = transaction.transaction.message.accountKeys[0]
     const timestamp = transaction.blockTime;
     if (!timestamp) return null;
