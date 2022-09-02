@@ -35,9 +35,11 @@ export class NotFound extends ServerError {
 export class RpcError extends ServerError {
   name = SERVER_ERROR_PREFIX + ":RpcError";
   statusCode = 409;
+  cause: Error;
 
   constructor(cause: Error) {
     super(cause.message);
+    this.cause = cause;
   }
 }
 
