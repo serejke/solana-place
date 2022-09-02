@@ -121,7 +121,7 @@ export function GameCanvas({onPixelClicked}: GameCanvasProps) {
         clearHighlightedOrHoveredPixel(helperCtx, changedPixel.coordinates);
       })
     }
-  }, [hoveredPixel, highlightedPixel, boardState?.changed, isPendingTransaction])
+  }, [hoveredPixel, highlightedPixel, boardState?.changed, isPendingTransaction, zoomingState])
 
   const onClickCallback: CanvasCallback = React.useCallback(({canvasPosition, eventPosition}) => {
     if (!boardState) return;
