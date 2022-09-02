@@ -41,8 +41,8 @@ export function GameCanvas({onPixelClicked}: GameCanvasProps) {
   React.useEffect(() => {
     if (!boardState?.width || !boardState?.height) return;
     const resizeListener = () => {
-      const newWidth = Math.max(boardState.width * PIXEL_SIZE, window.innerWidth);
-      const newHeight = Math.max(boardState.height * PIXEL_SIZE, window.innerHeight);
+      const newWidth = boardState.width * PIXEL_SIZE;
+      const newHeight = boardState.height * PIXEL_SIZE;
 
       if (canvasSize
         && canvasSize.width === newWidth
@@ -87,15 +87,15 @@ export function GameCanvas({onPixelClicked}: GameCanvasProps) {
 
   // Draw grid.
   React.useEffect(() => {
-    if (!canvasSize) return;
+    if (!boardState?.height || !boardState?.width) return;
     const gridCtx = canvasGridRef.current?.getContext("2d");
     if (!gridCtx) return;
 
-    const gridRows = Math.round(canvasSize.height / PIXEL_SIZE);
-    const gridColumns = Math.round(canvasSize.width / PIXEL_SIZE);
+    const gridRows = boardState.height + 1;
+    const gridColumns = boardState.width + 1;
 
     drawGrid(gridCtx, gridRows, gridColumns);
-  }, [canvasSize, zoomingState]);
+  }, [canvasSize, zoomingState, boardState?.height, boardState?.width]);
 
   // Draw hovered, highlighted and changed pixels, if any.
   const isPendingTransaction = boardState?.pendingTransaction != null;
