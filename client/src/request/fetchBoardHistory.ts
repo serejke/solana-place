@@ -1,7 +1,9 @@
-import {BOARD_HISTORY_MAX_LENGTH, BoardHistory} from "../model/model";
+import {BoardHistory} from "../model/model";
 import {EventsWithTransactionDetailsDto} from "../dto/eventsWithTransactionDetailsDto";
 import {parseBoardHistory} from "../dto-converter/converter";
 import {reportError, sleep} from "../utils";
+
+const BOARD_HISTORY_TRANSACTIONS_LIMIT = 10;
 
 export async function fetchBoardHistory(httpUrl: string): Promise<BoardHistory> {
   while (true) {
@@ -17,7 +19,7 @@ export async function fetchBoardHistory(httpUrl: string): Promise<BoardHistory> 
 async function fetchBoardHistoryOrRetry(httpUrl: string): Promise<BoardHistory | "retry"> {
   try {
     const response = await fetch(
-      new Request(`${httpUrl}/api/board/history?limit=${BOARD_HISTORY_MAX_LENGTH}`, {
+      new Request(`${httpUrl}/api/board/history?limit=${BOARD_HISTORY_TRANSACTIONS_LIMIT}`, {
         method: "GET",
         headers: {"Content-Type": "application/json"}
       })

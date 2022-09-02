@@ -44,7 +44,7 @@ export default class ApiServer implements CloseableService {
     })
 
     app.get("/api/board/history", async (req, res) => {
-      const limitString = req.query["limit"]?.toString() ?? "100"
+      const limitString = req.query["limit"]?.toString() ?? "10"
       const limit = parseInt(limitString);
       res.json(toEventsWithTransactionDetailsDto(await boardHistoryService.getBoardHistory(limit)));
     })
