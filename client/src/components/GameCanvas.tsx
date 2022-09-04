@@ -1,5 +1,5 @@
 import {useBoardState} from "../providers/board/boardState";
-import React, {useRef, useState} from "react";
+import React, {useReducer, useRef, useState} from "react";
 import {
   CHANGED_COLOR,
   GRID_COLOR,
@@ -13,25 +13,23 @@ import {BoardState, getColor, isWithinBounds} from "../model/boardState";
 import {useHighlightedPixel} from "../providers/board/highlightedPixel";
 import {SelectedPixel} from "./PixelColorPicker";
 import {PixelCoordinates} from "../model/pixelCoordinates";
-import {ClientPosition, useZooming, ZoomingState, ZoomPivot} from "providers/board/zooming";
-import {CanvasPosition} from "../model/canvasPosition";
 
 export const PIXEL_SIZE = 4;
 
 type GameCanvasProps = {
-  onPixelClicked: (selectedPixel: SelectedPixel) => void
+  onPixelClicked: (selectedPixel: SelectedPixel) => void,
+  onZoomChanged: (zoom: number) => void
 };
 
-export function GameCanvas({onPixelClicked}: GameCanvasProps) {
+export function GameCanvas({onPixelClicked, onZoomChanged}: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvasGridRef = useRef<HTMLCanvasElement>(null);
   const canvasHelperRef = useRef<HTMLCanvasElement>(null);
-  const [canvasSize, setCanvasSize] = useState<CanvasSize>();
 
   const boardState = useBoardState();
   const highlightedPixel = useHighlightedPixel();
   const showGrid = useBoardConfig().showGrid;
-  const zoomingState = useZooming();
+  const [zoomingState, zoomingDispatch] = useZooming();
 
   const [hoveredPixel, setHoveredPixel] = useState<PixelCoordinates>();
 
@@ -41,49 +39,52 @@ export function GameCanvas({onPixelClicked}: GameCanvasProps) {
   React.useEffect(() => {
     if (!boardState?.width || !boardState?.height) return;
     const resizeListener = () => {
-      const newWidth = boardState.width * PIXEL_SIZE;
-      const newHeight = boardState.height * PIXEL_SIZE;
-
-      if (canvasSize
-        && canvasSize.width === newWidth
-        && canvasSize.height === newHeight
-      ) {
-        // No need to resize.
-        return;
+      const innerWidth = window.innerWidth;
+      const innerHeight = window.innerHeight;
+      const styleProportion = 0.9;
+      let canvasStyle;
+      if (innerWidth > innerHeight) {
+        const height = Math.floor(innerHeight * styleProportion);
+        const width = Math.floor(height * boardState.width / boardState.height);
+        canvasStyle = {width, height};
+      } else {
+        const width = Math.floor(innerWidth * styleProportion);
+        const height = Math.floor(width * boardState.height / boardState.width);
+        canvasStyle = {width, height};
       }
-
-      setCanvasSize({
-        width: newWidth,
-        height: newHeight
-      })
+      const canvasSize = {
+        width: boardState.width * PIXEL_SIZE,
+        height: boardState.height * PIXEL_SIZE
+      };
+      zoomingDispatch({
+        type: "canvasInstalled",
+        canvasSize,
+        canvasStyle
+      });
     };
     resizeListener();
     window.addEventListener("resize", resizeListener)
     return () => window.removeEventListener("resize", resizeListener)
-  }, [boardState?.width, boardState?.height, canvasSize]);
+  }, [boardState?.width, boardState?.height, zoomingDispatch]);
 
-  // Resize and zoom canvas and translate origin.
+  // Resize and zoom canvas and translate origin according to the zooming state.
   React.useEffect(() => {
-    if (!canvasSize) return;
-
-    scaleCanvas(canvasRef.current!, canvasSize, zoomingState);
-    scaleCanvas(canvasGridRef.current!, canvasSize, zoomingState);
-    scaleCanvas(canvasHelperRef.current!, canvasSize, zoomingState);
-    zoomingState.onZoomUpdated();
-
+    scaleCanvas(canvasRef.current!, zoomingState);
+    scaleCanvas(canvasGridRef.current!, zoomingState);
+    scaleCanvas(canvasHelperRef.current!, zoomingState);
     // Drop the board cache to force the re-paint.
     currentBoardState.current = undefined;
-  }, [canvasSize, zoomingState]);
+    onZoomChanged(zoomingState.zoom);
+  }, [zoomingState, onZoomChanged]);
 
   // Draw board state.
   React.useEffect(() => {
     const ctx = canvasRef.current?.getContext("2d");
     if (!ctx) return;
     if (!boardState) return;
-    if (!canvasSize) return;
-    drawBoard(ctx, boardState, canvasSize, currentBoardState.current);
+    drawBoard(ctx, boardState, currentBoardState.current);
     currentBoardState.current = boardState;
-  }, [boardState, canvasSize, showGrid, zoomingState]);
+  }, [boardState, zoomingState]);
 
   // Draw grid.
   React.useEffect(() => {
@@ -95,7 +96,7 @@ export function GameCanvas({onPixelClicked}: GameCanvasProps) {
     const gridColumns = boardState.width + 1;
 
     drawGrid(gridCtx, gridRows, gridColumns);
-  }, [canvasSize, zoomingState, boardState?.height, boardState?.width]);
+  }, [boardState?.height, boardState?.width, zoomingState]);
 
   // Draw hovered, highlighted and changed pixels, if any.
   const isPendingTransaction = boardState?.pendingTransaction != null;
@@ -123,7 +124,7 @@ export function GameCanvas({onPixelClicked}: GameCanvasProps) {
     }
   }, [hoveredPixel, highlightedPixel, boardState?.changed, isPendingTransaction, zoomingState])
 
-  const onClickCallback: CanvasCallback = React.useCallback(({canvasPosition, eventPosition}) => {
+  const onClickCallback: CanvasCallback = React.useCallback(({canvasPosition, event}) => {
     if (!boardState) return;
     const pixelCoordinates = getPixelCoordinates(canvasPosition);
     if (!isWithinBounds(boardState, pixelCoordinates.row, pixelCoordinates.column)) {
@@ -131,7 +132,7 @@ export function GameCanvas({onPixelClicked}: GameCanvasProps) {
     }
     onPixelClicked({
       pixelCoordinates,
-      popupPosition: eventPosition
+      popupPosition: {clientX: event.clientX, clientY: event.clientY}
     })
   }, [boardState, onPixelClicked]);
 
@@ -145,35 +146,42 @@ export function GameCanvas({onPixelClicked}: GameCanvasProps) {
     }
   }, [boardState, setHoveredPixel]);
 
-  const onMouseWheelCallback: CanvasCallback = React.useCallback(({canvasPosition, eventPosition, event}) => {
-    const deltaY = event.deltaY;
-    if (!deltaY) return;
-    const newPivot: ZoomPivot = {...canvasPosition, ...eventPosition};
-    if (deltaY > 0) {
-      zoomingState.zoomIn(newPivot);
-    } else if (deltaY < 0) {
-      zoomingState.zoomOut(newPivot);
-    }
-  }, [zoomingState]);
-
-  const onZoomKeyDown = React.useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+  const zoomInOrOut = React.useCallback((isZoomInOrOut: "in" | "out" | undefined) => {
     if (!hoveredPixel) return;
     const canvasPosition = getPixelBeginningCanvasPosition(hoveredPixel);
-    const clientPosition = getClientPositionByCanvasPosition(canvasRef.current!, canvasPosition, zoomingState);
-    const newPivot = {...canvasPosition, ...clientPosition};
-    if (e.code === "Equal" || e.code === "Plus") {
-      zoomingState.zoomIn(newPivot)
-    } else if (e.code === "Minus") {
-      zoomingState.zoomOut(newPivot);
+    const clientPositionInCanvas = getClientPositionInCanvasByCanvasPosition(canvasPosition, zoomingState);
+    if (!clientPositionInCanvas) return;
+    const newPivot: ZoomPivot = {...canvasPosition, ...clientPositionInCanvas};
+    if (isZoomInOrOut !== undefined) {
+      zoomingDispatch({
+        type: "zoom",
+        pivot: newPivot,
+        inOurOut: isZoomInOrOut
+      });
     }
-  }, [hoveredPixel, zoomingState]);
+  }, [hoveredPixel, zoomingState, zoomingDispatch])
 
-  const onClick = useCanvasCallback(onClickCallback);
-  const onMouseMove = useCanvasCallback(onMouseMoveCallback);
-  const onMouseWheel = useCanvasCallback(onMouseWheelCallback);
-  const canvasStyle = React.useMemo(() =>
-    canvasSize ?? {width: 0, height: 0}, [canvasSize]
-  )
+  const onMouseWheelCallback: CanvasCallback = React.useCallback(({event}) => {
+    const deltaY = event.deltaY;
+    if (!deltaY) return;
+    if (deltaY > 0) {
+      zoomInOrOut("in");
+    } else if (deltaY < 0) {
+      zoomInOrOut("out");
+    }
+  }, [zoomInOrOut]);
+
+  const onZoomKeyDown = React.useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.code === "Equal" || e.code === "Plus") {
+      zoomInOrOut("in");
+    } else if (e.code === "Minus") {
+      zoomInOrOut("out");
+    }
+  }, [zoomInOrOut]);
+
+  const onClick = useCanvasCallback(onClickCallback, zoomingState);
+  const onMouseMove = useCanvasCallback(onMouseMoveCallback, zoomingState);
+  const onMouseWheel = useCanvasCallback(onMouseWheelCallback, zoomingState);
 
   const gameStageRef = useRef<HTMLDivElement>(null);
   React.useEffect(() => {
@@ -186,11 +194,12 @@ export function GameCanvas({onPixelClicked}: GameCanvasProps) {
       ref={gameStageRef}
       tabIndex={0}
       className="game-stage"
+      style={zoomingState.canvasStyle}
       onKeyDown={onZoomKeyDown}
     >
       <canvas
         className="game-canvas"
-        style={canvasStyle}
+        style={zoomingState.canvasStyle}
         ref={canvasRef}
         onClick={onClick}
         onMouseMove={onMouseMove}
@@ -198,44 +207,39 @@ export function GameCanvas({onPixelClicked}: GameCanvasProps) {
       />
       <canvas
         className={`game-grid-canvas ${showGrid ? "" : "hide"}`}
-        style={canvasStyle}
+        style={zoomingState.canvasStyle}
         ref={canvasGridRef}
       />
       <canvas
         className="game-helper-canvas"
-        style={canvasStyle}
+        style={zoomingState.canvasStyle}
         ref={canvasHelperRef}
       />
     </div>
   );
 }
 
-type CanvasSize = { width: number, height: number }
+type CanvasSize = { width: number, height: number };
+type CanvasStyle = { width: number, height: number };
 
-type CanvasCallback = ({canvasPosition, eventPosition, event}: {
-  canvasPosition: CanvasPosition,
-  eventPosition: ClientPosition,
-  event: CanvasEvent
-}) => void;
+type CanvasCallback = ({canvasPosition, event}: { canvasPosition: CanvasPosition, event: CanvasEvent }) => void;
 
 function scaleCanvas(
   canvasNode: HTMLCanvasElement,
-  canvasSize: CanvasSize,
   zoomingState: ZoomingState
 ) {
   const ctx = canvasNode.getContext("2d");
   if (!ctx) return;
-  const {dpr, zoom} = zoomingState;
-  canvasNode.width = Math.floor(dpr * canvasSize.width);
-  canvasNode.height = Math.floor(dpr * canvasSize.height);
-  const scale = dpr * zoom;
+  const {zoom, canvasSize, canvasTranslateX, canvasTranslateY} = zoomingState
+  canvasNode.width = canvasSize.width;
+  canvasNode.height = canvasSize.height;
   ctx.setTransform({
-    a: scale,
+    a: zoom,
     b: 0,
     c: 0,
-    d: scale,
-    e: zoomingState.canvasTranslateX,
-    f: zoomingState.canvasTranslateY
+    d: zoom,
+    e: canvasTranslateX,
+    f: canvasTranslateY
   })
 }
 
@@ -288,7 +292,6 @@ function drawPixel(ctx: CanvasRenderingContext2D, pixelCoordinates: PixelCoordin
 function drawBoard(
   ctx: CanvasRenderingContext2D,
   boardState: BoardState,
-  canvasSize: CanvasSize,
   currentBoardState: BoardState | undefined
 ) {
   for (let row = 0; row < boardState.height; row++) {
@@ -318,16 +321,15 @@ interface CanvasEvent {
 }
 
 function useCanvasCallback(
-  callback: CanvasCallback
+  callback: CanvasCallback,
+  zoomingState: ZoomingState
 ): (e: CanvasEvent) => void {
-  const zoomingState = useZooming();
   return React.useCallback((event) => {
     const canvas = event.currentTarget;
     const canvasPosition = getCanvasPosition(canvas, event, zoomingState);
-    const clientPosition = getClientPosition(canvas, event);
-    if (!canvasPosition) return;
+    const clientPosition = getEventClientPositionInCanvas(canvas, event);
+    if (!canvasPosition || !clientPosition) return;
     callback({
-      eventPosition: clientPosition,
       canvasPosition,
       event
     });
@@ -346,44 +348,39 @@ function getCanvasPosition(
   event: CanvasEvent,
   zoomingState: ZoomingState
 ): CanvasPosition | undefined {
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return;
-  const {clientX, clientY} = getClientPosition(canvas, event);
-  if (clientX < 0 || clientY < 0) {
+  const clientPositionInCanvas = getEventClientPositionInCanvas(canvas, event);
+  if (!clientPositionInCanvas) {
     return undefined;
   }
-  const dpr = zoomingState.dpr;
-  const translateX = zoomingState.canvasTranslateX;
-  const translateY = zoomingState.canvasTranslateY;
-  const x = Math.floor((clientX - translateX / dpr) / zoomingState.zoom);
-  const y = Math.floor((clientY - translateY / dpr) / zoomingState.zoom);
+  const {clientX, clientY} = clientPositionInCanvas;
+  const {canvasTranslateX, canvasTranslateY, canvasSize, canvasStyle} = zoomingState;
+  const k = canvasSize.width / canvasStyle.width;
+  const x = (k * clientX - canvasTranslateX) / zoomingState.zoom;
+  const y = (k * clientY - canvasTranslateY) / zoomingState.zoom;
   return {x, y};
 }
 
-function getClientPosition(
+function getEventClientPositionInCanvas(
   canvas: HTMLCanvasElement,
   event: CanvasEvent
-): ClientPosition {
+): ClientPositionInCanvas | undefined {
   const rect = canvas.getBoundingClientRect();
+  if (event.clientX > rect.right || event.clientY > rect.bottom) {
+    return undefined;
+  }
   const clientX = event.clientX - rect.left;
   const clientY = event.clientY - rect.top;
   return {clientX, clientY};
 }
 
-function getClientPositionByCanvasPosition(
-  canvas: HTMLCanvasElement,
+function getClientPositionInCanvasByCanvasPosition(
   canvasPosition: CanvasPosition,
   zoomingState: ZoomingState
-): ClientPosition {
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return {clientX: 0, clientY: 0};
-  const rect = canvas.getBoundingClientRect();
-
-  const transform = ctx.getTransform();
-  const translateX = -transform.e;
-  const translateY = -transform.f;
-  const clientX = Math.floor(canvasPosition.x * zoomingState.zoom - translateX / zoomingState.dpr + rect.left);
-  const clientY = Math.floor(canvasPosition.y * zoomingState.zoom - translateY / zoomingState.dpr + rect.top);
+): ClientPositionInCanvas {
+  const {zoom, canvasTranslateX, canvasTranslateY, canvasSize, canvasStyle} = zoomingState;
+  const k = canvasSize.width / canvasStyle.width;
+  const clientX = (canvasPosition.x * zoom + canvasTranslateX) / k;
+  const clientY = (canvasPosition.y * zoom + canvasTranslateY) / k;
   return {clientX, clientY};
 }
 
@@ -394,3 +391,79 @@ function getPixelBeginningCanvasPosition({row, column}: PixelCoordinates): Canva
     y: row * PIXEL_SIZE,
   }
 }
+
+type ZoomingState = {
+  canvasSize: CanvasSize,
+  canvasStyle: CanvasStyle,
+  zoom: number,
+  zoomPivot: ZoomPivot,
+  canvasTranslateX: number,
+  canvasTranslateY: number
+}
+
+const ZERO_ZOOM_PIVOT: ZoomPivot = {x: 0, y: 0, clientX: 0, clientY: 0}
+
+type CanvasInstalled = {
+  "type": "canvasInstalled",
+  canvasSize: CanvasSize,
+  canvasStyle: CanvasStyle
+}
+type Zoom = {
+  "type": "zoom",
+  pivot: ZoomPivot,
+  inOurOut: "in" | "out"
+}
+
+type ZoomingAction = CanvasInstalled | Zoom;
+
+function zoomingReducer(state: ZoomingState, action: ZoomingAction): ZoomingState {
+  switch (action.type) {
+    case "canvasInstalled":
+      return {
+        ...state,
+        canvasStyle: action.canvasStyle,
+        canvasSize: action.canvasSize
+      };
+    case "zoom":
+      const zoom = state.zoom;
+      const index = ZOOMING_OPTIONS.indexOf(zoom);
+      let newZoom = zoom;
+      if (action.inOurOut === "in" && index < ZOOMING_OPTIONS.length - 1) {
+        newZoom = ZOOMING_OPTIONS[index + 1];
+      } else if (action.inOurOut === "out" && index > 0) {
+        newZoom = ZOOMING_OPTIONS[index - 1];
+      }
+      if (newZoom !== zoom) {
+        const newZoomPivot = newZoom === 1 ? ZERO_ZOOM_PIVOT : action.pivot;
+        const k = state.canvasSize.width / state.canvasStyle.width;
+        const canvasTranslateX = Math.min(0, k * newZoomPivot.clientX - newZoom * newZoomPivot.x);
+        const canvasTranslateY = Math.min(0, k * newZoomPivot.clientY - newZoom * newZoomPivot.y);
+        return {
+          ...state,
+          zoom: newZoom,
+          zoomPivot: newZoomPivot,
+          canvasTranslateX,
+          canvasTranslateY
+        }
+      }
+      return state;
+  }
+}
+
+function useZooming(): [ZoomingState, React.Dispatch<ZoomingAction>] {
+  const [zoomingState, zoomingDispatch] = useReducer(zoomingReducer, {
+    zoom: 1.0,
+    canvasSize: {height: 0, width: 0},
+    canvasStyle: {height: 0, width: 0},
+    canvasTranslateX: 0,
+    canvasTranslateY: 0,
+    zoomPivot: ZERO_ZOOM_PIVOT,
+  });
+  return [zoomingState, zoomingDispatch];
+}
+
+type CanvasPosition = { x: number, y: number; }
+type ClientPositionInCanvas = { clientX: number, clientY: number };
+type ZoomPivot = CanvasPosition & ClientPositionInCanvas;
+
+const ZOOMING_OPTIONS = [1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.25, 4.5, 4.75, 5];

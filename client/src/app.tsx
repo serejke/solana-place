@@ -20,21 +20,25 @@ import {BoardHistoryDispatch} from "./reducers/boardHistoryReducer";
 
 export default function App() {
   const [selectedPixel, setSelectedPixel] = useState<SelectedPixel>();
+  const [zoom, setZoom] = useState(1);
 
   useRequestInitialBoardState();
   useRequestInitialBoardHistory();
   useSubscribeToBoardEvents();
 
+  const onPixelClicked = React.useCallback((pixel: SelectedPixel) => {
+    if (selectedPixel && areEqual(selectedPixel.pixelCoordinates, pixel.pixelCoordinates)) {
+      setSelectedPixel(undefined);
+    } else {
+      setSelectedPixel(pixel)
+    }
+  }, [selectedPixel]);
+  const onZoomChanged = React.useCallback((newZoom: number) => setZoom(newZoom), [setZoom]);
+
   return (
     <div className="main-content">
-      <GameCanvas onPixelClicked={(pixel) => {
-        if (selectedPixel && areEqual(selectedPixel.pixelCoordinates, pixel.pixelCoordinates)) {
-          setSelectedPixel(undefined);
-        } else {
-          setSelectedPixel(pixel)
-        }
-      }}/>
-      <Dashboard onMouseDown={() => setSelectedPixel(undefined)}/>
+      <GameCanvas onPixelClicked={onPixelClicked} onZoomChanged={onZoomChanged}/>
+      <Dashboard zoom={zoom} onMouseDown={() => setSelectedPixel(undefined)}/>
       <PixelColorPicker selectedPixel={selectedPixel} close={() => setSelectedPixel(undefined)}/>
       <LoadingModal/>
       <AboutModal/>

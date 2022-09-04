@@ -11,11 +11,9 @@ import {useBoardHistory} from "../providers/board/boardHistory";
 import {useHighlightPixel} from "../providers/board/highlightedPixel";
 import {getColorByIndex} from "../utils/colorUtils";
 import SolanaExplorerLogo from '../styles/icons/dark-solana-logo.svg';
-import {serverUrl} from "../request/serverUrls";
 import {displayTimestamp} from "../utils/date";
 import {ClipLoader} from "react-spinners";
 import ReactTooltip from "react-tooltip";
-import {useZooming} from "../providers/board/zooming";
 import {useSetAbout} from "../providers/about/about";
 import {
   Squares2X2Icon,
@@ -27,10 +25,11 @@ import {
 import {useSetPendingTransaction} from "../providers/transactions/pendingTransaction";
 
 type DashboardProps = {
+  zoom: number,
   onMouseDown: () => void
 }
 
-export function Dashboard({onMouseDown}: DashboardProps) {
+export function Dashboard({zoom, onMouseDown}: DashboardProps) {
   const {showHistory} = useBoardConfig();
 
   return (
@@ -40,7 +39,7 @@ export function Dashboard({onMouseDown}: DashboardProps) {
           <SendActionButton/>
           <ShowGridToggle/>
           <ShowHistoryToggle/>
-          <ShowZoom/>
+          <ShowZoom zoom={zoom}/>
           <OnlineStatus/>
           <ShowAbout/>
         </div>
@@ -129,8 +128,8 @@ function ShowGridToggle() {
   );
 }
 
-function ShowZoom() {
-  const {zoom} = useZooming();
+type ShowZoomProps = { zoom: number };
+function ShowZoom({zoom}: ShowZoomProps) {
   const zoomString = zoom * 100;
   return (
     <div className="dashboard-item">

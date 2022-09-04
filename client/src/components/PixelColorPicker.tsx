@@ -8,13 +8,12 @@ import {useBoardDispatch, useBoardState} from "../providers/board/boardState";
 import {areEqual} from "../model/boardState";
 import {MAX_CHANGES_PER_TRANSACTION} from "request/changePixels";
 import {PixelCoordinates} from "../model/pixelCoordinates";
-import { ClientPosition } from "providers/board/zooming";
 
 const GITHUB_PICKER_TRIANGLE_SIZE = 16;
 
 export type SelectedPixel = {
   pixelCoordinates: PixelCoordinates,
-  popupPosition: ClientPosition
+  popupPosition: { clientX: number, clientY: number }
 }
 
 type PixelColorPickerProps = {
