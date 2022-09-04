@@ -20,7 +20,8 @@ import {
   InformationCircleIcon,
   ClockIcon as HistoryIconNotChecked,
   MagnifyingGlassIcon,
-  WifiIcon
+  WifiIcon,
+  PaperAirplaneIcon
 } from '@heroicons/react/24/outline'
 import {useSetPendingTransaction} from "../providers/transactions/pendingTransaction";
 
@@ -36,7 +37,8 @@ export function Dashboard({zoom, onMouseDown}: DashboardProps) {
     <Draggable onMouseDown={onMouseDown} cancel=".dashboard-cancel-draggable">
       <div className="dashboard">
         <div className="dashboard-row">
-          <SendActionButton/>
+          <ConnectionButton/>
+          <SendChangesButton/>
           <ShowGridToggle/>
           <ShowHistoryToggle/>
           <ShowZoom zoom={zoom}/>
@@ -53,45 +55,65 @@ export function Dashboard({zoom, onMouseDown}: DashboardProps) {
   );
 }
 
-function SendActionButton() {
-  const boardState = useBoardState();
-  const changedPixels = boardState?.changed ?? [];
-  const wallet = useWallet();
-  const isPendingTransaction = boardState && boardState.pendingTransaction !== null;
-  const isDisabled = !boardState || boardState.changed.length === 0 || isPendingTransaction;
-  const setPendingTransaction = useSetPendingTransaction();
-
+function ConnectionButton() {
   return <div className="dashboard-item">
-    <div
-      data-tip={true}
-      data-for="action-button-tooltip-id"
-      className="dashboard-cancel-draggable"
-    >
-      {!wallet.connected && <WalletMultiButton className="action-button"/>}
-      {wallet.connected
-        && <button
-          className="action-button"
-          disabled={isDisabled}
-          onClick={() => {
-            changePixels(changedPixels, wallet)
-              .then(setPendingTransaction)
-              .catch(console.error);
-          }}>
-          {
-            isPendingTransaction
-              ? `Sending ${changedPixels.length}...`
-              : isDisabled ? 'Send' : `Send (${changedPixels.length})`
-          }
-        </button>
-      }
+    <div className="dashboard-cancel-draggable">
+      <WalletMultiButton className="action-button"/>
     </div>
-    <ReactTooltip
-      className="dashboard-tooltip"
-      id="action-button-tooltip-id"
-      type="info"
-      effect="solid"
-    >Change colors of pixels</ReactTooltip>
   </div>;
+}
+
+function SendChangesButton() {
+  const wallet = useWallet();
+  const boardState = useBoardState();
+  const isPendingTransaction = boardState && boardState.pendingTransaction !== null;
+  const changedPixels = React.useMemo(() => boardState?.changed ?? [], [boardState?.changed]);
+  const isWalletConnected = wallet.connected;
+  const isAnyChanged = boardState && boardState.changed.length > 0;
+  const isDisabled = !isWalletConnected || !isAnyChanged || isPendingTransaction;
+  const setPendingTransaction = useSetPendingTransaction();
+  const onClick = React.useCallback(() => {
+    if (!changedPixels) return;
+    changePixels(changedPixels, wallet)
+      .then(setPendingTransaction)
+      .catch(console.error);
+  }, [changedPixels, wallet, setPendingTransaction]);
+
+  const tooltipText = React.useMemo(() => {
+    if (isPendingTransaction) {
+      return `Sending ${changedPixels.length}...`;
+    }
+    if (!isWalletConnected) {
+      return "Connect the wallet";
+    }
+    if (!isAnyChanged) {
+      return "Change some pixels";
+    }
+    return `Send (${changedPixels.length})`;
+  }, [isPendingTransaction, isWalletConnected, isAnyChanged, changedPixels]);
+
+  return (
+    <div className="dashboard-item">
+      <div
+        className={`dashboard-cancel-draggable dashboard-icon-holder`}
+        data-tip={true}
+        data-for="wallet-tooltip-id"
+      >
+        <PaperAirplaneIcon
+          className={`send-changes-icon ${isDisabled ? "send-changes-icon-disabled" : ""}`}
+          onClick={onClick}
+        />
+      </div>
+      <ReactTooltip
+        className="dashboard-tooltip"
+        id="wallet-tooltip-id"
+        type="info"
+        effect="solid"
+      >
+        {tooltipText}
+      </ReactTooltip>
+    </div>
+  );
 }
 
 function ShowGridToggle() {

@@ -119,6 +119,16 @@
   cursor: pointer;
 }
 
+.send-changes-icon {
+  @include dashboard-icon;
+  color: green;
+
+  &-disabled {
+    color: #888888;
+    cursor: initial;
+  }
+}
+
 .grid-icon {
   @include dashboard-icon;
 }
