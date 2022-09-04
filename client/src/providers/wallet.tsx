@@ -3,7 +3,7 @@ import {WalletProvider as SolanaWalletProvider} from '@solana/wallet-adapter-rea
 import {
   GlowWalletAdapter,
   PhantomWalletAdapter,
-  SlopeWalletAdapter,
+  SlopeWalletAdapter, SolflareWalletAdapter, SolletWalletAdapter,
 } from '@solana/wallet-adapter-wallets';
 import {
   WalletModalProvider
@@ -16,7 +16,9 @@ export function WalletProvider({children}: Props) {
     () => [
       new PhantomWalletAdapter(),
       new GlowWalletAdapter(),
-      new SlopeWalletAdapter()
+      new SlopeWalletAdapter(),
+      new SolflareWalletAdapter(),
+      new SolletWalletAdapter()
     ],
     []
   );
