@@ -1149,6 +1149,7 @@ version = "0.1.0"
 dependencies = [
  "anchor-lang",
  "borsh",
+ "solana-security-txt",
 ]
 
 [[package]]
@@ -1205,6 +1206,12 @@ dependencies = [
  "rustversion",
  "syn",
 ]
+
+[[package]]
+name = "solana-security-txt"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f14189df19df7f3977a7ea236ccae6cdc40855ab5baf1ab2796a091ef5c490d1"
 
 [[package]]
 name = "subtle"

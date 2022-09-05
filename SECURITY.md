@@ -1,0 +1,1 @@
+We do not pay a bug bounty yet, but we may consider doing so when the project gets very popular.

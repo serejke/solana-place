@@ -1,7 +1,5 @@
 [features]
 seeds = false
-[programs.localnet]
-solana_place = "PLACEMmfm3ZMpYKWfTwzHsTGnPnnDgmK2QkJPeLnZWE"
 
 [registry]
 url = "https://anchor.projectserum.com"
@@ -9,6 +7,12 @@ url = "https://anchor.projectserum.com"
 [provider]
 cluster = "localnet"
 wallet = "~/.config/solana/id.json"
+
+[programs.localnet]
+solana_place = "PLACEMmfm3ZMpYKWfTwzHsTGnPnnDgmK2QkJPeLnZWE"
+
+[programs.mainnet]
+solana_place = "PLACEMmfm3ZMpYKWfTwzHsTGnPnnDgmK2QkJPeLnZWE"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"

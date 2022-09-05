@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use solana_security_txt::security_txt;
 use instructions::*;
 
 pub mod errors;
@@ -29,4 +30,13 @@ pub mod solana_place {
         return instructions::change_colors(ctx, encoded_changes);
     }
 
+}
+
+security_txt! {
+    name: "Place | Solana",
+    project_url: "https://solana-place.com/",
+    contacts: "discord:serejke#5191",
+    policy: "https://github.com/serejke/solana-place/SECURITY.md",
+    preferred_languages: "en",
+    source_code: "https://github.com/serejke/solana-place"
 }
