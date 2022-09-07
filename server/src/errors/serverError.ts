@@ -1,3 +1,5 @@
+import { ServerErrorBodyDto } from "../dto/serverErrorBodyDto";
+
 export const SERVER_ERROR_PREFIX = "ServerError";
 
 export class ServerError implements Error {
@@ -7,7 +9,7 @@ export class ServerError implements Error {
   constructor(public message: string) {
   }
 
-  toJson(): { status: number, message: string, name: string } {
+  toJson(): ServerErrorBodyDto {
     return {
       status: this.statusCode,
       message: this.message,

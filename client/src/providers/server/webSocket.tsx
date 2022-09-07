@@ -149,5 +149,6 @@ export function useAddSocketMessageHandler(handler: SocketMessageHandler) {
   const setSocketMessageHandlers = context[1];
   React.useEffect(() => {
     setSocketMessageHandlers((previousHandlers) => [...previousHandlers, handler])
+    return () => setSocketMessageHandlers((previousHandlers) => previousHandlers.filter(h => h !== handler));
   }, [setSocketMessageHandlers, handler]);
 }

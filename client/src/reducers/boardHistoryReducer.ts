@@ -5,12 +5,12 @@ type InitialBoardHistoryAction = {
   history: BoardHistory
 };
 
-type AddHistoryEntriesAction = {
-  type: "addHistoryEntries",
-  gameEventsWithTransactionDetails: GameEventWithTransactionDetails[]
+type AddHistoryEntryAction = {
+  type: "addHistoryEntry",
+  gameEventWithTransactionDetails: GameEventWithTransactionDetails
 };
 
-export type BoardHistoryAction = InitialBoardHistoryAction | AddHistoryEntriesAction;
+export type BoardHistoryAction = InitialBoardHistoryAction | AddHistoryEntryAction;
 
 export type BoardHistoryDispatch = (action: BoardHistoryAction) => void;
 
@@ -22,8 +22,8 @@ export function boardHistoryReducer(state: BoardHistory, action: BoardHistoryAct
       const events = deduplicateEvents(allEvents);
       return {events};
     }
-    case "addHistoryEntries":
-      const allEvents = [...action.gameEventsWithTransactionDetails, ...state.events];
+    case "addHistoryEntry":
+      const allEvents = [action.gameEventWithTransactionDetails, ...state.events];
       allEvents.sort((event1, event2) => -compareGameEvent(event1, event2))
       const events = deduplicateEvents(allEvents);
       return {events};

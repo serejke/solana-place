@@ -1,7 +1,7 @@
 import {TransactionSignature} from "@solana/web3.js";
 import {SerializedTransactionDto} from "../dto/transactionDto";
 import {serverUrl} from "./serverUrls";
-import {RequestError} from "./requestError";
+import {rethrowIfFailed} from "./requestError";
 
 export async function sendTransaction(
   serializedTransactionDto: SerializedTransactionDto
@@ -13,8 +13,6 @@ export async function sendTransaction(
       body: JSON.stringify(serializedTransactionDto)
     })
   );
-  if (!response.ok) {
-    throw new RequestError(response.status, await response.json());
-  }
+  await rethrowIfFailed(response);
   return await response.json();
 }

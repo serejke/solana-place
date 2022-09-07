@@ -1,10 +1,9 @@
 import {useBoardState} from "../providers/board/boardState";
 import React, {useReducer, useRef, useState} from "react";
 import {
-  CHANGED_COLOR,
+  CHANGED_COLOR, getColorByIndex,
   GRID_COLOR,
   HIGHLIGHTED_COLOR,
-  HIGHLIGHTED_STROKE_WIDTH,
   HOVERED_PIXEL_COLOR,
   PENDING_COLOR
 } from "../utils/colorUtils";
@@ -13,6 +12,7 @@ import {BoardState, getColor, isWithinBounds} from "../model/boardState";
 import {useHighlightedPixel} from "../providers/board/highlightedPixel";
 import {SelectedPixel} from "./PixelColorPicker";
 import {PixelCoordinates} from "../model/pixelCoordinates";
+import {usePendingTransaction} from "../providers/transactions/pendingTransaction";
 
 export const PIXEL_SIZE = 4;
 
@@ -27,6 +27,7 @@ export function GameCanvas({onPixelClicked, onZoomChanged}: GameCanvasProps) {
   const canvasHelperRef = useRef<HTMLCanvasElement>(null);
 
   const boardState = useBoardState();
+  const {changedPixels, pendingTransaction} = usePendingTransaction();
   const highlightedPixel = useHighlightedPixel();
   const showGrid = useBoardConfig().showGrid;
   const [zoomingState, zoomingDispatch] = useZooming();
@@ -99,7 +100,7 @@ export function GameCanvas({onPixelClicked, onZoomChanged}: GameCanvasProps) {
   }, [boardState?.height, boardState?.width, zoomingState]);
 
   // Draw hovered, highlighted and changed pixels, if any.
-  const isPendingTransaction = boardState?.pendingTransaction != null;
+  const isPendingTransaction = pendingTransaction != null;
   React.useEffect(() => {
     const helperCtx = canvasHelperRef.current?.getContext("2d");
     if (!helperCtx) return;
@@ -107,22 +108,22 @@ export function GameCanvas({onPixelClicked, onZoomChanged}: GameCanvasProps) {
       highlightPixel(helperCtx, highlightedPixel.pixelCoordinates, HIGHLIGHTED_COLOR);
     }
     if (hoveredPixel) {
-      hoverPixel(helperCtx, hoveredPixel, HOVERED_PIXEL_COLOR);
+      highlightPixel(helperCtx, hoveredPixel, HOVERED_PIXEL_COLOR);
     }
-    if (boardState?.changed) {
+    if (changedPixels) {
       const color = isPendingTransaction ? PENDING_COLOR : CHANGED_COLOR;
-      boardState.changed.forEach((changedPixel) => {
-        hoverPixel(helperCtx, changedPixel.coordinates, color);
+      changedPixels.forEach((changedPixel) => {
+        const colorByIndex = getColorByIndex(changedPixel.newColor);
+        drawPixel(helperCtx, changedPixel.coordinates, colorByIndex);
+        highlightPixel(helperCtx, changedPixel.coordinates, color);
       });
     }
     return () => {
-      highlightedPixel && clearHighlightedOrHoveredPixel(helperCtx, highlightedPixel.pixelCoordinates);
-      hoveredPixel && clearHighlightedOrHoveredPixel(helperCtx, hoveredPixel);
-      boardState?.changed && boardState.changed.forEach((changedPixel) => {
-        clearHighlightedOrHoveredPixel(helperCtx, changedPixel.coordinates);
-      })
+      highlightedPixel && clearPixel(helperCtx, highlightedPixel.pixelCoordinates);
+      hoveredPixel && clearPixel(helperCtx, hoveredPixel);
+      changedPixels.forEach((changedPixel) => clearPixel(helperCtx, changedPixel.coordinates))
     }
-  }, [hoveredPixel, highlightedPixel, boardState?.changed, isPendingTransaction, zoomingState])
+  }, [hoveredPixel, highlightedPixel, changedPixels, isPendingTransaction, zoomingState])
 
   const onClickCallback: CanvasCallback = React.useCallback(({canvasPosition, event}) => {
     if (!boardState) return;
@@ -243,26 +244,16 @@ function scaleCanvas(
   })
 }
 
-function hoverPixel(ctx: CanvasRenderingContext2D, pixelCoordinates: PixelCoordinates, color: string) {
+function highlightPixel(ctx: CanvasRenderingContext2D, pixelCoordinates: PixelCoordinates, color: string) {
   const {x: px, y: py} = getPixelBeginningCanvasPosition(pixelCoordinates);
   ctx.strokeStyle = color;
   ctx.lineWidth = 1;
   ctx.strokeRect(px + 0.5, py + 0.5, PIXEL_SIZE - 1, PIXEL_SIZE - 1);
 }
 
-function highlightPixel(ctx: CanvasRenderingContext2D, pixelCoordinates: PixelCoordinates, color: string) {
+function clearPixel(ctx: CanvasRenderingContext2D, pixelCoordinates: PixelCoordinates) {
   const {x: px, y: py} = getPixelBeginningCanvasPosition(pixelCoordinates);
-  ctx.beginPath();
-  ctx.strokeStyle = color;
-  ctx.lineWidth = HIGHLIGHTED_STROKE_WIDTH;
-  ctx.arc(px + PIXEL_SIZE / 2, py + PIXEL_SIZE / 2, PIXEL_SIZE, 0, 2 * Math.PI);
-  ctx.stroke();
-  ctx.closePath();
-}
-
-function clearHighlightedOrHoveredPixel(ctx: CanvasRenderingContext2D, pixelCoordinates: PixelCoordinates) {
-  const {x: px, y: py} = getPixelBeginningCanvasPosition(pixelCoordinates);
-  ctx.clearRect(px - PIXEL_SIZE, py - PIXEL_SIZE, PIXEL_SIZE * 3, PIXEL_SIZE * 3);
+  ctx.clearRect(px, py, PIXEL_SIZE, PIXEL_SIZE);
 }
 
 function drawGrid(ctx: CanvasRenderingContext2D, rows: number, columns: number) {

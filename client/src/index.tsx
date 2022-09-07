@@ -13,26 +13,32 @@ import {BoardHistoryProvider} from "./providers/board/boardHistory";
 import {WebSocketProvider} from "providers/server/webSocket";
 import {ClusterConfigProvider} from "./providers/server/clusterConfig";
 import {AboutProvider} from "./providers/about/about";
+import {NotificationsProvider} from "./providers/notifications/notifications";
+import {PendingTransactionProvider} from "./providers/transactions/pendingTransaction";
 
 ReactDOM.render(
   <BrowserRouter>
-    <ClusterConfigProvider>
-      <WebSocketProvider>
-        <WalletProvider>
-          <BoardConfigProvider>
-            <BoardStateProvider>
-              <BoardHistoryProvider>
-                <GameStateProvider>
-                  <AboutProvider>
-                    <App/>
-                  </AboutProvider>
-                </GameStateProvider>
-              </BoardHistoryProvider>
-            </BoardStateProvider>
-          </BoardConfigProvider>
-        </WalletProvider>
-      </WebSocketProvider>
-    </ClusterConfigProvider>
+    <NotificationsProvider>
+      <ClusterConfigProvider>
+        <WebSocketProvider>
+          <WalletProvider>
+            <BoardConfigProvider>
+              <BoardStateProvider>
+                <BoardHistoryProvider>
+                  <GameStateProvider>
+                    <PendingTransactionProvider>
+                      <AboutProvider>
+                        <App/>
+                      </AboutProvider>
+                    </PendingTransactionProvider>
+                  </GameStateProvider>
+                </BoardHistoryProvider>
+              </BoardStateProvider>
+            </BoardConfigProvider>
+          </WalletProvider>
+        </WebSocketProvider>
+      </ClusterConfigProvider>
+    </NotificationsProvider>
   </BrowserRouter>,
   document.getElementById("root")
 );

@@ -1,0 +1,50 @@
+.notifications {
+  position: fixed;
+  left: 2vw;
+  bottom: 2vh;
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.notification {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-radius: 0.8rem;
+  margin: 0.5rem;
+  width: 20rem;
+  background-color: hsla(0, 1%, 79%, 0.85);
+
+  &-title {
+    padding: 0.5rem 0.5rem 0.2rem 1rem;
+    font-weight: 600;
+  }
+
+  &-content {
+    padding: 0.5rem 0.5rem 0.5rem 1rem;
+  }
+
+  &-info &-title {
+    color: hsl(0, 0%, 0%);
+  }
+
+  &-success &-title {
+    color: hsla(116, 84%, 38%, 0.85);
+  }
+
+  &-warn &-title {
+    color: hsl(53, 100%, 63%);
+  }
+
+  &-error &-title {
+    color: hsla(9, 82%, 45%, 0.85);
+  }
+}
+
+.link-icon-center-aligned {
+  vertical-align: text-bottom;
+  margin: 0.3rem;
+}

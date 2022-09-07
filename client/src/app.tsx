@@ -17,6 +17,12 @@ import {AboutModal} from "./components/AboutModal";
 import {GameEventWithTransactionDetails} from "./model/model";
 import {BoardStateDispatch} from "./reducers/boardStateReducer";
 import {BoardHistoryDispatch} from "./reducers/boardHistoryReducer";
+import {Notifications} from "components/Notifications";
+import {
+  createTransactionConfirmedNotification,
+  useSetAndUnsetPendingTransaction
+} from "./providers/transactions/pendingTransaction";
+import {useAddNotification} from "./providers/notifications/notifications";
 
 export default function App() {
   const [selectedPixel, setSelectedPixel] = useState<SelectedPixel>();
@@ -42,6 +48,7 @@ export default function App() {
       <PixelColorPicker selectedPixel={selectedPixel} close={() => setSelectedPixel(undefined)}/>
       <LoadingModal/>
       <AboutModal/>
+      <Notifications/>
     </div>
   );
 }
@@ -54,12 +61,7 @@ function useRequestInitialBoardState() {
       .then(boardStateDto => {
         boardDispatch({
           type: "initialState",
-          newState: {
-            ...boardStateDto,
-            changed: [],
-            pendingTransaction: null,
-            pendingTransactionIntervalId: null
-          }
+          newState: {...boardStateDto}
         })
       });
   }, [boardDispatch]);
@@ -82,38 +84,43 @@ function useRequestInitialBoardHistory() {
 function useSubscribeToBoardEvents() {
   const boardDispatch = useBoardDispatch();
   const boardHistoryDispatch = useBoardHistoryDispatch();
+  const addNotification = useAddNotification();
+  const {unsetPendingTransaction} = useSetAndUnsetPendingTransaction();
 
   // Subscribe to pixel updates via web-socket.
-  const messageHandler = React.useCallback((message: any) => {
-    const gameEventsWithTransactionDetails = parseGameEventWithTransactionDetailsFromDto(message);
-    if (gameEventsWithTransactionDetails) {
-      console.log("Received event", message);
-      updateBoardStateAndHistory(gameEventsWithTransactionDetails, boardDispatch, boardHistoryDispatch);
+  const messageHandler = React.useCallback(async (message: any) => {
+    const gameEventWithTransactionDetails = parseGameEventWithTransactionDetailsFromDto(message);
+    if (gameEventWithTransactionDetails) {
+      updateBoardStateAndHistory(gameEventWithTransactionDetails, boardDispatch, boardHistoryDispatch);
+      const transactionSignature = gameEventWithTransactionDetails.transactionDetails.signature;
+      if (await unsetPendingTransaction(transactionSignature, true)) {
+        addNotification(createTransactionConfirmedNotification())
+      }
     }
-  }, [boardDispatch, boardHistoryDispatch]);
+  }, [boardDispatch, boardHistoryDispatch, unsetPendingTransaction, addNotification]);
 
   useAddSocketMessageHandler(messageHandler);
 }
 
 export function updateBoardStateAndHistory(
-  gameEventsWithTransactionDetails: GameEventWithTransactionDetails[],
+  gameEventWithTransactionDetails: GameEventWithTransactionDetails,
   boardDispatch: BoardStateDispatch,
   boardHistoryDispatch: BoardHistoryDispatch
 ) {
-  const pixelChangedEvents = gameEventsWithTransactionDetails
-    .filter(({event}) => event.type === "pixelChangedEvent");
-  if (pixelChangedEvents.length > 0) {
-    boardDispatch({
-      type: "updatePixels",
-      updatedPixels: pixelChangedEvents
-        .map(({event}) => ({
-          coordinates: {row: event.row, column: event.column},
-          newColor: event.newColor
-        }))
-    })
-    boardHistoryDispatch({
-      type: "addHistoryEntries",
-      gameEventsWithTransactionDetails
-    })
+  if (gameEventWithTransactionDetails.event.type !== "pixelsChangedEvent") {
+    return;
   }
+  boardDispatch({
+    type: "updatePixels",
+    updatedPixels: gameEventWithTransactionDetails.event.changes
+      .map(({row, column, newColor}) => ({
+        coordinates: {row, column},
+        newColor: newColor
+      })),
+    transactionDetails: gameEventWithTransactionDetails.transactionDetails
+  })
+  boardHistoryDispatch({
+    type: "addHistoryEntry",
+    gameEventWithTransactionDetails: gameEventWithTransactionDetails
+  })
 }

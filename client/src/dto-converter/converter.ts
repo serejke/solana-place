@@ -3,6 +3,7 @@ import {SerializedTransactionDto} from "../dto/transactionDto";
 import base58 from "bs58";
 import {BoardHistory, GameEventWithTransactionDetails} from "../model/model";
 import {EventsWithTransactionDetailsDto, EventWithTransactionDetailsDto} from "../dto/eventsWithTransactionDetailsDto";
+import {ServerErrorBodyDto} from "../dto/serverErrorBodyDto";
 
 export function toSerializedTransactionDto(transaction: Transaction): SerializedTransactionDto {
   return {
@@ -10,25 +11,15 @@ export function toSerializedTransactionDto(transaction: Transaction): Serialized
   }
 }
 
-export function parseGameEventWithTransactionDetailsFromDto(data: EventWithTransactionDetailsDto): GameEventWithTransactionDetails[] | null {
-  if ("event" in data && "transactionDetails" in data) {
-    // eslint-disable-next-line
-    return data.event.changes.map((change, index: number) => (
-        {
-          event: {
-            type: "pixelChangedEvent",
-            state: data.event.state + index,
-            row: change.row,
-            column: change.column,
-            oldColor: change.oldColor,
-            newColor: change.newColor,
-          },
-          transactionDetails: data.transactionDetails
-        }
-      )
-    );
+export function parseGameEventWithTransactionDetailsFromDto(message: any): GameEventWithTransactionDetails | undefined {
+  if ("event" in message && "transactionDetails" in message) {
+    const eventWithTransactionDetailsDto = message as EventWithTransactionDetailsDto
+    return {
+      event: eventWithTransactionDetailsDto.event,
+      transactionDetails: eventWithTransactionDetailsDto.transactionDetails
+    }
   }
-  return null;
+  return undefined;
 }
 
 export function parseBoardHistory(eventsWithTransactionDetailsDto: EventsWithTransactionDetailsDto): BoardHistory {
@@ -39,4 +30,11 @@ export function parseBoardHistory(eventsWithTransactionDetailsDto: EventsWithTra
   return {
     events: gameEventsWithTransactionDetails
   };
+}
+
+export function parseServerErrorBody(errorBody: any): ServerErrorBodyDto | any {
+  if ("name" in errorBody && "message" in errorBody && "status" in errorBody) {
+    return errorBody;
+  }
+  return undefined;
 }

@@ -1,5 +1,4 @@
 import * as React from "react";
-import {useClusterConfig} from "../providers/server/clusterConfig";
 import {useBoardState} from "../providers/board/boardState";
 import {useBoardConfig, useSetBoardConfig} from "../providers/board/boardConfig";
 import {useWallet} from "@solana/wallet-adapter-react";
@@ -10,20 +9,26 @@ import {useActiveUsers, useIsOnline} from "../providers/server/webSocket";
 import {useBoardHistory} from "../providers/board/boardHistory";
 import {useHighlightPixel} from "../providers/board/highlightedPixel";
 import {getColorByIndex} from "../utils/colorUtils";
-import SolanaExplorerLogo from '../styles/icons/dark-solana-logo.svg';
 import {displayTimestamp} from "../utils/date";
 import {ClipLoader} from "react-spinners";
 import ReactTooltip from "react-tooltip";
 import {useSetAbout} from "../providers/about/about";
 import {
-  Squares2X2Icon,
-  InformationCircleIcon,
   ClockIcon as HistoryIconNotChecked,
+  InformationCircleIcon,
   MagnifyingGlassIcon,
-  WifiIcon,
-  PaperAirplaneIcon
+  PaperAirplaneIcon,
+  Squares2X2Icon,
+  WifiIcon
 } from '@heroicons/react/24/outline'
-import {useSetPendingTransaction} from "../providers/transactions/pendingTransaction";
+import {usePendingTransaction, useSetAndUnsetPendingTransaction} from "../providers/transactions/pendingTransaction";
+import {useAddNotification} from "../providers/notifications/notifications";
+import {
+  buildErrorNotification,
+  buildInfoNotification
+} from "../model/notification";
+import {SHORTENED_SYMBOL, shortenPublicKey, shortenTransactionSignature} from "../utils/presentationUtils";
+import {ExplorerTransactionLink} from "./ExplorerTransactionLink";
 
 type DashboardProps = {
   zoom: number,
@@ -65,23 +70,37 @@ function ConnectionButton() {
 
 function SendChangesButton() {
   const wallet = useWallet();
-  const boardState = useBoardState();
-  const isPendingTransaction = boardState && boardState.pendingTransaction !== null;
-  const changedPixels = React.useMemo(() => boardState?.changed ?? [], [boardState?.changed]);
+  const {changedPixels, pendingTransaction} = usePendingTransaction();
+  const addNotification = useAddNotification();
+  const isPendingTransaction = pendingTransaction !== null;
   const isWalletConnected = wallet.connected;
-  const isAnyChanged = boardState && boardState.changed.length > 0;
+  const isAnyChanged = changedPixels.length > 0;
   const isDisabled = !isWalletConnected || !isAnyChanged || isPendingTransaction;
-  const setPendingTransaction = useSetPendingTransaction();
+  const {setPendingTransaction} = useSetAndUnsetPendingTransaction();
   const onClick = React.useCallback(() => {
     if (!changedPixels) return;
     changePixels(changedPixels, wallet)
-      .then(setPendingTransaction)
-      .catch(console.error);
-  }, [changedPixels, wallet, setPendingTransaction]);
+      .then(transactionSignature => {
+        setPendingTransaction(transactionSignature);
+        addNotification(
+          buildInfoNotification(
+            "Transaction has been sent",
+            {
+              type: "waitingForTransaction",
+              transactionSignature
+            }
+          )
+        )
+      })
+      .catch((e) => addNotification(buildErrorNotification("Failed to change pixels", e)));
+  }, [changedPixels, wallet, setPendingTransaction, addNotification]);
 
   const tooltipText = React.useMemo(() => {
     if (isPendingTransaction) {
-      return `Sending ${changedPixels.length}...`;
+      if (changedPixels.length > 0) {
+        return `Sending ${changedPixels.length}${SHORTENED_SYMBOL}`;
+      }
+      return "Sending" + SHORTENED_SYMBOL
     }
     if (!isWalletConnected) {
       return "Connect the wallet";
@@ -99,10 +118,13 @@ function SendChangesButton() {
         data-tip={true}
         data-for="wallet-tooltip-id"
       >
-        <PaperAirplaneIcon
-          className={`send-changes-icon ${isDisabled ? "send-changes-icon-disabled" : ""}`}
-          onClick={onClick}
-        />
+        {isPendingTransaction
+          ? <ClipLoader className="send-changes-pending-loader"/>
+          : <PaperAirplaneIcon
+            className={`send-changes-icon send-changes-icon-${isDisabled ? "disabled" : "enabled"}`}
+            onClick={onClick}
+          />
+        }
       </div>
       <ReactTooltip
         className="dashboard-tooltip"
@@ -151,6 +173,7 @@ function ShowGridToggle() {
 }
 
 type ShowZoomProps = { zoom: number };
+
 function ShowZoom({zoom}: ShowZoomProps) {
   const zoomString = zoom * 100;
   return (
@@ -249,32 +272,21 @@ function ShowAbout() {
   </div>;
 }
 
-function BoardHistoryExplorerLink({signature}: { signature: string }) {
-  const clusterParam = useClusterParam();
-  const explorerLink = (path: string) => `https://explorer.solana.com/${path}?${clusterParam}`;
-  return <div className="board-history-cell">
-    <a
-      href={explorerLink("tx/" + signature)}
-      target="_blank"
-      rel="noopener noreferrer"
-      title="Open in Explorer"
-    >
-      <img
-        className="board-history-explorer-link"
-        src={SolanaExplorerLogo}
-        alt="Solana Explorer"
-      />
-    </a>
-  </div>;
-}
-
 function BoardHistoryTable() {
   const boardHistory = useBoardHistory();
   const highlightPixel = useHighlightPixel();
 
-  if (!boardHistory) {
-    return null;
-  }
+  const boardRows = React.useMemo(() => {
+    if (!boardHistory) {
+      return [];
+    }
+    return boardHistory.events.flatMap(({event, transactionDetails}) => {
+      if (event.type !== "pixelsChangedEvent") {
+        return [];
+      }
+      return event.changes.map(change => ({...change, transactionDetails}));
+    });
+  }, [boardHistory]);
 
   return <div className="board-history">
     <table className="board-history-table">
@@ -288,23 +300,24 @@ function BoardHistoryTable() {
       </tr>
       </thead>
       <tbody>
-      {boardHistory.events.map(({event, transactionDetails}) => (
+      {boardRows.map(({row, column, oldColor, newColor, transactionDetails}) => (
         <tr
-          key={transactionDetails.signature + event.row + event.column}
+          key={transactionDetails.signature + row + column}
           className="board-history-row"
           onMouseOut={() => highlightPixel(undefined)}
           onMouseOver={() => highlightPixel({
-            pixelCoordinates: {
-              row: event.row,
-              column: event.column
-            }
+            pixelCoordinates: {row, column}
           })}
         >
-          <td><BoardHistoryChangeArrow oldColor={event.oldColor} newColor={event.newColor}/></td>
+          <td><BoardHistoryChangeArrow oldColor={oldColor} newColor={newColor}/></td>
           <td>{formatTime(transactionDetails.timestamp)}</td>
-          <td>{transactionDetails.signature.slice(0, 7)}…</td>
-          <td>{transactionDetails.sender.slice(0, 7)}…</td>
-          <td><BoardHistoryExplorerLink signature={transactionDetails.signature}/></td>
+          <td>{shortenTransactionSignature(transactionDetails.signature)}{SHORTENED_SYMBOL}</td>
+          <td>{shortenPublicKey(transactionDetails.sender)}{SHORTENED_SYMBOL}</td>
+          <td>
+            <div className="board-history-cell">
+              <ExplorerTransactionLink signature={transactionDetails.signature}/>
+            </div>
+          </td>
         </tr>
       ))}
       </tbody>
@@ -357,22 +370,4 @@ function BoardHistoryChangeArrow({oldColor, newColor}: { oldColor: number, newCo
       />
     </div>
   );
-}
-
-function useClusterParam(): string | undefined {
-  const clusterConfig = useClusterConfig();
-  if (!clusterConfig) {
-    return undefined;
-  }
-  const cluster = clusterConfig.cluster;
-  switch (cluster) {
-    case "mainnet-beta":
-      return "";
-    case "devnet":
-      return "cluster=devnet"
-    case "testnet":
-      return "cluster=testnet"
-    case "custom":
-      return "cluster=custom&customUrl=http://localhost:8899"
-  }
 }

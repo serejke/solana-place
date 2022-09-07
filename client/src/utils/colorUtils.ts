@@ -58,9 +58,6 @@ export function getColorByIndex(index: number): string | null {
   }
   return ALL_COLORS[index - 1];
 }
-
-export const HIGHLIGHTED_STROKE_WIDTH = 2;
-
 export const HIGHLIGHTED_COLOR = "#75d8ff";
 export const GRID_COLOR = "lightgray";
 export const CHANGED_COLOR = "green";

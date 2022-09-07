@@ -10,4 +10,4 @@ export type BoardHistory = {
   events: GameEventWithTransactionDetails[];
 };
 
-export const BOARD_HISTORY_MAX_LENGTH = 100;
+export const BOARD_HISTORY_MAX_LENGTH = 10;

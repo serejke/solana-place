@@ -10,10 +10,7 @@ export function BoardStateProvider({children}: { children: React.ReactNode }) {
   const [boardState, boardDispatch] = React.useReducer(boardStateReducer, {
     height: 0,
     width: 0,
-    colors: [],
-    changed: [],
-    pendingTransaction: null,
-    pendingTransactionIntervalId: null
+    colors: []
   });
 
   return (

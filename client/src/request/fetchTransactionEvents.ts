@@ -4,7 +4,7 @@ import {EventsWithTransactionDetailsDto} from "../dto/eventsWithTransactionDetai
 import {parseBoardHistory} from "../dto-converter/converter";
 import {TransactionSignature} from "@solana/web3.js";
 import {serverUrl} from "./serverUrls";
-import {RequestError} from "./requestError";
+import {rethrowIfFailed} from "./requestError";
 
 export async function fetchTransactionEvents(
   signature: TransactionSignature
@@ -35,9 +35,7 @@ async function fetchTransactionEventsOrRetry(
     if (response.status === 404) {
       return null;
     }
-    if (!response.ok) {
-      throw new RequestError(response.status, await response.json());
-    }
+    await rethrowIfFailed(response);
     const eventsWithTransactionDetails: EventsWithTransactionDetailsDto = await response.json();
     return parseBoardHistory(eventsWithTransactionDetails);
   } catch (err) {

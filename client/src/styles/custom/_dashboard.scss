@@ -121,14 +121,22 @@
 }
 
 @mixin dashboard-icon() {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.5rem !important;
+  height: 1.5rem !important;
   cursor: pointer;
 }
 
-.send-changes-icon {
+.send-changes-pending-loader {
   @include dashboard-icon;
-  color: green;
+  animation-duration: 1.5s !important;
+
+  border-color: rgb(227, 227, 0) rgb(227, 227, 0) hsla(0, 0%, 0%, 0) rgb(227, 227, 0) !important;
+}
+
+.send-changes-icon {
+  &-enabled {
+    color: green;
+  }
 
   &-disabled {
     color: #888888;

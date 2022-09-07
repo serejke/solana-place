@@ -4,10 +4,10 @@ import {getColorIndexFromPickerResult, getColorsForPicker} from "../utils/colorU
 import {CSSProperties} from "react";
 import {Classes} from 'reactcss'
 import {GithubPickerStylesProps} from "react-color/lib/components/github/Github";
-import {useBoardDispatch, useBoardState} from "../providers/board/boardState";
 import {areEqual} from "../model/boardState";
 import {MAX_CHANGES_PER_TRANSACTION} from "request/changePixels";
 import {PixelCoordinates} from "../model/pixelCoordinates";
+import {useAddOrDeleteChangedPixel, usePendingTransaction} from "../providers/transactions/pendingTransaction";
 
 const GITHUB_PICKER_TRIANGLE_SIZE = 16;
 
@@ -22,26 +22,21 @@ type PixelColorPickerProps = {
 };
 
 export function PixelColorPicker({selectedPixel, close}: PixelColorPickerProps) {
-  const boardState = useBoardState();
-  const boardDispatch = useBoardDispatch();
+  const {addChangedPixel, deleteChangedPixel} = useAddOrDeleteChangedPixel();
+  const {changedPixels, pendingTransaction} = usePendingTransaction();
 
-  const isAlreadyChanged = boardState
-    && selectedPixel
-    && boardState.changed.some(pixel => areEqual(pixel.coordinates, selectedPixel.pixelCoordinates));
+  const isAlreadyChanged = selectedPixel && changedPixels.some(pixel => areEqual(pixel.coordinates, selectedPixel.pixelCoordinates));
 
-  const isPendingTransaction = boardState && boardState.pendingTransaction !== null
+  const isPendingTransaction = pendingTransaction !== null
 
   React.useEffect(() => {
     if (isAlreadyChanged && !isPendingTransaction) {
-      boardDispatch({
-        type: "deleteChangedPixel",
-        coordinates: selectedPixel.pixelCoordinates
-      })
+      deleteChangedPixel(selectedPixel.pixelCoordinates);
       close();
     }
-  }, [isAlreadyChanged, isPendingTransaction, selectedPixel, boardDispatch, close])
+  }, [isAlreadyChanged, isPendingTransaction, selectedPixel, deleteChangedPixel, close])
 
-  const canChangeMore = boardState && boardState.changed.length < MAX_CHANGES_PER_TRANSACTION;
+  const canChangeMore = changedPixels.length < MAX_CHANGES_PER_TRANSACTION;
 
   if (!selectedPixel || isAlreadyChanged || isPendingTransaction) {
     return null;
@@ -82,8 +77,7 @@ export function PixelColorPicker({selectedPixel, close}: PixelColorPickerProps) 
               return;
             }
             close();
-            boardDispatch({
-              type: "changePixel",
+            addChangedPixel({
               coordinates: selectedPixel.pixelCoordinates,
               newColor: colorIndex
             })

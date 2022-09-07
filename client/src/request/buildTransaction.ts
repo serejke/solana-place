@@ -3,7 +3,7 @@ import {CreateTransactionRequestDto, SerializedMessageDto} from "../dto/transact
 import base58 from "bs58";
 import {Message, Transaction} from "@solana/web3.js";
 import {serverUrl} from "./serverUrls";
-import {RequestError} from "./requestError";
+import {rethrowIfFailed} from "./requestError";
 
 export async function createTransactionToChangePixels(
   changePixelsRequestDto: CreateTransactionRequestDto<ChangePixelRequestDto[]>
@@ -15,9 +15,7 @@ export async function createTransactionToChangePixels(
       body: JSON.stringify(changePixelsRequestDto)
     })
   );
-  if (!response.ok) {
-    throw new RequestError(response.status, await response.json());
-  }
+  await rethrowIfFailed(response);
   const data: SerializedMessageDto = await response.json();
   const message = Message.from(base58.decode(data.messageBase58))
   return Transaction.populate(message);
