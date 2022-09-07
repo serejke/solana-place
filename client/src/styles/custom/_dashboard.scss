@@ -33,6 +33,13 @@
   max-height: 30vh;
   overflow-y: scroll;
   flex-grow: 1;
+
+  //noinspection CssUnknownProperty; for Firefox only.
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .board-history-table {
