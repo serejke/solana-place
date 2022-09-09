@@ -8,6 +8,7 @@ export function useCanvasCallback(
   zoomingState: ZoomingState
 ): (e: CanvasEvent) => void {
   return React.useCallback((event) => {
+    event.preventDefault();
     const canvas = event.currentTarget;
     const canvasPosition = getCanvasPosition(canvas, event, zoomingState);
     const clientPosition = getEventClientPositionInCanvas(canvas, event);

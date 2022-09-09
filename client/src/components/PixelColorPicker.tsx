@@ -1,54 +1,38 @@
 import * as React from "react";
-import {GithubPicker} from 'react-color';
-import {getColorByIndex, getColorIndexFromPickerResult, getColorsForPicker, PixelColor} from "../utils/colorUtils";
+import {ColorResult, GithubPicker} from 'react-color';
+import {getColorByIndex, getColorIndexFromPickerResult, getColorsForPicker} from "../utils/colorUtils";
 import {CSSProperties} from "react";
 import {Classes} from 'reactcss'
 import {GithubPickerStylesProps} from "react-color/lib/components/github/Github";
-import {areEqual} from "../model/boardState";
-import {MAX_CHANGES_PER_TRANSACTION} from "request/changePixels";
-import {PixelCoordinates} from "../model/pixelCoordinates";
-import {useAddOrDeleteChangedPixel, usePendingTransaction} from "../providers/transactions/pendingTransaction";
 import {useCurrentPixelColorState} from "../providers/color/currentColor";
+import {useColorPickerStateAndActions} from "../providers/color/colorPicker";
 
 const GITHUB_PICKER_TRIANGLE_SIZE = 16;
 
-export type SelectedPixel = {
-  pixelCoordinates: PixelCoordinates,
-  popupPosition: { clientX: number, clientY: number }
-}
-
-type PixelColorPickerProps = {
-  selectedPixel: SelectedPixel | undefined,
-  close: () => void
-};
-
-export function PixelColorPicker({selectedPixel, close}: PixelColorPickerProps) {
-  const {addChangedPixel, deleteChangedPixel} = useAddOrDeleteChangedPixel();
-  const {changedPixels, pendingTransaction} = usePendingTransaction();
+export function PixelColorPicker() {
   const setCurrentPixelColor = useCurrentPixelColorState()[1];
+  const {colorPickerPosition, closeColorPicker} = useColorPickerStateAndActions();
 
-  const isAlreadyChanged = selectedPixel && changedPixels.some(pixel => areEqual(pixel.coordinates, selectedPixel.pixelCoordinates));
-
-  const isPendingTransaction = pendingTransaction !== null
-
-  React.useEffect(() => {
-    if (isAlreadyChanged && !isPendingTransaction) {
-      deleteChangedPixel(selectedPixel.pixelCoordinates);
-      close();
+  const onColorPicked = React.useCallback((color: ColorResult) => {
+    const colorIndex = getColorIndexFromPickerResult(color);
+    if (colorIndex === undefined) {
+      console.error("Unknown color", color);
+      closeColorPicker();
+      return;
     }
-  }, [isAlreadyChanged, isPendingTransaction, selectedPixel, deleteChangedPixel, close])
+    closeColorPicker();
+    setCurrentPixelColor(getColorByIndex(colorIndex)!);
+  }, [setCurrentPixelColor, closeColorPicker]);
 
-  const canChangeMore = changedPixels.length < MAX_CHANGES_PER_TRANSACTION;
-
-  if (!selectedPixel || isAlreadyChanged || isPendingTransaction) {
+  if (!colorPickerPosition) {
     return null;
   }
 
   const popover: CSSProperties = {
     position: 'absolute',
     zIndex: 2,
-    left: selectedPixel.popupPosition.clientX - GITHUB_PICKER_TRIANGLE_SIZE / 2,
-    top: selectedPixel.popupPosition.clientY + GITHUB_PICKER_TRIANGLE_SIZE / 2
+    left: colorPickerPosition.popupPosition.clientX - GITHUB_PICKER_TRIANGLE_SIZE / 2,
+    top: colorPickerPosition.popupPosition.clientY + GITHUB_PICKER_TRIANGLE_SIZE / 2
   }
 
   const styles: Partial<Classes<GithubPickerStylesProps>> = {
@@ -66,32 +50,12 @@ export function PixelColorPicker({selectedPixel, close}: PixelColorPickerProps) 
 
   return (
     <div style={popover} className="color-picker">
-      {canChangeMore
-        ? <GithubPicker
-          width="313px"
-          styles={styles}
-          colors={getColorsForPicker()}
-          onChangeComplete={(color) => {
-            const colorIndex = getColorIndexFromPickerResult(color);
-            if (colorIndex === undefined) {
-              console.error("Unknown color", color);
-              close();
-              return;
-            }
-            close();
-            setCurrentPixelColor(getColorByIndex(colorIndex)!);
-            addChangedPixel({
-              coordinates: selectedPixel.pixelCoordinates,
-              newColor: colorIndex
-            })
-          }}
-        />
-        : (
-          <div className="popup-max-changes-per-transaction">
-            Maximum of {MAX_CHANGES_PER_TRANSACTION} changes are allowed in a single transaction
-          </div>
-        )
-      }
+      <GithubPicker
+        width="313px"
+        styles={styles}
+        colors={getColorsForPicker()}
+        onChangeComplete={onColorPicked}
+      />
     </div>
   )
 }

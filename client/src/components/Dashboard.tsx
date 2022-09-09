@@ -30,16 +30,12 @@ import {SHORTENED_SYMBOL, shortenPublicKey, shortenTransactionSignature} from ".
 import {ExplorerTransactionLink} from "./ExplorerTransactionLink";
 import {useZooming} from "../providers/zooming/zooming";
 
-type DashboardProps = {
-  onMouseDown: () => void
-}
-
-export function Dashboard({onMouseDown}: DashboardProps) {
+export function Dashboard() {
   const {showHistory} = useBoardConfig();
   const {zoom} = useZooming()[0];
 
   return (
-    <Draggable onMouseDown={onMouseDown} cancel=".dashboard-cancel-draggable">
+    <Draggable cancel=".dashboard-cancel-draggable">
       <div className="dashboard">
         <div className="dashboard-row">
           <ConnectionButton/>
@@ -70,6 +66,7 @@ function ConnectionButton() {
 
 function SendChangesButton() {
   const wallet = useWallet();
+  const setBoardConfig = useSetBoardConfig();
   const {changedPixels, pendingTransaction} = usePendingTransaction();
   const addNotification = useAddNotification();
   const isPendingTransaction = pendingTransaction !== null;
@@ -94,6 +91,12 @@ function SendChangesButton() {
       })
       .catch((e) => addNotification(buildErrorNotification("Failed to change pixels", e)));
   }, [changedPixels, wallet, setPendingTransaction, addNotification]);
+  const onMouseEnter = React.useCallback(() => {
+    setBoardConfig(config => ({...config, isHighlightChangedPixels: true}));
+  }, [setBoardConfig]);
+  const onMouseLeave = React.useCallback(() => {
+    setBoardConfig(config => ({...config, isHighlightChangedPixels: false}));
+  }, [setBoardConfig]);
 
   const tooltipText = React.useMemo(() => {
     if (isPendingTransaction) {
@@ -123,6 +126,8 @@ function SendChangesButton() {
           : <PaperAirplaneIcon
             className={`send-changes-icon send-changes-icon-${isDisabled ? "disabled" : "enabled"}`}
             onClick={onClick}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
           />
         }
       </div>

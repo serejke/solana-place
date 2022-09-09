@@ -8,6 +8,7 @@ const Context = React.createContext<State | undefined>(undefined);
 const EMPTY_BOARD_CONFIG: BoardConfig = {
   showGrid: true,
   showHistory: true,
+  isHighlightChangedPixels: false
 };
 
 export function BoardConfigProvider({children}: { children: React.ReactNode }) {

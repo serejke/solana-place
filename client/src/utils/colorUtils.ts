@@ -50,6 +50,10 @@ export function getColorIndexFromPickerResult(color: ColorResult): number | unde
   return colorIndex < 0 ? undefined : colorIndex + 1;
 }
 
+export function getIndexOfColor(pixelColor: PixelColor): number {
+  return ALL_COLORS.indexOf(pixelColor) + 1;
+}
+
 export function getColorByIndex(index: number): PixelColor | null {
   if (index === 0) {
     return null;

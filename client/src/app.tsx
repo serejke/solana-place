@@ -1,9 +1,8 @@
 import * as React from "react";
-import {useState} from "react";
 
 import {LoadingModal} from "components/LoadingModal";
 import {GameCanvas} from "./components/canvas/GameCanvas";
-import {PixelColorPicker, SelectedPixel} from "./components/PixelColorPicker";
+import {PixelColorPicker} from "./components/PixelColorPicker";
 import {Dashboard} from "components/Dashboard";
 import {parseGameEventWithTransactionDetailsFromDto} from "./dto-converter/converter";
 import {useAddSocketMessageHandler} from "./providers/server/webSocket";
@@ -12,7 +11,6 @@ import {useBoardHistoryDispatch} from "./providers/board/boardHistory";
 import {fetchBoard} from "./request/fetchBoard";
 import {serverUrl} from "./request/serverUrls";
 import {fetchBoardHistory} from "./request/fetchBoardHistory";
-import {areEqual} from "./model/boardState";
 import {AboutModal} from "./components/AboutModal";
 import {GameEventWithTransactionDetails} from "./model/model";
 import {BoardStateDispatch} from "./reducers/boardStateReducer";
@@ -24,29 +22,22 @@ import {
 } from "./providers/transactions/pendingTransaction";
 import {useAddNotification} from "./providers/notifications/notifications";
 import {ZoomingStateProvider} from "./providers/zooming/zooming";
+import {ColorPickerProvider} from "./providers/color/colorPicker";
 
 export default function App() {
-  const [selectedPixel, setSelectedPixel] = useState<SelectedPixel>();
-
   useRequestInitialBoardState();
   useRequestInitialBoardHistory();
   useSubscribeToBoardEvents();
 
-  const onPixelClicked = React.useCallback((pixel: SelectedPixel) => {
-    if (selectedPixel && areEqual(selectedPixel.pixelCoordinates, pixel.pixelCoordinates)) {
-      setSelectedPixel(undefined);
-    } else {
-      setSelectedPixel(pixel)
-    }
-  }, [selectedPixel]);
-
   return (
     <div className="main-content">
       <ZoomingStateProvider>
-        <GameCanvas onPixelClicked={onPixelClicked}/>
-        <Dashboard onMouseDown={() => setSelectedPixel(undefined)}/>
+        <ColorPickerProvider>
+          <GameCanvas/>
+          <PixelColorPicker/>
+          <Dashboard/>
+        </ColorPickerProvider>
       </ZoomingStateProvider>
-      <PixelColorPicker selectedPixel={selectedPixel} close={() => setSelectedPixel(undefined)}/>
       <LoadingModal/>
       <AboutModal/>
       <Notifications/>

@@ -4,7 +4,6 @@ import {CHANGED_COLOR, getColorByIndex, HIGHLIGHTED_COLOR, PENDING_COLOR} from "
 import {useBoardConfig} from "../../providers/board/boardConfig";
 import {BoardState, isWithinBounds} from "../../model/boardState";
 import {useHighlightedPixel} from "../../providers/board/highlightedPixel";
-import {SelectedPixel} from "../PixelColorPicker";
 import {PixelCoordinates} from "../../model/pixelCoordinates";
 import {usePendingTransaction} from "../../providers/transactions/pendingTransaction";
 import {useCurrentPixelColorState} from "../../providers/color/currentColor";
@@ -19,22 +18,25 @@ import {
 import {clearPixel, drawBoard, drawGrid, drawPixel, highlightPixel} from "./drawing";
 import {useCanvasCallback} from "./useCanvasCallback";
 import {scaleCanvas} from "./zooming";
+import {useColorPickerStateAndActions} from "../../providers/color/colorPicker";
+import {useChangeOrCancelPixel} from "./useChangeOrCancelPixel";
 
-type GameCanvasProps = {
-  onPixelClicked: (selectedPixel: SelectedPixel) => void
-};
-
-export function GameCanvas({onPixelClicked}: GameCanvasProps) {
+export function GameCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvasGridRef = useRef<HTMLCanvasElement>(null);
   const canvasHelperRef = useRef<HTMLCanvasElement>(null);
 
   const boardState = useBoardState();
-  const showGrid = useBoardConfig().showGrid;
+  const {showGrid, isHighlightChangedPixels} = useBoardConfig();
   const [zoomingState, zoomingDispatch] = useZooming();
 
   const [hoveredPixel, setHoveredPixel] = useState<PixelCoordinates>();
-  useCanvasResizeEffect([canvasRef, canvasGridRef, canvasHelperRef]);
+  const [isDrawingMode, setIsDrawingMode] = useState(false);
+  const {pendingTransaction} = usePendingTransaction();
+  const isPendingTransaction = pendingTransaction !== null;
+
+  const {openColorPicker, closeColorPicker} = useColorPickerStateAndActions();
+  const changeOrCancelPixel = useChangeOrCancelPixel();
 
   // Used for optimization.
   const currentBoardState = useRef<BoardState>();
@@ -43,31 +45,38 @@ export function GameCanvas({onPixelClicked}: GameCanvasProps) {
     currentBoardState.current = undefined;
   }, [zoomingState]);
 
+  useCanvasResizeEffect([canvasRef, canvasGridRef, canvasHelperRef]);
   useDrawBoardEffect(canvasRef, currentBoardState);
   useDrawGridEffect(canvasGridRef);
-  useDrawHoveredAndHighlightedAndChangedPixelsEffect(canvasHelperRef, hoveredPixel);
+  useDrawHoveredAndHighlightedAndChangedPixelsEffect(canvasHelperRef, hoveredPixel, isHighlightChangedPixels);
 
-  const onClickCallback: CanvasCallback = React.useCallback(({canvasPosition, event}) => {
-    if (!boardState) return;
+  const onOpenColorPickerCallback: CanvasCallback = React.useCallback(({canvasPosition, event}) => {
     const pixelCoordinates = getPixelCoordinates(canvasPosition);
-    if (!isWithinBounds(boardState, pixelCoordinates.row, pixelCoordinates.column)) {
-      return;
-    }
-    onPixelClicked({
+    if (!boardState || !isWithinBounds(boardState, pixelCoordinates.row, pixelCoordinates.column)) return;
+    openColorPicker({
       pixelCoordinates,
-      popupPosition: {clientX: event.clientX, clientY: event.clientY}
+      popupPosition: {
+        clientX: event.clientX,
+        clientY: event.clientY
+      }
     })
-  }, [boardState, onPixelClicked]);
+  }, [boardState, openColorPicker]);
 
   const onMouseMoveCallback: CanvasCallback = React.useCallback(({canvasPosition}) => {
-    if (!boardState) return;
     const pixelCoordinates = getPixelCoordinates(canvasPosition);
-    if (isWithinBounds(boardState, pixelCoordinates.row, pixelCoordinates.column)) {
+    if (!boardState || !isWithinBounds(boardState, pixelCoordinates.row, pixelCoordinates.column)) return;
+    if (!isDrawingMode || isPendingTransaction) {
       setHoveredPixel(pixelCoordinates);
-    } else {
-      setHoveredPixel(undefined);
+      return;
     }
-  }, [boardState, setHoveredPixel]);
+    changeOrCancelPixel(pixelCoordinates, isDrawingMode);
+  }, [
+    boardState,
+    setHoveredPixel,
+    isDrawingMode,
+    isPendingTransaction,
+    changeOrCancelPixel
+  ]);
 
   const zoomInOrOut = React.useCallback((isZoomInOrOut: "in" | "out" | undefined) => {
     if (!hoveredPixel) return;
@@ -94,6 +103,14 @@ export function GameCanvas({onPixelClicked}: GameCanvasProps) {
     }
   }, [zoomInOrOut]);
 
+  const onMouseDownCallback: CanvasCallback = React.useCallback(({canvasPosition}) => {
+    closeColorPicker();
+    const pixelCoordinates = getPixelCoordinates(canvasPosition);
+    if (!boardState || !isWithinBounds(boardState, pixelCoordinates.row, pixelCoordinates.column)) return;
+    changeOrCancelPixel(pixelCoordinates, false);
+    setIsDrawingMode(true);
+  }, [setIsDrawingMode, boardState, changeOrCancelPixel, closeColorPicker]);
+
   const onZoomKeyDown = React.useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.code === "Equal" || e.code === "Plus") {
       zoomInOrOut("in");
@@ -102,9 +119,14 @@ export function GameCanvas({onPixelClicked}: GameCanvasProps) {
     }
   }, [zoomInOrOut]);
 
-  const onClick = useCanvasCallback(onClickCallback, zoomingState);
+  const onDoubleClick = useCanvasCallback(onOpenColorPickerCallback, zoomingState);
+  const onContextMenu = useCanvasCallback(onOpenColorPickerCallback, zoomingState);
   const onMouseMove = useCanvasCallback(onMouseMoveCallback, zoomingState);
   const onMouseWheel = useCanvasCallback(onMouseWheelCallback, zoomingState);
+  const onMouseDown = useCanvasCallback(onMouseDownCallback, zoomingState);
+  const onMouseUp = React.useCallback(() => {
+    setIsDrawingMode(false);
+  }, [setIsDrawingMode]);
 
   const gameStageRef = useRef<HTMLDivElement>(null);
   React.useEffect(() => {
@@ -124,7 +146,10 @@ export function GameCanvas({onPixelClicked}: GameCanvasProps) {
         className="game-canvas"
         style={zoomingState.canvasStyle}
         ref={canvasRef}
-        onClick={onClick}
+        onDoubleClick={onDoubleClick}
+        onContextMenu={onContextMenu}
+        onMouseDown={onMouseDown}
+        onMouseUp={onMouseUp}
         onMouseMove={onMouseMove}
         onWheel={onMouseWheel}
       />
@@ -187,13 +212,12 @@ function useCanvasResizeEffect(canvasRefs: MutableRefObject<HTMLCanvasElement | 
 }
 
 function useCanvas2DContext(canvasRef: MutableRefObject<HTMLCanvasElement | null>): CanvasRenderingContext2D | undefined {
-  const current = canvasRef.current !== null;
+  const isCanvasSet = canvasRef.current !== null;
   return React.useMemo(() => {
-    const canvas = canvasRef.current;
-    return canvas?.getContext("2d")!;
-    // Assume the canvas context never changes.
+    return canvasRef.current?.getContext("2d")!;
+    // Do not depend on the HTMLCanvasElement.
     //  eslint-disable-next-line
-  }, [current])
+  }, [isCanvasSet])
 }
 
 function useDrawBoardEffect(
@@ -226,7 +250,8 @@ function useDrawGridEffect(canvasGridRef: MutableRefObject<HTMLCanvasElement | n
 
 function useDrawHoveredAndHighlightedAndChangedPixelsEffect(
   canvasHelperRef: MutableRefObject<HTMLCanvasElement | null>,
-  hoveredPixel: PixelCoordinates | undefined
+  hoveredPixel: PixelCoordinates | undefined,
+  isHighlightChangedPixels: boolean
 ) {
   const {pendingTransaction, changedPixels} = usePendingTransaction();
   const currentPixelColor = useCurrentPixelColorState()[0];
@@ -240,21 +265,31 @@ function useDrawHoveredAndHighlightedAndChangedPixelsEffect(
     if (highlightedPixel) {
       highlightPixel(canvasHelperCtx, highlightedPixel.pixelCoordinates, HIGHLIGHTED_COLOR);
     }
-    if (hoveredPixel) {
-      drawPixel(canvasHelperCtx, hoveredPixel, currentPixelColor);
-    }
     if (changedPixels) {
-      const color = isPendingTransaction ? PENDING_COLOR : CHANGED_COLOR;
       changedPixels.forEach((changedPixel) => {
         const colorByIndex = getColorByIndex(changedPixel.newColor);
         drawPixel(canvasHelperCtx, changedPixel.coordinates, colorByIndex);
-        highlightPixel(canvasHelperCtx, changedPixel.coordinates, color);
+        if (isPendingTransaction || isHighlightChangedPixels) {
+          highlightPixel(canvasHelperCtx, changedPixel.coordinates, isPendingTransaction ? PENDING_COLOR : CHANGED_COLOR);
+        }
       });
+    }
+    if (hoveredPixel) {
+      drawPixel(canvasHelperCtx, hoveredPixel, currentPixelColor);
     }
     return () => {
       highlightedPixel && clearPixel(canvasHelperCtx, highlightedPixel.pixelCoordinates);
       hoveredPixel && clearPixel(canvasHelperCtx, hoveredPixel);
       changedPixels.forEach((changedPixel) => clearPixel(canvasHelperCtx, changedPixel.coordinates))
     }
-  }, [hoveredPixel, highlightedPixel, currentPixelColor, changedPixels, isPendingTransaction, zoomingState, canvasHelperCtx]);
+  }, [
+    hoveredPixel,
+    highlightedPixel,
+    currentPixelColor,
+    changedPixels,
+    isPendingTransaction,
+    zoomingState,
+    isHighlightChangedPixels,
+    canvasHelperCtx,
+  ]);
 }

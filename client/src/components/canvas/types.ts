@@ -3,6 +3,7 @@ export type CanvasStyle = { width: number, height: number };
 export type CanvasCallback = ({canvasPosition, event}: { canvasPosition: CanvasPosition, event: CanvasEvent }) => void;
 
 export type CanvasEvent = {
+  preventDefault(): void,
   currentTarget: EventTarget & HTMLCanvasElement,
   clientX: number,
   clientY: number,

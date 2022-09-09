@@ -1,4 +1,5 @@
 export type BoardConfig = {
   showGrid: boolean,
-  showHistory: boolean
+  showHistory: boolean,
+  isHighlightChangedPixels: boolean
 }
