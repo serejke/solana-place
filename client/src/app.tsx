@@ -2,7 +2,7 @@ import * as React from "react";
 import {useState} from "react";
 
 import {LoadingModal} from "components/LoadingModal";
-import {GameCanvas} from "./components/GameCanvas";
+import {GameCanvas} from "./components/canvas/GameCanvas";
 import {PixelColorPicker, SelectedPixel} from "./components/PixelColorPicker";
 import {Dashboard} from "components/Dashboard";
 import {parseGameEventWithTransactionDetailsFromDto} from "./dto-converter/converter";
@@ -23,10 +23,10 @@ import {
   useSetAndUnsetPendingTransaction
 } from "./providers/transactions/pendingTransaction";
 import {useAddNotification} from "./providers/notifications/notifications";
+import {ZoomingStateProvider} from "./providers/zooming/zooming";
 
 export default function App() {
   const [selectedPixel, setSelectedPixel] = useState<SelectedPixel>();
-  const [zoom, setZoom] = useState(1);
 
   useRequestInitialBoardState();
   useRequestInitialBoardHistory();
@@ -39,12 +39,13 @@ export default function App() {
       setSelectedPixel(pixel)
     }
   }, [selectedPixel]);
-  const onZoomChanged = React.useCallback((newZoom: number) => setZoom(newZoom), [setZoom]);
 
   return (
     <div className="main-content">
-      <GameCanvas onPixelClicked={onPixelClicked} onZoomChanged={onZoomChanged}/>
-      <Dashboard zoom={zoom} onMouseDown={() => setSelectedPixel(undefined)}/>
+      <ZoomingStateProvider>
+        <GameCanvas onPixelClicked={onPixelClicked}/>
+        <Dashboard onMouseDown={() => setSelectedPixel(undefined)}/>
+      </ZoomingStateProvider>
       <PixelColorPicker selectedPixel={selectedPixel} close={() => setSelectedPixel(undefined)}/>
       <LoadingModal/>
       <AboutModal/>

@@ -1,5 +1,4 @@
 import * as React from "react";
-import {useBoardState} from "../providers/board/boardState";
 import {useBoardConfig, useSetBoardConfig} from "../providers/board/boardConfig";
 import {useWallet} from "@solana/wallet-adapter-react";
 import {WalletMultiButton} from "@solana/wallet-adapter-react-ui";
@@ -29,14 +28,15 @@ import {
 } from "../model/notification";
 import {SHORTENED_SYMBOL, shortenPublicKey, shortenTransactionSignature} from "../utils/presentationUtils";
 import {ExplorerTransactionLink} from "./ExplorerTransactionLink";
+import {useZooming} from "../providers/zooming/zooming";
 
 type DashboardProps = {
-  zoom: number,
   onMouseDown: () => void
 }
 
-export function Dashboard({zoom, onMouseDown}: DashboardProps) {
+export function Dashboard({onMouseDown}: DashboardProps) {
   const {showHistory} = useBoardConfig();
+  const {zoom} = useZooming()[0];
 
   return (
     <Draggable onMouseDown={onMouseDown} cancel=".dashboard-cancel-draggable">
