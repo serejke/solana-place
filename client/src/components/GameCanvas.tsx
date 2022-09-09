@@ -4,7 +4,6 @@ import {
   CHANGED_COLOR, getColorByIndex,
   GRID_COLOR,
   HIGHLIGHTED_COLOR,
-  HOVERED_PIXEL_COLOR,
   PENDING_COLOR
 } from "../utils/colorUtils";
 import {useBoardConfig} from "../providers/board/boardConfig";
@@ -13,6 +12,7 @@ import {useHighlightedPixel} from "../providers/board/highlightedPixel";
 import {SelectedPixel} from "./PixelColorPicker";
 import {PixelCoordinates} from "../model/pixelCoordinates";
 import {usePendingTransaction} from "../providers/transactions/pendingTransaction";
+import {useCurrentPixelColorState} from "../providers/color/currentColor";
 
 export const PIXEL_SIZE = 4;
 
@@ -33,6 +33,7 @@ export function GameCanvas({onPixelClicked, onZoomChanged}: GameCanvasProps) {
   const [zoomingState, zoomingDispatch] = useZooming();
 
   const [hoveredPixel, setHoveredPixel] = useState<PixelCoordinates>();
+  const currentPixelColor = useCurrentPixelColorState()[0];
 
   // Used for optimization.
   const currentBoardState = useRef<BoardState>();
@@ -108,7 +109,7 @@ export function GameCanvas({onPixelClicked, onZoomChanged}: GameCanvasProps) {
       highlightPixel(helperCtx, highlightedPixel.pixelCoordinates, HIGHLIGHTED_COLOR);
     }
     if (hoveredPixel) {
-      highlightPixel(helperCtx, hoveredPixel, HOVERED_PIXEL_COLOR);
+      drawPixel(helperCtx, hoveredPixel, currentPixelColor);
     }
     if (changedPixels) {
       const color = isPendingTransaction ? PENDING_COLOR : CHANGED_COLOR;
@@ -123,7 +124,7 @@ export function GameCanvas({onPixelClicked, onZoomChanged}: GameCanvasProps) {
       hoveredPixel && clearPixel(helperCtx, hoveredPixel);
       changedPixels.forEach((changedPixel) => clearPixel(helperCtx, changedPixel.coordinates))
     }
-  }, [hoveredPixel, highlightedPixel, changedPixels, isPendingTransaction, zoomingState])
+  }, [hoveredPixel, highlightedPixel, currentPixelColor, changedPixels, isPendingTransaction, zoomingState])
 
   const onClickCallback: CanvasCallback = React.useCallback(({canvasPosition, event}) => {
     if (!boardState) return;

@@ -15,6 +15,7 @@ import {ClusterConfigProvider} from "./providers/server/clusterConfig";
 import {AboutProvider} from "./providers/about/about";
 import {NotificationsProvider} from "./providers/notifications/notifications";
 import {PendingTransactionProvider} from "./providers/transactions/pendingTransaction";
+import { CurrentColorProvider } from "providers/color/currentColor";
 
 ReactDOM.render(
   <BrowserRouter>
@@ -28,7 +29,9 @@ ReactDOM.render(
                   <GameStateProvider>
                     <PendingTransactionProvider>
                       <AboutProvider>
-                        <App/>
+                        <CurrentColorProvider>
+                          <App/>
+                        </CurrentColorProvider>
                       </AboutProvider>
                     </PendingTransactionProvider>
                   </GameStateProvider>

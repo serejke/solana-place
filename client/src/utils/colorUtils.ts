@@ -1,6 +1,8 @@
 import {ColorResult} from "react-color";
 
-const ALL_COLORS = [
+export type PixelColor = string;
+
+const ALL_COLORS: PixelColor[] = [
   '#ffffff',
   '#999999',
   '#4d4d4d',
@@ -39,7 +41,7 @@ const ALL_COLORS = [
   '#a9149c'
 ]
 
-export function getColorsForPicker(): string[] {
+export function getColorsForPicker(): PixelColor[] {
   return ALL_COLORS;
 }
 
@@ -48,7 +50,7 @@ export function getColorIndexFromPickerResult(color: ColorResult): number | unde
   return colorIndex < 0 ? undefined : colorIndex + 1;
 }
 
-export function getColorByIndex(index: number): string | null {
+export function getColorByIndex(index: number): PixelColor | null {
   if (index === 0) {
     return null;
   }
@@ -62,4 +64,3 @@ export const HIGHLIGHTED_COLOR = "#75d8ff";
 export const GRID_COLOR = "lightgray";
 export const CHANGED_COLOR = "green";
 export const PENDING_COLOR = "yellow";
-export const HOVERED_PIXEL_COLOR = "#d13115";

@@ -1,6 +1,6 @@
 import * as React from "react";
 import {GithubPicker} from 'react-color';
-import {getColorIndexFromPickerResult, getColorsForPicker} from "../utils/colorUtils";
+import {getColorByIndex, getColorIndexFromPickerResult, getColorsForPicker, PixelColor} from "../utils/colorUtils";
 import {CSSProperties} from "react";
 import {Classes} from 'reactcss'
 import {GithubPickerStylesProps} from "react-color/lib/components/github/Github";
@@ -8,6 +8,7 @@ import {areEqual} from "../model/boardState";
 import {MAX_CHANGES_PER_TRANSACTION} from "request/changePixels";
 import {PixelCoordinates} from "../model/pixelCoordinates";
 import {useAddOrDeleteChangedPixel, usePendingTransaction} from "../providers/transactions/pendingTransaction";
+import {useCurrentPixelColorState} from "../providers/color/currentColor";
 
 const GITHUB_PICKER_TRIANGLE_SIZE = 16;
 
@@ -24,6 +25,7 @@ type PixelColorPickerProps = {
 export function PixelColorPicker({selectedPixel, close}: PixelColorPickerProps) {
   const {addChangedPixel, deleteChangedPixel} = useAddOrDeleteChangedPixel();
   const {changedPixels, pendingTransaction} = usePendingTransaction();
+  const setCurrentPixelColor = useCurrentPixelColorState()[1];
 
   const isAlreadyChanged = selectedPixel && changedPixels.some(pixel => areEqual(pixel.coordinates, selectedPixel.pixelCoordinates));
 
@@ -77,6 +79,7 @@ export function PixelColorPicker({selectedPixel, close}: PixelColorPickerProps) 
               return;
             }
             close();
+            setCurrentPixelColor(getColorByIndex(colorIndex)!);
             addChangedPixel({
               coordinates: selectedPixel.pixelCoordinates,
               newColor: colorIndex
