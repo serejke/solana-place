@@ -18,7 +18,10 @@ export type NotificationContent = {
   type: "transactionWasDropped",
   transactionSignature: TransactionSignature,
   timeout: number
-}
+} | {
+  type: "maximumChangesReached",
+  limit: number
+};
 
 export type NotificationExpiration = {
   type: "after",

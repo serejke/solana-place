@@ -30,8 +30,8 @@ export function useChangeOrCancelPixel(): ChangeOrCancelPixelAction {
         addNotification(buildInfoNotification(
           notificationTitle,
           {
-            type: "string",
-            content: `Maximum of ${MAX_CHANGES_PER_TRANSACTION} changes are allowed in a single transaction`
+            type: "maximumChangesReached",
+            limit: MAX_CHANGES_PER_TRANSACTION
           }
         ))
       }

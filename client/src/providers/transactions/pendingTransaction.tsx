@@ -64,6 +64,7 @@ function useSetPendingTransactionState(): SetState {
 type AddOrDeleteChangedPixel = {
   addChangedPixel: (changedPixel: ChangedPixel) => void;
   deleteChangedPixel: (pixelCoordinates: PixelCoordinates) => void;
+  deleteAllChangedPixels: () => void;
 }
 
 export function useAddOrDeleteChangedPixel(): AddOrDeleteChangedPixel {
@@ -92,9 +93,16 @@ export function useAddOrDeleteChangedPixel(): AddOrDeleteChangedPixel {
       changedPixels: state.changedPixels.filter(changed => !areEqual(changed.coordinates, pixelCoordinates))
     }))
   }, [setPendingTransactionState]);
+  const deleteAllChangedPixels = React.useCallback(() => {
+    setPendingTransactionState((state) => ({
+      ...state,
+      changedPixels: []
+    }));
+  }, [setPendingTransactionState])
   return {
     addChangedPixel,
-    deleteChangedPixel
+    deleteChangedPixel,
+    deleteAllChangedPixels
   }
 }
 
