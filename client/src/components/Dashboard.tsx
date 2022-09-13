@@ -75,7 +75,7 @@ function SendChangesButton() {
   const isDisabled = !isWalletConnected || !isAnyChanged || isPendingTransaction;
   const {setPendingTransaction} = useSetAndUnsetPendingTransaction();
   const onClick = React.useCallback(() => {
-    if (!changedPixels) return;
+    if (isDisabled) return;
     changePixels(changedPixels, wallet)
       .then(transactionSignature => {
         setPendingTransaction(transactionSignature);
@@ -90,7 +90,7 @@ function SendChangesButton() {
         )
       })
       .catch((e) => addNotification(buildErrorNotification("Failed to change pixels", e)));
-  }, [changedPixels, wallet, setPendingTransaction, addNotification]);
+  }, [isDisabled, changedPixels, wallet, setPendingTransaction, addNotification]);
   const onMouseEnter = React.useCallback(() => {
     setBoardConfig(config => ({...config, isHighlightChangedPixels: true}));
   }, [setBoardConfig]);
