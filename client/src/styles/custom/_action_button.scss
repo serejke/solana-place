@@ -1,3 +1,5 @@
+@import "dashboard";
+
 .action-button {
   background-color: #512da8;
   border: none;
@@ -27,4 +29,18 @@
   background: #404144;
   color: #999;
   cursor: not-allowed;
+}
+
+@media (max-width: 767px) {
+  .action-button {
+    background-color: initial;
+    min-width: initial;
+    width: $dashboard-icon-size;
+    height: $dashboard-icon-size;
+    padding: 0;
+  }
+
+  .wallet-adapter-button-start-icon {
+    margin: 0;
+  }
 }

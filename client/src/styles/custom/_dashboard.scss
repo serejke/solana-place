@@ -1,3 +1,5 @@
+$dashboard-icon-size: 1.75rem;
+
 .dashboard {
   position: fixed;
   right: 6vw;
@@ -111,8 +113,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 1.75rem;
-  height: 1.75rem;
+  width: $dashboard-icon-size;
+  height: $dashboard-icon-size;
 
   &.checked-toggle {
     background-color: #a2a2a2;
@@ -146,6 +148,11 @@
   }
 }
 
+.action-button-icon {
+  @include dashboard-icon;
+  color: #512da8;
+}
+
 .grid-icon {
   @include dashboard-icon;
 }
@@ -176,4 +183,10 @@
 
 // Phantom class used by React Draggable on some elements to prevent dragging
 .dashboard-cancel-draggable {
+}
+
+@media (max-width: 767px) {
+  .dashboard-row {
+    flex-direction: column;
+  }
 }

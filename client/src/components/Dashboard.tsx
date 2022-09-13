@@ -18,6 +18,7 @@ import {
   MagnifyingGlassIcon,
   PaperAirplaneIcon,
   Squares2X2Icon,
+  WalletIcon,
   WifiIcon
 } from '@heroicons/react/24/outline'
 import {usePendingTransaction, useSetAndUnsetPendingTransaction} from "../providers/transactions/pendingTransaction";
@@ -29,10 +30,12 @@ import {
 import {SHORTENED_SYMBOL, shortenPublicKey, shortenTransactionSignature} from "../utils/presentationUtils";
 import {ExplorerTransactionLink} from "./ExplorerTransactionLink";
 import {useZooming} from "../providers/zooming/zooming";
+import {useIsPhone} from "../utils/mobile";
 
 export function Dashboard() {
   const {showHistory} = useBoardConfig();
   const {zoom} = useZooming()[0];
+  const isPhone = useIsPhone();
 
   return (
     <Draggable cancel=".dashboard-cancel-draggable">
@@ -41,7 +44,7 @@ export function Dashboard() {
           <ConnectionButton/>
           <SendChangesButton/>
           <ShowGridToggle/>
-          <ShowHistoryToggle/>
+          {!isPhone && <ShowHistoryToggle/>}
           <ShowZoom zoom={zoom}/>
           <OnlineStatus/>
           <ShowAbout/>
@@ -57,9 +60,21 @@ export function Dashboard() {
 }
 
 function ConnectionButton() {
+  const isPhone = useIsPhone();
+  const isConnected = useWallet().connected;
+  let content = undefined;
+  if (isPhone) {
+    if (isConnected) {
+      content = <div/>;
+    } else {
+      content = <WalletIcon className="action-button-icon"/>;
+    }
+  }
   return <div className="dashboard-item">
     <div className="dashboard-cancel-draggable">
-      <WalletMultiButton className="action-button"/>
+      <WalletMultiButton className={`action-button ${isPhone ? 'action-button-phone' : ''}`}>
+        {content}
+      </WalletMultiButton>
     </div>
   </div>;
 }
@@ -180,6 +195,7 @@ function ShowGridToggle() {
 type ShowZoomProps = { zoom: number };
 
 function ShowZoom({zoom}: ShowZoomProps) {
+  const isPhone = useIsPhone();
   const zoomString = zoom * 100;
   return (
     <div className="dashboard-item">
@@ -197,7 +213,7 @@ function ShowZoom({zoom}: ShowZoomProps) {
         effect="solid"
       >Use mouse wheel or +/- keys to zoom in/out
       </ReactTooltip>
-      {zoomString}%
+      {!isPhone && zoomString + '%'}
     </div>
   );
 }

@@ -1,18 +1,18 @@
 import * as React from "react";
 import {BoardConfig} from "../../model/boardConfig";
+import {useIsPhone} from "../../utils/mobile";
 
 type SetState = React.Dispatch<React.SetStateAction<BoardConfig>>;
 type State = [BoardConfig, SetState];
 const Context = React.createContext<State | undefined>(undefined);
 
-const EMPTY_BOARD_CONFIG: BoardConfig = {
-  showGrid: true,
-  showHistory: true,
-  isHighlightChangedPixels: false
-};
-
 export function BoardConfigProvider({children}: { children: React.ReactNode }) {
-  const state: State = React.useState<BoardConfig>(EMPTY_BOARD_CONFIG);
+  const isPhone = useIsPhone();
+  const state: State = React.useState<BoardConfig>({
+    showGrid: !isPhone,
+    showHistory: !isPhone,
+    isHighlightChangedPixels: false
+  });
   return (
     <Context.Provider value={state}>
       {children}
