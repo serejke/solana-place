@@ -134,6 +134,8 @@
 }
 
 .send-changes-icon {
+  @include dashboard-icon();
+
   &-enabled {
     color: green;
   }
