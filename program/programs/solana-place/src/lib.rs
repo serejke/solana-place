@@ -32,6 +32,7 @@ pub mod solana_place {
 
 }
 
+#[cfg(not(feature = "no-entrypoint"))]
 security_txt! {
     name: "Place | Solana",
     project_url: "https://solana-place.com/",
