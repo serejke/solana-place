@@ -8,5 +8,7 @@
     "esModuleInterop": true,
     "resolveJsonModule": true
   },
-  "include": ["migrations"]
+  "include": [
+    "migrations"
+  ]
 }
