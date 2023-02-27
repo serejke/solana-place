@@ -1,13 +1,19 @@
-import {AnchorProvider, Program} from "@project-serum/anchor";
+import { AnchorProvider, Program } from "@project-serum/anchor";
 import * as anchor from "@project-serum/anchor";
 import * as web3 from "@solana/web3.js";
 import * as fs from "fs";
-import {PNG} from "pngjs";
-import {IDL as SolanaPlaceGameIDL, SolanaPlace} from "../target/types/solana_place";
+import { PNG } from "pngjs";
+import {
+  IDL as SolanaPlaceGameIDL,
+  SolanaPlace,
+} from "../target/types/solana_place";
 import solanaPlaceProgramKeypair from "../target/deploy/solana_place-keypair.json";
 import gameAccountKeypair from "../target/deploy/game_account_keypair.json";
-import {ChangeColorRequest, encodeChangeColorRequests} from "../tests/test-board-utils";
-import {SystemProgram} from "@solana/web3.js";
+import {
+  ChangeColorRequest,
+  encodeChangeColorRequests,
+} from "../tests/test-board-utils";
+import { SystemProgram } from "@solana/web3.js";
 
 const PICTURE_PATH = "../target/pictures/img.png";
 
@@ -17,15 +23,23 @@ async function copyPicture(provider) {
   // Configure client to use the provider.
   anchor.setProvider(provider);
 
-  const programKeypair = web3.Keypair.fromSecretKey(Uint8Array.from(solanaPlaceProgramKeypair));
+  const programKeypair = web3.Keypair.fromSecretKey(
+    Uint8Array.from(solanaPlaceProgramKeypair)
+  );
   const programId = programKeypair.publicKey;
 
-  const gameKeypair = web3.Keypair.fromSecretKey(Uint8Array.from(gameAccountKeypair));
+  const gameKeypair = web3.Keypair.fromSecretKey(
+    Uint8Array.from(gameAccountKeypair)
+  );
   const gameAccount = gameKeypair.publicKey;
 
-  const program = new Program<SolanaPlace>(SolanaPlaceGameIDL, programId, provider);
+  const program = new Program<SolanaPlace>(
+    SolanaPlaceGameIDL,
+    programId,
+    provider
+  );
 
-  const imageBuffer = fs.readFileSync(PICTURE_PATH)
+  const imageBuffer = fs.readFileSync(PICTURE_PATH);
   const png = PNG.sync.read(imageBuffer);
   const baseRow = 0;
   const baseColumn = 0;
@@ -46,21 +60,23 @@ async function copyPicture(provider) {
       changes.push({
         row: baseRow + row,
         column: baseColumn + column,
-        color: colorIndex
-      })
+        color: colorIndex,
+      });
     }
   }
 
   const sliceSize = 150;
   let sliceStart = 0;
   while (sliceStart < changes.length) {
-    const encodedRequests = encodeChangeColorRequests(changes.slice(sliceStart, sliceStart + sliceSize));
+    const encodedRequests = encodeChangeColorRequests(
+      changes.slice(sliceStart, sliceStart + sliceSize)
+    );
     await program.methods
       .changeColors(encodedRequests)
       .accounts({
         gameAccount,
         payer: (provider as AnchorProvider).wallet.publicKey,
-        systemProgram: SystemProgram.programId
+        systemProgram: SystemProgram.programId,
       })
       .rpc()
       .then(() => console.log(`Finished slice ${sliceStart / sliceSize}`));
@@ -71,12 +87,12 @@ async function copyPicture(provider) {
 function findBestColorIndex(r: number, g: number, b: number): number {
   const parsedColors = ALL_COLORS.map((hexString) => hexToRgb(hexString));
 
-  const targetColor = {r, g, b};
+  const targetColor = { r, g, b };
 
   let bestIndex = 0;
   let bestDistance = distance(parsedColors[bestIndex], targetColor);
   for (let index = 1; index < parsedColors.length; index++) {
-    const currentDistance = distance(parsedColors[index], targetColor)
+    const currentDistance = distance(parsedColors[index], targetColor);
     if (bestDistance > currentDistance) {
       bestDistance = currentDistance;
       bestIndex = index;
@@ -86,12 +102,14 @@ function findBestColorIndex(r: number, g: number, b: number): number {
 }
 
 function distance(color1: RgbColor, color2: RgbColor): number {
-  return Math.pow(color1.r - color2.r, 2) +
+  return (
+    Math.pow(color1.r - color2.r, 2) +
     Math.pow(color1.g - color2.g, 2) +
-    Math.pow(color1.b - color2.b, 2);
+    Math.pow(color1.b - color2.b, 2)
+  );
 }
 
-type RgbColor = { r: number, g: number, b: number }
+type RgbColor = { r: number; g: number; b: number };
 
 /*
 function parseRgb(rgb: string): { r: number, g: number, b: number } {
@@ -103,55 +121,52 @@ function parseRgb(rgb: string): { r: number, g: number, b: number } {
 }
 */
 
-function hexToRgb(hex: string): { r: number, g: number, b: number } {
+function hexToRgb(hex: string): { r: number; g: number; b: number } {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  const r = parseInt(result[1], 16)
-  const g = parseInt(result[2], 16)
-  const b = parseInt(result[3], 16)
-  return {r, g, b}
+  const r = parseInt(result[1], 16);
+  const g = parseInt(result[2], 16);
+  const b = parseInt(result[3], 16);
+  return { r, g, b };
 }
 
 const ALL_COLORS = [
-  '#ffffff', //0
-  '#999999',
-  '#4d4d4d',
-  '#f34c39',
-  '#ff9100',
-  '#fad900',
-  '#dde000',
-  '#a4db00',
-  '#66ccca',
-  '#75d8ff',
-  '#afa3ff', // 10
-  '#fda3ff',
-  '#cccccc',
-  '#808080',
-  '#333333',
-  '#d13115',
-  '#e07400',
-  '#fac400',
-  '#b0bd00',
-  '#68bd00',
-  '#17a6a6', //20
-  '#009de0',
-  '#7d66ff',
-  '#fb29ff',
-  '#b3b3b3',
-  '#666666',
-  '#000000',
-  '#9e0500',
-  '#c25100',
-  '#fa9e00',
-  '#818a00', //30
-  '#194d33',
-  '#0c7a7d',
-  '#0062b3',
-  '#653394',
-  '#a9149c'
+  "#ffffff", //0
+  "#999999",
+  "#4d4d4d",
+  "#f34c39",
+  "#ff9100",
+  "#fad900",
+  "#dde000",
+  "#a4db00",
+  "#66ccca",
+  "#75d8ff",
+  "#afa3ff", // 10
+  "#fda3ff",
+  "#cccccc",
+  "#808080",
+  "#333333",
+  "#d13115",
+  "#e07400",
+  "#fac400",
+  "#b0bd00",
+  "#68bd00",
+  "#17a6a6", //20
+  "#009de0",
+  "#7d66ff",
+  "#fb29ff",
+  "#b3b3b3",
+  "#666666",
+  "#000000",
+  "#9e0500",
+  "#c25100",
+  "#fa9e00",
+  "#818a00", //30
+  "#194d33",
+  "#0c7a7d",
+  "#0062b3",
+  "#653394",
+  "#a9149c",
 ];
 
 export default copyPicture;
 module.exports = copyPicture;
-
-
-

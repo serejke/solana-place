@@ -1,15 +1,15 @@
-import {Buffer} from "buffer";
-import {MAX_HEIGHT, MAX_WIDTH} from "../migrations/game-account-util";
-import {PublicKey} from "@solana/web3.js";
+import { Buffer } from "buffer";
+import { MAX_HEIGHT, MAX_WIDTH } from "../migrations/game-account-util";
+import { PublicKey } from "@solana/web3.js";
 
 type Board = {
-  authority: PublicKey,
-  state: number,
-  height: number,
-  width: number,
-  changeCost: number,
-  colors: number[]
-}
+  authority: PublicKey;
+  state: number;
+  height: number;
+  width: number;
+  changeCost: number;
+  colors: number[];
+};
 
 export function emptyBoard(
   authority: PublicKey,
@@ -24,18 +24,20 @@ export function emptyBoard(
     height,
     width,
     changeCost,
-    colors: colors
-  }
+    colors: colors,
+  };
 }
 
 export const CHANGE_COLOR_ENCODING_LENGTH = 5;
-export type ChangeColorRequest = { row: number, column: number, color: number };
+export type ChangeColorRequest = { row: number; column: number; color: number };
 
 export function encodeChangeColorRequests(
   changes: ChangeColorRequest[]
 ): Buffer {
-  const encodedChanges = Buffer.alloc(changes.length * CHANGE_COLOR_ENCODING_LENGTH);
-  changes.map(({row, column, color}, index) => {
+  const encodedChanges = Buffer.alloc(
+    changes.length * CHANGE_COLOR_ENCODING_LENGTH
+  );
+  changes.map(({ row, column, color }, index) => {
     const startIndex = index * CHANGE_COLOR_ENCODING_LENGTH;
     encodedChanges.writeUint16BE(row, startIndex);
     encodedChanges.writeUint16BE(column, startIndex + 2);

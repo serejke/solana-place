@@ -1,18 +1,25 @@
-import {AnchorProvider, Program} from "@project-serum/anchor";
-import {Keypair, PublicKey, SystemProgram, Transaction} from "@solana/web3.js";
-import {SolanaPlace} from "../target/types/solana_place";
+import { AnchorProvider, Program } from "@project-serum/anchor";
+import {
+  Keypair,
+  PublicKey,
+  SystemProgram,
+  Transaction,
+} from "@solana/web3.js";
+import { SolanaPlace } from "../target/types/solana_place";
 
 export const MAX_HEIGHT = 300;
 export const MAX_WIDTH = 500;
 
 function calculateGameAccountSpace(): number {
-  return 8 // Discriminator
-    + 32 // Authority
-    + 4 // State
-    + 2 // Height
-    + 2 // Width
-    + 4 // Change cost
-    + MAX_HEIGHT * MAX_WIDTH
+  return (
+    8 + // Discriminator
+    32 + // Authority
+    4 + // State
+    2 + // Height
+    2 + // Width
+    4 + // Change cost
+    MAX_HEIGHT * MAX_WIDTH
+  );
 }
 
 export async function createGameAccount(
@@ -28,7 +35,10 @@ export async function createGameAccount(
 
   const tx = new Transaction();
   const gameAccountSpace = calculateGameAccountSpace();
-  const rentExempt = await programProvider.connection.getMinimumBalanceForRentExemption(gameAccountSpace);
+  const rentExempt =
+    await programProvider.connection.getMinimumBalanceForRentExemption(
+      gameAccountSpace
+    );
 
   tx.add(
     SystemProgram.createAccount({
@@ -36,9 +46,9 @@ export async function createGameAccount(
       programId: program.programId,
       space: gameAccountSpace,
       lamports: rentExempt,
-      newAccountPubkey: gameKeypair.publicKey
+      newAccountPubkey: gameKeypair.publicKey,
     })
-  )
+  );
 
   await programProvider.sendAndConfirm(tx, [gameKeypair]);
 
@@ -46,10 +56,10 @@ export async function createGameAccount(
     .initializeOnly(height, width, changeCost)
     .accounts({
       gameAccount: gameKeypair.publicKey,
-      authority: gameAuthority
+      authority: gameAuthority,
     })
     .signers([gameKeypair])
-    .rpc({skipPreflight: true});
+    .rpc({ skipPreflight: true });
 
   return gameKeypair;
 }
