@@ -1,16 +1,17 @@
-import {BoardHistory} from "../model/model";
-import {sleep} from "../utils";
-import {EventsWithTransactionDetailsDto} from "../dto/eventsWithTransactionDetailsDto";
-import {parseBoardHistory} from "../dto-converter/converter";
-import {TransactionSignature} from "@solana/web3.js";
-import {serverUrl} from "./serverUrls";
-import {rethrowIfFailed} from "./requestError";
+import { BoardHistory } from "../model/model";
+import { sleep } from "../utils";
+import { EventsWithTransactionDetailsDto } from "../dto/eventsWithTransactionDetailsDto";
+import { parseBoardHistory } from "../dto-converter/converter";
+import { TransactionSignature } from "@solana/web3.js";
+import { serverUrl } from "./serverUrls";
+import { rethrowIfFailed } from "./requestError";
 
 export async function fetchTransactionEvents(
   signature: TransactionSignature
 ): Promise<BoardHistory | null> {
   while (true) {
-    const response: BoardHistory | null | "retry" = await fetchTransactionEventsOrRetry(signature);
+    const response: BoardHistory | null | "retry" =
+      await fetchTransactionEventsOrRetry(signature);
     if (response === "retry") {
       await sleep(2000);
     } else {
@@ -28,7 +29,7 @@ async function fetchTransactionEventsOrRetry(
         `${serverUrl}/api/board/changePixels/status?transactionSignature=${signature}`,
         {
           method: "GET",
-          headers: {"Content-Type": "application/json"}
+          headers: { "Content-Type": "application/json" },
         }
       )
     );
@@ -36,7 +37,8 @@ async function fetchTransactionEventsOrRetry(
       return null;
     }
     await rethrowIfFailed(response);
-    const eventsWithTransactionDetails: EventsWithTransactionDetailsDto = await response.json();
+    const eventsWithTransactionDetails: EventsWithTransactionDetailsDto =
+      await response.json();
     return parseBoardHistory(eventsWithTransactionDetails);
   } catch (err) {
     console.error("/api/board/changePixels/status failed", err);

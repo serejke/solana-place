@@ -1,1 +1,1 @@
-export type ClientPosition = { clientX: number, clientY: number };
+export type ClientPosition = { clientX: number; clientY: number };

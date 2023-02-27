@@ -1,5 +1,5 @@
-import {parseServerErrorBody} from "../dto-converter/converter";
-import {ServerErrorBodyDto} from "../dto/serverErrorBodyDto";
+import { parseServerErrorBody } from "../dto-converter/converter";
+import { ServerErrorBodyDto } from "../dto/serverErrorBodyDto";
 
 export const REQUEST_ERROR_PREFIX = "RequestError";
 

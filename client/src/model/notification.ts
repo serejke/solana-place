@@ -1,41 +1,45 @@
-import {RequestError} from "../request/requestError";
-import {TransactionSignature} from "@solana/web3.js";
+import { RequestError } from "../request/requestError";
+import { TransactionSignature } from "@solana/web3.js";
 
 export enum NotificationLevel {
-  INFO = 'INFO',
-  WARN = 'WARN',
-  SUCCESS = 'SUCCESS',
-  ERROR = 'ERROR'
+  INFO = "INFO",
+  WARN = "WARN",
+  SUCCESS = "SUCCESS",
+  ERROR = "ERROR",
 }
 
-export type NotificationContent = {
-  type: "string",
-  content: string
-} | {
-  type: "waitingForTransaction",
-  transactionSignature: TransactionSignature
-} | {
-  type: "transactionWasDropped",
-  transactionSignature: TransactionSignature,
-  timeout: number
-} | {
-  type: "maximumChangesReached",
-  limit: number
-};
+export type NotificationContent =
+  | {
+      type: "string";
+      content: string;
+    }
+  | {
+      type: "waitingForTransaction";
+      transactionSignature: TransactionSignature;
+    }
+  | {
+      type: "transactionWasDropped";
+      transactionSignature: TransactionSignature;
+      timeout: number;
+    }
+  | {
+      type: "maximumChangesReached";
+      limit: number;
+    };
 
 export type NotificationExpiration = {
-  type: "after",
-  duration: number
-}
+  type: "after";
+  duration: number;
+};
 
 export type Notification = {
-  id: string,
-  createdAt: number,
-  expiration: NotificationExpiration,
+  id: string;
+  createdAt: number;
+  expiration: NotificationExpiration;
   level: NotificationLevel;
-  title: string,
-  content: NotificationContent
-}
+  title: string;
+  content: NotificationContent;
+};
 
 let notificationId = 0;
 export function createNotificationId(): string {
@@ -44,18 +48,21 @@ export function createNotificationId(): string {
 
 export const DEFAULT_NOTIFICATION_EXPIRATION: NotificationExpiration = {
   type: "after",
-  duration: 5000
+  duration: 5000,
 };
 
-export function buildInfoNotification(title: string, notificationContent: NotificationContent): Notification {
+export function buildInfoNotification(
+  title: string,
+  notificationContent: NotificationContent
+): Notification {
   return {
     id: createNotificationId(),
     createdAt: Date.now(),
     expiration: DEFAULT_NOTIFICATION_EXPIRATION,
     title,
     level: NotificationLevel.INFO,
-    content: notificationContent
-  }
+    content: notificationContent,
+  };
 }
 
 export function buildWarnNotification(
@@ -69,19 +76,22 @@ export function buildWarnNotification(
     expiration,
     title,
     level: NotificationLevel.WARN,
-    content: notificationContent
-  }
+    content: notificationContent,
+  };
 }
 
-export function buildSuccessNotification(title: string, notificationContent: NotificationContent): Notification {
+export function buildSuccessNotification(
+  title: string,
+  notificationContent: NotificationContent
+): Notification {
   return {
     id: createNotificationId(),
     createdAt: Date.now(),
     expiration: DEFAULT_NOTIFICATION_EXPIRATION,
     title,
     level: NotificationLevel.SUCCESS,
-    content: notificationContent
-  }
+    content: notificationContent,
+  };
 }
 
 export function buildErrorNotification(title: string, e: any): Notification {
@@ -89,10 +99,14 @@ export function buildErrorNotification(title: string, e: any): Notification {
   if (e instanceof RequestError) {
     const errorBody = e.errorBody;
     if (errorBody) {
-      if (errorBody.message.includes("Attempt to debit an account but found no record of a prior credit")) {
-        details = "Your wallet has insufficient funds"
+      if (
+        errorBody.message.includes(
+          "Attempt to debit an account but found no record of a prior credit"
+        )
+      ) {
+        details = "Your wallet has insufficient funds";
       } else {
-        details = errorBody.message
+        details = errorBody.message;
       }
     } else {
       details = e.message;
@@ -100,7 +114,8 @@ export function buildErrorNotification(title: string, e: any): Notification {
   } else if (e instanceof Error) {
     details = e.message;
   } else {
-    details = "Please check the console logs and report the error to Discord https://discord.gg/eSvvbHe86R";
+    details =
+      "Please check the console logs and report the error to Discord https://discord.gg/eSvvbHe86R";
   }
   return {
     id: createNotificationId(),
@@ -110,7 +125,7 @@ export function buildErrorNotification(title: string, e: any): Notification {
     title,
     content: {
       type: "string",
-      content: details
-    }
-  }
+      content: details,
+    },
+  };
 }

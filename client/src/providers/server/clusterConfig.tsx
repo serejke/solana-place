@@ -1,20 +1,28 @@
 import React from "react";
-import {serverUrl} from "request/serverUrls";
-import {fetchClusterInfo} from "../../request/fetchClusterInfo";
-import {ClusterConfig} from "../../model/clusterConfig";
-import {ClusterConfigState, clusterConfigReducer, ConfigStatus, Dispatch} from "../../reducers/clusterConfigReducer";
+import { serverUrl } from "request/serverUrls";
+import { fetchClusterInfo } from "../../request/fetchClusterInfo";
+import { ClusterConfig } from "../../model/clusterConfig";
+import {
+  ClusterConfigState,
+  clusterConfigReducer,
+  ConfigStatus,
+  Dispatch,
+} from "../../reducers/clusterConfigReducer";
 
 const Context = React.createContext<ClusterConfigState | undefined>(undefined);
 const DispatchContext = React.createContext<Dispatch | undefined>(undefined);
 
-export function ClusterConfigProvider({children}: { children: React.ReactNode }) {
+export function ClusterConfigProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [state, dispatch] = React.useReducer(clusterConfigReducer, {
     status: ConfigStatus.Fetching,
   });
 
   React.useEffect(() => {
-    fetchClusterInfo(dispatch, serverUrl)
-      .catch(console.error);
+    fetchClusterInfo(dispatch, serverUrl).catch(console.error);
   }, []);
 
   return (
@@ -33,4 +41,3 @@ export function useClusterConfig(): ClusterConfig | undefined {
   }
   return context.config;
 }
-

@@ -1,6 +1,6 @@
-import {PixelCoordinates} from "./pixelCoordinates";
+import { PixelCoordinates } from "./pixelCoordinates";
 
 export type ChangedPixel = {
-  coordinates: PixelCoordinates,
-  newColor: number
-}
+  coordinates: PixelCoordinates;
+  newColor: number;
+};

@@ -45,7 +45,7 @@ $dashboard-icon-size: 1.75rem;
 }
 
 .board-history-table {
-  width: 100%
+  width: 100%;
 }
 
 .board-history-row {
@@ -132,7 +132,8 @@ $dashboard-icon-size: 1.75rem;
   @include dashboard-icon;
   animation-duration: 1.5s !important;
 
-  border-color: rgb(227, 227, 0) rgb(227, 227, 0) hsla(0, 0%, 0%, 0) rgb(227, 227, 0) !important;
+  border-color: rgb(227, 227, 0) rgb(227, 227, 0) hsla(0, 0%, 0%, 0)
+    rgb(227, 227, 0) !important;
 }
 
 .send-changes-icon {

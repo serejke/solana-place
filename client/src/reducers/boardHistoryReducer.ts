@@ -1,32 +1,44 @@
-import {BOARD_HISTORY_MAX_LENGTH, BoardHistory, GameEventWithTransactionDetails} from "../model/model";
+import {
+  BOARD_HISTORY_MAX_LENGTH,
+  BoardHistory,
+  GameEventWithTransactionDetails,
+} from "../model/model";
 
 type InitialBoardHistoryAction = {
-  type: "initialHistory",
-  history: BoardHistory
+  type: "initialHistory";
+  history: BoardHistory;
 };
 
 type AddHistoryEntryAction = {
-  type: "addHistoryEntry",
-  gameEventWithTransactionDetails: GameEventWithTransactionDetails
+  type: "addHistoryEntry";
+  gameEventWithTransactionDetails: GameEventWithTransactionDetails;
 };
 
-export type BoardHistoryAction = InitialBoardHistoryAction | AddHistoryEntryAction;
+export type BoardHistoryAction =
+  | InitialBoardHistoryAction
+  | AddHistoryEntryAction;
 
 export type BoardHistoryDispatch = (action: BoardHistoryAction) => void;
 
-export function boardHistoryReducer(state: BoardHistory, action: BoardHistoryAction): BoardHistory {
+export function boardHistoryReducer(
+  state: BoardHistory,
+  action: BoardHistoryAction
+): BoardHistory {
   switch (action.type) {
     case "initialHistory": {
       const allEvents = [...action.history.events];
-      allEvents.sort((event1, event2) => -compareGameEvent(event1, event2))
+      allEvents.sort((event1, event2) => -compareGameEvent(event1, event2));
       const events = deduplicateEvents(allEvents);
-      return {events};
+      return { events };
     }
     case "addHistoryEntry":
-      const allEvents = [action.gameEventWithTransactionDetails, ...state.events];
-      allEvents.sort((event1, event2) => -compareGameEvent(event1, event2))
+      const allEvents = [
+        action.gameEventWithTransactionDetails,
+        ...state.events,
+      ];
+      allEvents.sort((event1, event2) => -compareGameEvent(event1, event2));
       const events = deduplicateEvents(allEvents);
-      return {events};
+      return { events };
   }
 }
 
@@ -41,9 +53,11 @@ function deduplicateEvents(events: GameEventWithTransactionDetails[]) {
   const result: GameEventWithTransactionDetails[] = [];
   for (const event of events) {
     const lastEvent = result.length > 0 ? result[result.length - 1] : null;
-    if (lastEvent === null
-      || lastEvent.transactionDetails.signature !== event.transactionDetails.signature
-      || lastEvent.event.state !== event.event.state
+    if (
+      lastEvent === null ||
+      lastEvent.transactionDetails.signature !==
+        event.transactionDetails.signature ||
+      lastEvent.event.state !== event.event.state
     ) {
       result.push(event);
     }
@@ -54,12 +68,15 @@ function deduplicateEvents(events: GameEventWithTransactionDetails[]) {
   return result;
 }
 
-function compareGameEvent(event1: GameEventWithTransactionDetails, event2: GameEventWithTransactionDetails): number {
+function compareGameEvent(
+  event1: GameEventWithTransactionDetails,
+  event2: GameEventWithTransactionDetails
+): number {
   const details1 = event1.transactionDetails;
   const details2 = event2.transactionDetails;
   const byTimestamp = compareNumbers(details1.timestamp, details2.timestamp);
   if (byTimestamp !== 0) {
-    return byTimestamp
+    return byTimestamp;
   }
   return compareNumbers(event1.event.state, event2.event.state);
 }

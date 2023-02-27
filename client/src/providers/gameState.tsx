@@ -1,12 +1,9 @@
 import React from "react";
 
-import {useClusterConfig} from "providers/server/clusterConfig";
-import {useBoardState} from "./board/boardState";
+import { useClusterConfig } from "providers/server/clusterConfig";
+import { useBoardState } from "./board/boardState";
 
-export type GameStateLoadingPhase =
-  | "config"
-  | "initial-state"
-  | "complete";
+export type GameStateLoadingPhase = "config" | "initial-state" | "complete";
 
 export interface GameState {
   loadingPhase: GameStateLoadingPhase;
@@ -24,7 +21,10 @@ export function GameStateProvider({ children }: Props) {
     return "complete";
   }, [clusterConfig, boardState]);
 
-  const gameState: GameState = React.useMemo(() => ({ loadingPhase }), [loadingPhase]);
+  const gameState: GameState = React.useMemo(
+    () => ({ loadingPhase }),
+    [loadingPhase]
+  );
 
   return (
     <GameStateContext.Provider value={gameState}>

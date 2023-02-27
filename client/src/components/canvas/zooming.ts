@@ -1,4 +1,4 @@
-import {ZoomingState} from "../../providers/zooming/zooming";
+import { ZoomingState } from "../../providers/zooming/zooming";
 
 export function scaleCanvas(
   canvasNode: HTMLCanvasElement,
@@ -6,7 +6,7 @@ export function scaleCanvas(
 ) {
   const ctx = canvasNode.getContext("2d");
   if (!ctx) return;
-  const {zoom, canvasSize, canvasTranslateX, canvasTranslateY} = zoomingState
+  const { zoom, canvasSize, canvasTranslateX, canvasTranslateY } = zoomingState;
   canvasNode.width = canvasSize.width;
   canvasNode.height = canvasSize.height;
   ctx.setTransform({
@@ -15,6 +15,6 @@ export function scaleCanvas(
     c: 0,
     d: zoom,
     e: canvasTranslateX,
-    f: canvasTranslateY
-  })
+    f: canvasTranslateY,
+  });
 }

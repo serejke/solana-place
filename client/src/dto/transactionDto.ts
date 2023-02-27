@@ -1,21 +1,24 @@
-export type TransactionConfirmationDto = "processed" | "confirmed" | "finalized";
+export type TransactionConfirmationDto =
+  | "processed"
+  | "confirmed"
+  | "finalized";
 
 export type TransactionDetailsDto = {
-  signature: string,
-  sender: string,
-  timestamp: number,
-  confirmation: TransactionConfirmationDto
-}
+  signature: string;
+  sender: string;
+  timestamp: number;
+  confirmation: TransactionConfirmationDto;
+};
 
 export type CreateTransactionRequestDto<T> = {
-  feePayer: string,
-  data: T
-}
+  feePayer: string;
+  data: T;
+};
 
 export type SerializedMessageDto = {
-  messageBase58: string
-}
+  messageBase58: string;
+};
 
 export type SerializedTransactionDto = {
-  transactionBase58: string
-}
+  transactionBase58: string;
+};

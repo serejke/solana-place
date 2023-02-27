@@ -1,4 +1,5 @@
-import {PixelsChangedEventDto} from "./pixelsChangedEventDto";
+import { PixelsChangedEventDto } from "./pixelsChangedEventDto";
 
-export type EventWithTypeDto =
-  { type: "pixelsChangedEvent" } & PixelsChangedEventDto;
+export type EventWithTypeDto = {
+  type: "pixelsChangedEvent";
+} & PixelsChangedEventDto;

@@ -1,38 +1,46 @@
-import React, {useReducer} from "react";
-import {CanvasPosition, CanvasSize, CanvasStyle, ClientPositionInCanvas} from "../../components/canvas/types";
+import React, { useReducer } from "react";
+import {
+  CanvasPosition,
+  CanvasSize,
+  CanvasStyle,
+  ClientPositionInCanvas,
+} from "../../components/canvas/types";
 
 export type ZoomingState = {
-  canvasSize: CanvasSize,
-  canvasStyle: CanvasStyle,
-  zoom: number,
-  zoomPivot: ZoomPivot,
-  canvasTranslateX: number,
-  canvasTranslateY: number
-}
+  canvasSize: CanvasSize;
+  canvasStyle: CanvasStyle;
+  zoom: number;
+  zoomPivot: ZoomPivot;
+  canvasTranslateX: number;
+  canvasTranslateY: number;
+};
 
-const ZERO_ZOOM_PIVOT: ZoomPivot = {x: 0, y: 0, clientX: 0, clientY: 0}
+const ZERO_ZOOM_PIVOT: ZoomPivot = { x: 0, y: 0, clientX: 0, clientY: 0 };
 
 type CanvasInstalledAction = {
-  "type": "canvasInstalled",
-  canvasSize: CanvasSize,
-  canvasStyle: CanvasStyle
-}
+  type: "canvasInstalled";
+  canvasSize: CanvasSize;
+  canvasStyle: CanvasStyle;
+};
 
 type ZoomInOurOutAction = {
-  "type": "zoom",
-  pivot: ZoomPivot,
-  inOurOut: "in" | "out"
-}
+  type: "zoom";
+  pivot: ZoomPivot;
+  inOurOut: "in" | "out";
+};
 
 type ZoomingAction = CanvasInstalledAction | ZoomInOurOutAction;
 
-function zoomingReducer(state: ZoomingState, action: ZoomingAction): ZoomingState {
+function zoomingReducer(
+  state: ZoomingState,
+  action: ZoomingAction
+): ZoomingState {
   switch (action.type) {
     case "canvasInstalled":
       return {
         ...state,
         canvasStyle: action.canvasStyle,
-        canvasSize: action.canvasSize
+        canvasSize: action.canvasSize,
       };
     case "zoom":
       const zoom = state.zoom;
@@ -46,15 +54,21 @@ function zoomingReducer(state: ZoomingState, action: ZoomingAction): ZoomingStat
       if (newZoom !== zoom) {
         const newZoomPivot = newZoom === 1 ? ZERO_ZOOM_PIVOT : action.pivot;
         const k = state.canvasSize.width / state.canvasStyle.width;
-        const canvasTranslateX = Math.min(0, k * newZoomPivot.clientX - newZoom * newZoomPivot.x);
-        const canvasTranslateY = Math.min(0, k * newZoomPivot.clientY - newZoom * newZoomPivot.y);
+        const canvasTranslateX = Math.min(
+          0,
+          k * newZoomPivot.clientX - newZoom * newZoomPivot.x
+        );
+        const canvasTranslateY = Math.min(
+          0,
+          k * newZoomPivot.clientY - newZoom * newZoomPivot.y
+        );
         return {
           ...state,
           zoom: newZoom,
           zoomPivot: newZoomPivot,
           canvasTranslateX,
-          canvasTranslateY
-        }
+          canvasTranslateY,
+        };
       }
       return state;
   }
@@ -65,15 +79,22 @@ const Context = React.createContext<State | undefined>(undefined);
 
 const DEFAULT_ZOOMING_STATE: ZoomingState = {
   zoom: 1.0,
-  canvasSize: {height: 0, width: 0},
-  canvasStyle: {height: 0, width: 0},
+  canvasSize: { height: 0, width: 0 },
+  canvasStyle: { height: 0, width: 0 },
   canvasTranslateX: 0,
   canvasTranslateY: 0,
   zoomPivot: ZERO_ZOOM_PIVOT,
 };
 
-export function ZoomingStateProvider({children}: { children: React.ReactNode }) {
-  const [zoomingState, zoomingDispatch] = useReducer(zoomingReducer, DEFAULT_ZOOMING_STATE);
+export function ZoomingStateProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [zoomingState, zoomingDispatch] = useReducer(
+    zoomingReducer,
+    DEFAULT_ZOOMING_STATE
+  );
   return (
     <Context.Provider value={[zoomingState, zoomingDispatch]}>
       {children}
@@ -90,4 +111,7 @@ export function useZooming(): [ZoomingState, React.Dispatch<ZoomingAction>] {
 }
 
 export type ZoomPivot = CanvasPosition & ClientPositionInCanvas;
-const ZOOMING_OPTIONS = [1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.25, 4.5, 4.75, 5, 5.25, 5.5, 5.75, 6, 6.25, 6.5, 6.75, 7, 7.25, 7.5, 7.75, 8];
+const ZOOMING_OPTIONS = [
+  1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.25, 4.5,
+  4.75, 5, 5.25, 5.5, 5.75, 6, 6.25, 6.5, 6.75, 7, 7.25, 7.5, 7.75, 8,
+];

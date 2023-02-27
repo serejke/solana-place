@@ -1,12 +1,13 @@
-import {sleep} from "utils";
-import {PublicKey} from "@solana/web3.js";
-import {Action, ConfigStatus, Dispatch} from "../reducers/clusterConfigReducer";
-import {rethrowIfFailed} from "./requestError";
+import { sleep } from "utils";
+import { PublicKey } from "@solana/web3.js";
+import {
+  Action,
+  ConfigStatus,
+  Dispatch,
+} from "../reducers/clusterConfigReducer";
+import { rethrowIfFailed } from "./requestError";
 
-export async function fetchClusterInfo(
-  dispatch: Dispatch,
-  serverUrl: string
-) {
+export async function fetchClusterInfo(dispatch: Dispatch, serverUrl: string) {
   dispatch({
     status: ConfigStatus.Fetching,
   });
@@ -22,18 +23,22 @@ export async function fetchClusterInfo(
   }
 }
 
-async function fetchClusterInfoOrRetry(httpUrl: string): Promise<Action | "retry"> {
+async function fetchClusterInfoOrRetry(
+  httpUrl: string
+): Promise<Action | "retry"> {
   try {
     const response = await fetch(
       new Request(httpUrl + "/api/init", {
         method: "GET",
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json" },
       })
     );
     await rethrowIfFailed(response);
     const data = await response.json();
     if (!("cluster" in data) || !("programId" in data)) {
-      console.error(`/api/init failed because of invalid response ${JSON.stringify(data)}`)
+      console.error(
+        `/api/init failed because of invalid response ${JSON.stringify(data)}`
+      );
       return "retry";
     }
 
@@ -42,7 +47,7 @@ async function fetchClusterInfoOrRetry(httpUrl: string): Promise<Action | "retry
       config: {
         cluster: data.cluster,
         programId: new PublicKey(data.programId),
-        gameAccount: new PublicKey(data.gameAccount)
+        gameAccount: new PublicKey(data.gameAccount),
       },
     };
   } catch (err) {

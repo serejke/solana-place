@@ -1,14 +1,17 @@
-import {CanvasEvent, CanvasPosition, ClientPositionInCanvas} from "./types";
-import {PixelCoordinates} from "../../model/pixelCoordinates";
-import {ZoomingState} from "../../providers/zooming/zooming";
+import { CanvasEvent, CanvasPosition, ClientPositionInCanvas } from "./types";
+import { PixelCoordinates } from "../../model/pixelCoordinates";
+import { ZoomingState } from "../../providers/zooming/zooming";
 
 export const PIXEL_SIZE = 4;
 
-export function getPixelCoordinates({x, y}: CanvasPosition): PixelCoordinates {
+export function getPixelCoordinates({
+  x,
+  y,
+}: CanvasPosition): PixelCoordinates {
   return {
     row: Math.floor(y / PIXEL_SIZE),
-    column: Math.floor(x / PIXEL_SIZE)
-  }
+    column: Math.floor(x / PIXEL_SIZE),
+  };
 }
 
 export function getCanvasPosition(
@@ -20,12 +23,13 @@ export function getCanvasPosition(
   if (!clientPositionInCanvas) {
     return undefined;
   }
-  const {clientX, clientY} = clientPositionInCanvas;
-  const {canvasTranslateX, canvasTranslateY, canvasSize, canvasStyle} = zoomingState;
+  const { clientX, clientY } = clientPositionInCanvas;
+  const { canvasTranslateX, canvasTranslateY, canvasSize, canvasStyle } =
+    zoomingState;
   const k = canvasSize.width / canvasStyle.width;
   const x = (k * clientX - canvasTranslateX) / zoomingState.zoom;
   const y = (k * clientY - canvasTranslateY) / zoomingState.zoom;
-  return {x, y};
+  return { x, y };
 }
 
 export function getEventClientPositionInCanvas(
@@ -38,23 +42,27 @@ export function getEventClientPositionInCanvas(
   }
   const clientX = event.clientX - rect.left;
   const clientY = event.clientY - rect.top;
-  return {clientX, clientY};
+  return { clientX, clientY };
 }
 
 export function getClientPositionInCanvasByCanvasPosition(
   canvasPosition: CanvasPosition,
   zoomingState: ZoomingState
 ): ClientPositionInCanvas {
-  const {zoom, canvasTranslateX, canvasTranslateY, canvasSize, canvasStyle} = zoomingState;
+  const { zoom, canvasTranslateX, canvasTranslateY, canvasSize, canvasStyle } =
+    zoomingState;
   const k = canvasSize.width / canvasStyle.width;
   const clientX = (canvasPosition.x * zoom + canvasTranslateX) / k;
   const clientY = (canvasPosition.y * zoom + canvasTranslateY) / k;
-  return {clientX, clientY};
+  return { clientX, clientY };
 }
 
-export function getPixelBeginningCanvasPosition({row, column}: PixelCoordinates): CanvasPosition {
+export function getPixelBeginningCanvasPosition({
+  row,
+  column,
+}: PixelCoordinates): CanvasPosition {
   return {
     x: column * PIXEL_SIZE,
     y: row * PIXEL_SIZE,
-  }
+  };
 }

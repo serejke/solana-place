@@ -1,15 +1,21 @@
 import * as React from "react";
-import {websocketUrl} from "../../request/serverUrls";
+import { websocketUrl } from "../../request/serverUrls";
 
 type SetSocket = React.Dispatch<React.SetStateAction<ServerSocket | undefined>>;
 const SocketContext = React.createContext<WebSocket | undefined>(undefined);
 
 type SocketMessageHandler = (data: any) => void;
-type SetSocketMessageHandlers = React.Dispatch<React.SetStateAction<SocketMessageHandler[]>>;
-const SocketMessageHandlersContext = React.createContext<[SocketMessageHandler[], SetSocketMessageHandlers] | undefined>(undefined);
+type SetSocketMessageHandlers = React.Dispatch<
+  React.SetStateAction<SocketMessageHandler[]>
+>;
+const SocketMessageHandlersContext = React.createContext<
+  [SocketMessageHandler[], SetSocketMessageHandlers] | undefined
+>(undefined);
 
 type FailureCallback = (signature: string, reason: string) => void;
-const FailureCallbackContext = React.createContext<React.MutableRefObject<FailureCallback> | undefined>(undefined);
+const FailureCallbackContext = React.createContext<
+  React.MutableRefObject<FailureCallback> | undefined
+>(undefined);
 
 type SetActiveUsers = React.Dispatch<React.SetStateAction<number>>;
 const ActiveUsersContext = React.createContext<number | undefined>(undefined);
@@ -25,15 +31,24 @@ let socketCounter = 0;
 
 type SocketProviderProps = { children: React.ReactNode };
 
-export function WebSocketProvider({children}: SocketProviderProps) {
-  const [socket, setSocket] = React.useState<ServerSocket | undefined>(undefined);
-  const [socketMessageHandlers, setSocketMessageHandlers] = React.useState<SocketMessageHandler[]>([]);
-  const failureCallbackRef = React.useRef(() => {
-  });
+export function WebSocketProvider({ children }: SocketProviderProps) {
+  const [socket, setSocket] = React.useState<ServerSocket | undefined>(
+    undefined
+  );
+  const [socketMessageHandlers, setSocketMessageHandlers] = React.useState<
+    SocketMessageHandler[]
+  >([]);
+  const failureCallbackRef = React.useRef(() => {});
   const [activeUsers, setActiveUsers] = React.useState<number>(1);
 
   React.useEffect(() => {
-    newSocket(websocketUrl, setSocket, setActiveUsers, socketMessageHandlers, failureCallbackRef);
+    newSocket(
+      websocketUrl,
+      setSocket,
+      setActiveUsers,
+      socketMessageHandlers,
+      failureCallbackRef
+    );
   }, [setSocket, setActiveUsers, socketMessageHandlers, failureCallbackRef]);
 
   React.useEffect(() => {
@@ -43,13 +58,15 @@ export function WebSocketProvider({children}: SocketProviderProps) {
         if ("activeUsers" in data) {
           setActiveUsers(data.activeUsers);
         }
-      }
-    ])
-  }, [setSocketMessageHandlers, setActiveUsers])
+      },
+    ]);
+  }, [setSocketMessageHandlers, setActiveUsers]);
 
   return (
     <SocketContext.Provider value={socket?.socket}>
-      <SocketMessageHandlersContext.Provider value={[socketMessageHandlers, setSocketMessageHandlers]}>
+      <SocketMessageHandlersContext.Provider
+        value={[socketMessageHandlers, setSocketMessageHandlers]}
+      >
         <ActiveUsersContext.Provider value={activeUsers}>
           <FailureCallbackContext.Provider value={failureCallbackRef}>
             {children}
@@ -83,7 +100,7 @@ function newSocket(
         if (serverSocket && serverSocket.socket.readyState === WebSocket.OPEN) {
           serverSocket.socket.close(SWITCH_URL_CODE);
         }
-        return {socket, id};
+        return { socket, id };
       } else {
         socket.close(SWITCH_URL_CODE);
         return serverSocket;
@@ -94,7 +111,7 @@ function newSocket(
     const data = JSON.parse(e.data);
     socketMessageHandlers.forEach((handler) => {
       handler(data);
-    })
+    });
   };
 
   socket.onclose = async (event) => {
@@ -144,11 +161,19 @@ export function useActiveUsers(): number {
 export function useAddSocketMessageHandler(handler: SocketMessageHandler) {
   const context = React.useContext(SocketMessageHandlersContext);
   if (!context) {
-    throw new Error(`useSocketMessageHandlers must be used within a SocketMessageHandlersContext`);
+    throw new Error(
+      `useSocketMessageHandlers must be used within a SocketMessageHandlersContext`
+    );
   }
   const setSocketMessageHandlers = context[1];
   React.useEffect(() => {
-    setSocketMessageHandlers((previousHandlers) => [...previousHandlers, handler])
-    return () => setSocketMessageHandlers((previousHandlers) => previousHandlers.filter(h => h !== handler));
+    setSocketMessageHandlers((previousHandlers) => [
+      ...previousHandlers,
+      handler,
+    ]);
+    return () =>
+      setSocketMessageHandlers((previousHandlers) =>
+        previousHandlers.filter((h) => h !== handler)
+      );
   }, [setSocketMessageHandlers, handler]);
 }

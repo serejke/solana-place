@@ -1,25 +1,36 @@
-import {useBoardState} from "../../providers/board/boardState";
-import React, {MutableRefObject, useRef, useState} from "react";
-import {CHANGED_COLOR, getColorByIndex, HIGHLIGHTED_COLOR, PENDING_COLOR} from "../../utils/colorUtils";
-import {useBoardConfig} from "../../providers/board/boardConfig";
-import {BoardState, isWithinBounds} from "../../model/boardState";
-import {useHighlightedPixel} from "../../providers/board/highlightedPixel";
-import {PixelCoordinates} from "../../model/pixelCoordinates";
-import {usePendingTransaction} from "../../providers/transactions/pendingTransaction";
-import {useCurrentPixelColorState} from "../../providers/color/currentColor";
-import {useZooming, ZoomPivot} from "../../providers/zooming/zooming";
-import {CanvasCallback} from "./types";
+import { useBoardState } from "../../providers/board/boardState";
+import React, { MutableRefObject, useRef, useState } from "react";
+import {
+  CHANGED_COLOR,
+  getColorByIndex,
+  HIGHLIGHTED_COLOR,
+  PENDING_COLOR,
+} from "../../utils/colorUtils";
+import { useBoardConfig } from "../../providers/board/boardConfig";
+import { BoardState, isWithinBounds } from "../../model/boardState";
+import { useHighlightedPixel } from "../../providers/board/highlightedPixel";
+import { PixelCoordinates } from "../../model/pixelCoordinates";
+import { usePendingTransaction } from "../../providers/transactions/pendingTransaction";
+import { useCurrentPixelColorState } from "../../providers/color/currentColor";
+import { useZooming, ZoomPivot } from "../../providers/zooming/zooming";
+import { CanvasCallback } from "./types";
 import {
   getClientPositionInCanvasByCanvasPosition,
   getPixelBeginningCanvasPosition,
   getPixelCoordinates,
-  PIXEL_SIZE
+  PIXEL_SIZE,
 } from "./position";
-import {clearPixel, drawBoard, drawGrid, drawPixel, highlightPixel} from "./drawing";
-import {useCanvasCallback} from "./useCanvasCallback";
-import {scaleCanvas} from "./zooming";
-import {useColorPickerStateAndActions} from "../../providers/color/colorPicker";
-import {useChangeOrCancelPixel} from "./useChangeOrCancelPixel";
+import {
+  clearPixel,
+  drawBoard,
+  drawGrid,
+  drawPixel,
+  highlightPixel,
+} from "./drawing";
+import { useCanvasCallback } from "./useCanvasCallback";
+import { scaleCanvas } from "./zooming";
+import { useColorPickerStateAndActions } from "../../providers/color/colorPicker";
+import { useChangeOrCancelPixel } from "./useChangeOrCancelPixel";
 
 export function GameCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -27,15 +38,15 @@ export function GameCanvas() {
   const canvasHelperRef = useRef<HTMLCanvasElement>(null);
 
   const boardState = useBoardState();
-  const {showGrid, isHighlightChangedPixels} = useBoardConfig();
+  const { showGrid, isHighlightChangedPixels } = useBoardConfig();
   const [zoomingState, zoomingDispatch] = useZooming();
 
   const [hoveredPixel, setHoveredPixel] = useState<PixelCoordinates>();
   const [isDrawingMode, setIsDrawingMode] = useState(false);
-  const {pendingTransaction} = usePendingTransaction();
+  const { pendingTransaction } = usePendingTransaction();
   const isPendingTransaction = pendingTransaction !== null;
 
-  const {openColorPicker, closeColorPicker} = useColorPickerStateAndActions();
+  const { openColorPicker, closeColorPicker } = useColorPickerStateAndActions();
   const changeOrCancelPixel = useChangeOrCancelPixel();
 
   // Used for optimization.
@@ -48,79 +59,137 @@ export function GameCanvas() {
   useCanvasResizeEffect([canvasRef, canvasGridRef, canvasHelperRef]);
   useDrawBoardEffect(canvasRef, currentBoardState);
   useDrawGridEffect(canvasGridRef);
-  useDrawHoveredAndHighlightedAndChangedPixelsEffect(canvasHelperRef, hoveredPixel, isHighlightChangedPixels);
+  useDrawHoveredAndHighlightedAndChangedPixelsEffect(
+    canvasHelperRef,
+    hoveredPixel,
+    isHighlightChangedPixels
+  );
 
-  const onOpenColorPickerCallback: CanvasCallback = React.useCallback(({canvasPosition, event}) => {
-    const pixelCoordinates = getPixelCoordinates(canvasPosition);
-    if (!boardState || !isWithinBounds(boardState, pixelCoordinates.row, pixelCoordinates.column)) return;
-    openColorPicker({
-      pixelCoordinates,
-      popupPosition: {
-        clientX: event.clientX,
-        clientY: event.clientY
-      }
-    })
-  }, [boardState, openColorPicker]);
-
-  const onMouseMoveCallback: CanvasCallback = React.useCallback(({canvasPosition}) => {
-    const pixelCoordinates = getPixelCoordinates(canvasPosition);
-    if (!boardState || !isWithinBounds(boardState, pixelCoordinates.row, pixelCoordinates.column)) return;
-    if (!isDrawingMode || isPendingTransaction) {
-      setHoveredPixel(pixelCoordinates);
-      return;
-    }
-    changeOrCancelPixel(pixelCoordinates, isDrawingMode);
-  }, [
-    boardState,
-    setHoveredPixel,
-    isDrawingMode,
-    isPendingTransaction,
-    changeOrCancelPixel
-  ]);
-
-  const zoomInOrOut = React.useCallback((isZoomInOrOut: "in" | "out" | undefined) => {
-    if (!hoveredPixel) return;
-    const canvasPosition = getPixelBeginningCanvasPosition(hoveredPixel);
-    const clientPositionInCanvas = getClientPositionInCanvasByCanvasPosition(canvasPosition, zoomingState);
-    if (!clientPositionInCanvas) return;
-    const newPivot: ZoomPivot = {...canvasPosition, ...clientPositionInCanvas};
-    if (isZoomInOrOut !== undefined) {
-      zoomingDispatch({
-        type: "zoom",
-        pivot: newPivot,
-        inOurOut: isZoomInOrOut
+  const onOpenColorPickerCallback: CanvasCallback = React.useCallback(
+    ({ canvasPosition, event }) => {
+      const pixelCoordinates = getPixelCoordinates(canvasPosition);
+      if (
+        !boardState ||
+        !isWithinBounds(
+          boardState,
+          pixelCoordinates.row,
+          pixelCoordinates.column
+        )
+      )
+        return;
+      openColorPicker({
+        pixelCoordinates,
+        popupPosition: {
+          clientX: event.clientX,
+          clientY: event.clientY,
+        },
       });
-    }
-  }, [hoveredPixel, zoomingState, zoomingDispatch])
+    },
+    [boardState, openColorPicker]
+  );
 
-  const onMouseWheelCallback: CanvasCallback = React.useCallback(({event}) => {
-    const deltaY = event.deltaY;
-    if (!deltaY) return;
-    if (deltaY > 0) {
-      zoomInOrOut("in");
-    } else if (deltaY < 0) {
-      zoomInOrOut("out");
-    }
-  }, [zoomInOrOut]);
+  const onMouseMoveCallback: CanvasCallback = React.useCallback(
+    ({ canvasPosition }) => {
+      const pixelCoordinates = getPixelCoordinates(canvasPosition);
+      if (
+        !boardState ||
+        !isWithinBounds(
+          boardState,
+          pixelCoordinates.row,
+          pixelCoordinates.column
+        )
+      )
+        return;
+      if (!isDrawingMode || isPendingTransaction) {
+        setHoveredPixel(pixelCoordinates);
+        return;
+      }
+      changeOrCancelPixel(pixelCoordinates, isDrawingMode);
+    },
+    [
+      boardState,
+      setHoveredPixel,
+      isDrawingMode,
+      isPendingTransaction,
+      changeOrCancelPixel,
+    ]
+  );
 
-  const onMouseDownCallback: CanvasCallback = React.useCallback(({canvasPosition}) => {
-    closeColorPicker();
-    const pixelCoordinates = getPixelCoordinates(canvasPosition);
-    if (!boardState || !isWithinBounds(boardState, pixelCoordinates.row, pixelCoordinates.column)) return;
-    changeOrCancelPixel(pixelCoordinates, false);
-    setIsDrawingMode(true);
-  }, [setIsDrawingMode, boardState, changeOrCancelPixel, closeColorPicker]);
+  const zoomInOrOut = React.useCallback(
+    (isZoomInOrOut: "in" | "out" | undefined) => {
+      if (!hoveredPixel) return;
+      const canvasPosition = getPixelBeginningCanvasPosition(hoveredPixel);
+      const clientPositionInCanvas = getClientPositionInCanvasByCanvasPosition(
+        canvasPosition,
+        zoomingState
+      );
+      if (!clientPositionInCanvas) return;
+      const newPivot: ZoomPivot = {
+        ...canvasPosition,
+        ...clientPositionInCanvas,
+      };
+      if (isZoomInOrOut !== undefined) {
+        zoomingDispatch({
+          type: "zoom",
+          pivot: newPivot,
+          inOurOut: isZoomInOrOut,
+        });
+      }
+    },
+    [hoveredPixel, zoomingState, zoomingDispatch]
+  );
 
-  const onZoomKeyDown = React.useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.code === "Equal" || e.code === "Plus") {
-      zoomInOrOut("in");
-    } else if (e.code === "Minus") {
-      zoomInOrOut("out");
-    }
-  }, [zoomInOrOut]);
+  const onMouseWheelCallback: CanvasCallback = React.useCallback(
+    ({ event }) => {
+      const deltaY = event.deltaY;
+      if (!deltaY) return;
+      if (deltaY > 0) {
+        zoomInOrOut("in");
+      } else if (deltaY < 0) {
+        zoomInOrOut("out");
+      }
+    },
+    [zoomInOrOut]
+  );
 
-  const onDoubleClick = useCanvasCallback(onOpenColorPickerCallback, zoomingState);
-  const onContextMenu = useCanvasCallback(onOpenColorPickerCallback, zoomingState);
+  const onMouseDownCallback: CanvasCallback = React.useCallback(
+    ({ canvasPosition }) => {
+      closeColorPicker();
+      const pixelCoordinates = getPixelCoordinates(canvasPosition);
+      if (
+        !boardState ||
+        !isWithinBounds(
+          boardState,
+          pixelCoordinates.row,
+          pixelCoordinates.column
+        )
+      )
+        return;
+      changeOrCancelPixel(pixelCoordinates, false);
+      setIsDrawingMode(true);
+    },
+    [setIsDrawingMode, boardState, changeOrCancelPixel, closeColorPicker]
+  );
+
+  const onZoomKeyDown = React.useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (e.code === "Equal" || e.code === "Plus") {
+        zoomInOrOut("in");
+      } else if (e.code === "Minus") {
+        zoomInOrOut("out");
+      }
+    },
+    [zoomInOrOut]
+  );
+
+  const onDoubleClick = useCanvasCallback(
+    onOpenColorPickerCallback,
+    zoomingState
+  );
+  const onContextMenu = useCanvasCallback(
+    onOpenColorPickerCallback,
+    zoomingState
+  );
   const onMouseMove = useCanvasCallback(onMouseMoveCallback, zoomingState);
   const onMouseWheel = useCanvasCallback(onMouseWheelCallback, zoomingState);
   const onMouseDown = useCanvasCallback(onMouseDownCallback, zoomingState);
@@ -132,7 +201,7 @@ export function GameCanvas() {
   React.useEffect(() => {
     // Focus the game-stage to enable the onKeyDown event listener on rendering.
     gameStageRef.current!.focus();
-  }, [])
+  }, []);
 
   return (
     <div
@@ -167,7 +236,9 @@ export function GameCanvas() {
   );
 }
 
-function useCanvasResizeEffect(canvasRefs: MutableRefObject<HTMLCanvasElement | null>[]) {
+function useCanvasResizeEffect(
+  canvasRefs: MutableRefObject<HTMLCanvasElement | null>[]
+) {
   const boardState = useBoardState();
   const [zoomingState, zoomingDispatch] = useZooming();
   React.useEffect(() => {
@@ -179,26 +250,30 @@ function useCanvasResizeEffect(canvasRefs: MutableRefObject<HTMLCanvasElement | 
       let canvasStyle;
       if (innerWidth > innerHeight) {
         const height = Math.floor(innerHeight * styleProportion);
-        const width = Math.floor(height * boardState.width / boardState.height);
-        canvasStyle = {width, height};
+        const width = Math.floor(
+          (height * boardState.width) / boardState.height
+        );
+        canvasStyle = { width, height };
       } else {
         const width = Math.floor(innerWidth * styleProportion);
-        const height = Math.floor(width * boardState.height / boardState.width);
-        canvasStyle = {width, height};
+        const height = Math.floor(
+          (width * boardState.height) / boardState.width
+        );
+        canvasStyle = { width, height };
       }
       const canvasSize = {
         width: boardState.width * PIXEL_SIZE,
-        height: boardState.height * PIXEL_SIZE
+        height: boardState.height * PIXEL_SIZE,
       };
       zoomingDispatch({
         type: "canvasInstalled",
         canvasSize,
-        canvasStyle
+        canvasStyle,
       });
     };
     resizeListener();
-    window.addEventListener("resize", resizeListener)
-    return () => window.removeEventListener("resize", resizeListener)
+    window.addEventListener("resize", resizeListener);
+    return () => window.removeEventListener("resize", resizeListener);
   }, [boardState?.width, boardState?.height, zoomingDispatch]);
 
   // Resize and zoom canvas and translate origin according to the zooming state.
@@ -211,13 +286,15 @@ function useCanvasResizeEffect(canvasRefs: MutableRefObject<HTMLCanvasElement | 
   }, [zoomingState]);
 }
 
-function useCanvas2DContext(canvasRef: MutableRefObject<HTMLCanvasElement | null>): CanvasRenderingContext2D | undefined {
+function useCanvas2DContext(
+  canvasRef: MutableRefObject<HTMLCanvasElement | null>
+): CanvasRenderingContext2D | undefined {
   const isCanvasSet = canvasRef.current !== null;
   return React.useMemo(() => {
     return canvasRef.current?.getContext("2d")!;
     // Do not depend on the HTMLCanvasElement.
     //  eslint-disable-next-line
-  }, [isCanvasSet])
+  }, [isCanvasSet]);
 }
 
 function useDrawBoardEffect(
@@ -235,7 +312,9 @@ function useDrawBoardEffect(
   }, [boardState, zoomingState, canvasCtx, currentBoardState]);
 }
 
-function useDrawGridEffect(canvasGridRef: MutableRefObject<HTMLCanvasElement | null>) {
+function useDrawGridEffect(
+  canvasGridRef: MutableRefObject<HTMLCanvasElement | null>
+) {
   const boardState = useBoardState();
   const zoomingState = useZooming()[0];
   const canvasGridCtx = useCanvas2DContext(canvasGridRef);
@@ -253,7 +332,7 @@ function useDrawHoveredAndHighlightedAndChangedPixelsEffect(
   hoveredPixel: PixelCoordinates | undefined,
   isHighlightChangedPixels: boolean
 ) {
-  const {pendingTransaction, changedPixels} = usePendingTransaction();
+  const { pendingTransaction, changedPixels } = usePendingTransaction();
   const currentPixelColor = useCurrentPixelColorState()[0];
   const isPendingTransaction = pendingTransaction != null;
   const zoomingState = useZooming()[0];
@@ -263,14 +342,22 @@ function useDrawHoveredAndHighlightedAndChangedPixelsEffect(
   React.useEffect(() => {
     if (!canvasHelperCtx) return;
     if (highlightedPixel) {
-      highlightPixel(canvasHelperCtx, highlightedPixel.pixelCoordinates, HIGHLIGHTED_COLOR);
+      highlightPixel(
+        canvasHelperCtx,
+        highlightedPixel.pixelCoordinates,
+        HIGHLIGHTED_COLOR
+      );
     }
     if (changedPixels) {
       changedPixels.forEach((changedPixel) => {
         const colorByIndex = getColorByIndex(changedPixel.newColor);
         drawPixel(canvasHelperCtx, changedPixel.coordinates, colorByIndex);
         if (isPendingTransaction || isHighlightChangedPixels) {
-          highlightPixel(canvasHelperCtx, changedPixel.coordinates, isPendingTransaction ? PENDING_COLOR : CHANGED_COLOR);
+          highlightPixel(
+            canvasHelperCtx,
+            changedPixel.coordinates,
+            isPendingTransaction ? PENDING_COLOR : CHANGED_COLOR
+          );
         }
       });
     }
@@ -278,10 +365,13 @@ function useDrawHoveredAndHighlightedAndChangedPixelsEffect(
       drawPixel(canvasHelperCtx, hoveredPixel, currentPixelColor);
     }
     return () => {
-      highlightedPixel && clearPixel(canvasHelperCtx, highlightedPixel.pixelCoordinates);
+      highlightedPixel &&
+        clearPixel(canvasHelperCtx, highlightedPixel.pixelCoordinates);
       hoveredPixel && clearPixel(canvasHelperCtx, hoveredPixel);
-      changedPixels.forEach((changedPixel) => clearPixel(canvasHelperCtx, changedPixel.coordinates))
-    }
+      changedPixels.forEach((changedPixel) =>
+        clearPixel(canvasHelperCtx, changedPixel.coordinates)
+      );
+    };
   }, [
     hoveredPixel,
     highlightedPixel,

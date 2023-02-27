@@ -1,6 +1,4 @@
-export function displayTimestamp(
-  unixTimestamp: number
-): string {
+export function displayTimestamp(unixTimestamp: number): string {
   const expireDate = new Date(unixTimestamp);
   const dateString = new Intl.DateTimeFormat("en-US", {
     month: "short",
@@ -8,7 +6,7 @@ export function displayTimestamp(
   }).format(expireDate);
   const timeString = new Intl.DateTimeFormat("en-US", {
     hour: "numeric",
-    minute: "numeric"
+    minute: "numeric",
   }).format(expireDate);
   return `${timeString} on ${dateString}`;
 }

@@ -1,4 +1,4 @@
-import {TransactionSignature} from "@solana/web3.js";
+import { TransactionSignature } from "@solana/web3.js";
 
 export const SHORTENED_SYMBOL = "…";
 

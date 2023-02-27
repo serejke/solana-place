@@ -1,5 +1,5 @@
-import {PixelCoordinates} from "./pixelCoordinates";
+import { PixelCoordinates } from "./pixelCoordinates";
 
 export type HighlightedPixel = {
-  pixelCoordinates: PixelCoordinates,
-}
+  pixelCoordinates: PixelCoordinates;
+};

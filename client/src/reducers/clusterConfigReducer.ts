@@ -1,4 +1,4 @@
-import {ClusterConfig} from "../model/clusterConfig";
+import { ClusterConfig } from "../model/clusterConfig";
 
 export enum ConfigStatus {
   Initialized,
@@ -33,15 +33,18 @@ interface Failure {
 export type Action = Initialized | Fetching | Ready | Failure;
 export type Dispatch = (action: Action) => void;
 
-export function clusterConfigReducer(state: ClusterConfigState, action: Action): ClusterConfigState {
+export function clusterConfigReducer(
+  state: ClusterConfigState,
+  action: Action
+): ClusterConfigState {
   switch (action.status) {
     case ConfigStatus.Ready:
     case ConfigStatus.Initialized: {
-      return {...state, ...action};
+      return { ...state, ...action };
     }
     case ConfigStatus.Failure: {
       if (state.status === ConfigStatus.Fetching) {
-        return {...state, ...action};
+        return { ...state, ...action };
       } else {
         return state;
       }
