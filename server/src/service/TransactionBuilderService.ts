@@ -1,17 +1,15 @@
-import {PublicKey, SystemProgram, Transaction} from "@solana/web3.js";
+import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import AnchorService from "./AnchorService";
-import {GAME_PROGRAM_ACCOUNT} from "../program/program";
-import {CloseableService} from "./CloseableService";
-import {ChangePixelRequestDto} from "../dto/changePixelRequestDto";
-import {SerializedMessageDto} from "../dto/transactionDto";
-import {toSerializedMessageDto} from "../dto-converter/converter";
-import {encodeChangePixelColorRequests} from "../program/encoder";
-import {rethrowRpcError} from "../errors/serverError";
+import { GAME_PROGRAM_ACCOUNT } from "../program/program";
+import { CloseableService } from "./CloseableService";
+import { ChangePixelRequestDto } from "../dto/changePixelRequestDto";
+import { SerializedMessageDto } from "../dto/transactionDto";
+import { toSerializedMessageDto } from "../dto-converter/converter";
+import { encodeChangePixelColorRequests } from "../program/encoder";
+import { rethrowRpcError } from "../errors/serverError";
 
 export class TransactionBuilderService implements CloseableService {
-
-  constructor(private anchorService: AnchorService) {
-  }
+  constructor(private anchorService: AnchorService) {}
 
   static create(anchorService: AnchorService): TransactionBuilderService {
     return new TransactionBuilderService(anchorService);
@@ -27,10 +25,10 @@ export class TransactionBuilderService implements CloseableService {
       .accounts({
         gameAccount: GAME_PROGRAM_ACCOUNT,
         payer: feePayer,
-        systemProgram: SystemProgram.programId
+        systemProgram: SystemProgram.programId,
       })
       .instruction()
-      .catch((e) => rethrowRpcError(e))
+      .catch((e) => rethrowRpcError(e));
     const transaction = new Transaction();
     const latestBlockhash = await this.anchorService.anchorProvider.connection
       .getLatestBlockhash("finalized")

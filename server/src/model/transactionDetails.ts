@@ -1,8 +1,12 @@
-import {PublicKey, TransactionConfirmationStatus, TransactionSignature} from "@solana/web3.js";
+import {
+  PublicKey,
+  TransactionConfirmationStatus,
+  TransactionSignature,
+} from "@solana/web3.js";
 
 export type TransactionDetails = {
-  signature: TransactionSignature,
-  sender: PublicKey,
-  timestamp: number,
-  confirmation: TransactionConfirmationStatus
-}
+  signature: TransactionSignature;
+  sender: PublicKey;
+  timestamp: number;
+  confirmation: TransactionConfirmationStatus;
+};

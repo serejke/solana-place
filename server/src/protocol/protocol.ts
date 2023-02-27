@@ -1,57 +1,51 @@
-import {Connection, TransactionError} from "@solana/web3.js";
-import {GameEvent} from "../model/gameEvent";
-import {EventListener} from "./eventListener";
-import {TransactionDetails} from "../model/transactionDetails";
-import {EventWithTransactionDetails} from "../model/eventsHistory";
-import {CloseableService} from "../service/CloseableService";
+import { Connection, TransactionError } from "@solana/web3.js";
+import { GameEvent } from "../model/gameEvent";
+import { EventListener } from "./eventListener";
+import { TransactionDetails } from "../model/transactionDetails";
+import { EventWithTransactionDetails } from "../model/eventsHistory";
+import { CloseableService } from "../service/CloseableService";
 
 const PENDING_TRANSACTIONS_PROCESSING_INTERVAL = 5000;
 const PENDING_TRANSACTION_TIMEOUT = 90000;
 
 export class Protocol<T extends GameEvent> implements CloseableService {
-
   private listeners: EventListener[] = [];
 
   // Transactions received with status 'processed' instead of 'confirmed' or 'finalized'.
   //  We need to periodically poll the transaction's info and send the update to clients on success.
   //  Max timeout for a pending transaction is [PENDING_TRANSACTION_TIMEOUT].
   private pendingTransactions: {
-    event: T,
-    slot: number,
-    signature: string,
-    receivedAt: number
+    event: T;
+    slot: number;
+    signature: string;
+    receivedAt: number;
   }[] = [];
 
   private readonly pendingTransactionProcessorId: NodeJS.Timeout;
 
   private isProcessingPendingTransactions = false;
 
-  constructor(
-    private connection: Connection
-  ) {
-    this.pendingTransactionProcessorId = setInterval(
-      () => {
-        this.isProcessingPendingTransactions = true;
-        this.processPendingTransactions()
-          .catch((e) => console.error("Failed to process pending transactions", e))
-          .finally(() => {
-            this.isProcessingPendingTransactions = false;
-          });
-      },
-      PENDING_TRANSACTIONS_PROCESSING_INTERVAL
-    )
+  constructor(private connection: Connection) {
+    this.pendingTransactionProcessorId = setInterval(() => {
+      this.isProcessingPendingTransactions = true;
+      this.processPendingTransactions()
+        .catch((e) =>
+          console.error("Failed to process pending transactions", e)
+        )
+        .finally(() => {
+          this.isProcessingPendingTransactions = false;
+        });
+    }, PENDING_TRANSACTIONS_PROCESSING_INTERVAL);
   }
 
   addListener(listener: EventListener): void {
     this.listeners.push(listener);
   }
 
-  async onEvent(
-    event: T,
-    slot: number,
-    signature: string
-  ): Promise<void> {
-    const signatureStatus = (await this.connection.getSignatureStatus(signature)).value;
+  async onEvent(event: T, slot: number, signature: string): Promise<void> {
+    const signatureStatus = (
+      await this.connection.getSignatureStatus(signature)
+    ).value;
     if (!signatureStatus) {
       console.warn(`Transaction ${signature} is not found`);
       return this.onEventWithoutTransaction(event, slot, signature);
@@ -61,12 +55,16 @@ export class Protocol<T extends GameEvent> implements CloseableService {
     }
     const confirmation = signatureStatus.confirmationStatus;
     if (!confirmation) {
-      console.error(`Wrong response from RPC: both err and confirmationStatus are null for transaction ${signature}`);
+      console.error(
+        `Wrong response from RPC: both err and confirmationStatus are null for transaction ${signature}`
+      );
       return;
     }
 
     if (confirmation !== "confirmed" && confirmation !== "finalized") {
-      console.warn(`Transaction ${signature} is not confirmed nor finalized but ${confirmation}`);
+      console.warn(
+        `Transaction ${signature} is not confirmed nor finalized but ${confirmation}`
+      );
       return this.onEventWithoutTransaction(event, slot, signature);
     }
 
@@ -79,9 +77,13 @@ export class Protocol<T extends GameEvent> implements CloseableService {
     signature: string,
     commitment: "confirmed" | "finalized"
   ): Promise<void> {
-    const transaction = await this.connection.getTransaction(signature, {commitment});
+    const transaction = await this.connection.getTransaction(signature, {
+      commitment,
+    });
     if (!transaction) {
-      console.warn(`Transaction ${signature} status is received but transaction is not yet available via RPC`)
+      console.warn(
+        `Transaction ${signature} status is received but transaction is not yet available via RPC`
+      );
       return this.onEventWithoutTransaction(event, slot, signature);
     }
 
@@ -92,18 +94,23 @@ export class Protocol<T extends GameEvent> implements CloseableService {
     }
 
     const sender = transaction.transaction.message.accountKeys[0];
-    const transactionDetails: TransactionDetails = {signature, confirmation: commitment, sender, timestamp}
+    const transactionDetails: TransactionDetails = {
+      signature,
+      confirmation: commitment,
+      sender,
+      timestamp,
+    };
     return this.onEventConfirmation(event, slot, signature, transactionDetails);
   }
 
   private async onEventWithoutTransaction(
     event: T,
     slot: number,
-    signature: string,
+    signature: string
   ): Promise<void> {
     console.info(`Transaction ${signature} must be processed later.`);
     const receivedAt = Date.now();
-    this.pendingTransactions.push({event, slot, signature, receivedAt});
+    this.pendingTransactions.push({ event, slot, signature, receivedAt });
   }
 
   async onEventError(
@@ -121,11 +128,17 @@ export class Protocol<T extends GameEvent> implements CloseableService {
     signature: string,
     transactionDetails: TransactionDetails
   ): Promise<void> {
-    console.log(`Transaction ${signature} has been ${transactionDetails.confirmation}, sent by ${transactionDetails.sender.toBase58()} at ${transactionDetails.timestamp}`)
+    console.log(
+      `Transaction ${signature} has been ${
+        transactionDetails.confirmation
+      }, sent by ${transactionDetails.sender.toBase58()} at ${
+        transactionDetails.timestamp
+      }`
+    );
     const eventWithTransactionDetails: EventWithTransactionDetails = {
       event,
-      transactionDetails
-    }
+      transactionDetails,
+    };
     this.listeners.forEach((listener) => listener(eventWithTransactionDetails));
   }
 
@@ -133,12 +146,13 @@ export class Protocol<T extends GameEvent> implements CloseableService {
     // Fix the length in a const. The [pendingTransactions] array might be appended.
     const length = this.pendingTransactions.length;
     for (let i = 0; i < length; i++) {
-      const {event, slot, signature, receivedAt} = this.pendingTransactions.splice(0, 1)[0];
+      const { event, slot, signature, receivedAt } =
+        this.pendingTransactions.splice(0, 1)[0];
       if (Date.now() - receivedAt > PENDING_TRANSACTION_TIMEOUT) {
         console.log(`Drop pending transaction by timeout ${signature}`);
         continue;
       }
-      await this.onEvent(event, slot, signature)
+      await this.onEvent(event, slot, signature);
     }
   }
 

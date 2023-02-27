@@ -1,4 +1,4 @@
-import {EventWithTransactionDetails} from "../model/eventsHistory";
+import { EventWithTransactionDetails } from "../model/eventsHistory";
 
 export type EventListener = (
   eventWithTransactionDetails: EventWithTransactionDetails

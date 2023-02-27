@@ -1,5 +1,5 @@
 export type ServerErrorBodyDto = {
-  status: number,
-  message: string,
-  name: string
-}
+  status: number;
+  message: string;
+  name: string;
+};

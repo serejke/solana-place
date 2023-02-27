@@ -6,15 +6,14 @@ export class ServerError implements Error {
   name = SERVER_ERROR_PREFIX;
   statusCode = 500;
 
-  constructor(public message: string) {
-  }
+  constructor(public message: string) {}
 
   toJson(): ServerErrorBodyDto {
     return {
       status: this.statusCode,
       message: this.message,
-      name: this.name
-    }
+      name: this.name,
+    };
   }
 }
 

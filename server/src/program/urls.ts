@@ -29,6 +29,6 @@ export const clusterUrl: string = (() => {
     case "custom":
       return "http://localhost:8899";
     default:
-      throw new Error(`Unknown cluster ${cluster}`)
+      throw new Error(`Unknown cluster ${cluster}`);
   }
-})()
+})();

@@ -1,5 +1,5 @@
 export type ChangePixelRequestDto = {
-  row: number,
-  column: number,
-  newColor: number
-}
+  row: number;
+  column: number;
+  newColor: number;
+};

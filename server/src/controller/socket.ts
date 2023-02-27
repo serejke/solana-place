@@ -1,14 +1,12 @@
 import WebSocket from "ws";
 import http from "http";
-import {CloseableService} from "../service/CloseableService";
+import { CloseableService } from "../service/CloseableService";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 function noop() {}
 
 export default class WebSocketServer implements CloseableService {
-
-  constructor(private wss: WebSocket.Server) {
-  }
+  constructor(private wss: WebSocket.Server) {}
 
   static start(httpServer: http.Server): WebSocketServer {
     // Start websocket server
@@ -37,7 +35,7 @@ export default class WebSocketServer implements CloseableService {
         if (typeof message === "string") {
           console.log("Received message", isBinary, "'" + message + "'");
         } else {
-          console.log("Received binary data of length" + data.length)
+          console.log("Received binary data of length" + data.length);
         }
       });
       ws.on("pong", heartbeat);
@@ -45,7 +43,10 @@ export default class WebSocketServer implements CloseableService {
 
     // Start active user broadcast loop
     setInterval(() => {
-      this.sendToAllClients(wss, JSON.stringify({ type: "heartbeat", activeUsers }))
+      this.sendToAllClients(
+        wss,
+        JSON.stringify({ type: "heartbeat", activeUsers })
+      );
     }, 1000);
     return new WebSocketServer(wss);
   }
@@ -55,14 +56,14 @@ export default class WebSocketServer implements CloseableService {
   }
 
   async close(): Promise<void> {
-    this.wss.close()
+    this.wss.close();
   }
 
   private static sendToAllClients(wss: WebSocket.Server, data: string): void {
     wss.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
-        client.send(data)
+        client.send(data);
       }
-    })
+    });
   }
 }
