@@ -1,24 +1,24 @@
 {
   "name": "@serejke/solana-place-build",
-  "cacheDirectories": [
-    "client/node_modules",
-    "server/node_modules"
-  ],
+  "private": true,
   "engines": {
     "node": "16.x"
   },
   "scripts": {
-    "client:build": "./package.sh client run build",
-    "client:install": "./package.sh client install",
-    "server:build": "./package.sh server run build",
-    "server:start": "./package.sh server run start",
-    "server:install": "./package.sh server install",
+    "client:build": "nx run @serejke/place/client:build",
+    "server:build": "nx run @serejke/place/server:build",
+    "server:start": "nx run @serejke/place/server:start",
+    "server:start:dev": "nx run @serejke/place/server:start:dev",
+    "build-with-chains": "nx run-many --target=build",
+    "build": "nx run-many --target=build --projects=@serejke/place/server,@serejke/place/client",
+    "lint": "nx run-many --target=lint",
+    "lint:fix": "nx run-many --target=lint:fix",
+    "format": "nx run-many --target=format",
+    "format:fix": "nx run-many --target=format:fix",
     "start": "npm run server:start",
-    "build": "./package.sh both run build",
-    "lint": "./package.sh both run lint",
-    "lint:fix": "./package.sh both run lint:fix",
-    "format": "./package.sh both run format",
-    "format:fix": "./package.sh both run format:fix",
-    "postinstall": "./package.sh both install"
+    "postinstall": "nx run-many --target=npm-install"
+  },
+  "devDependencies": {
+    "nx": "^15.7.2"
   }
 }

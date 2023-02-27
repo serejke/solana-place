@@ -7,7 +7,8 @@
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject",
-    "lint": "echo \"lint is run during build\"",
+    "lint": "echo \"TODO: add lint\"",
+    "lint:fix": "echo \"TOOD: add lint:fix\"",
     "format": "prettier -c \"**/*.+(js|jsx|ts|tsx|json|css|scss|md)\"",
     "format:fix": "prettier --write \"**/*.+(js|jsx|ts|tsx|json|css|scss|md)\""
   },

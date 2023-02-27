@@ -1,0 +1,13 @@
+{
+  "name": "@serejke/place/server",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "targets": {
+    "npm-install": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "server",
+        "command": "npm install"
+      }
+    }
+  }
+}

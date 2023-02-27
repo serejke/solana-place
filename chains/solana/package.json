@@ -1,7 +1,10 @@
 {
     "scripts": {
+        "build": "anchor build",
         "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
         "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
+        "format": "echo \"TODO: add format\"",
+        "format:fix": "echo \"TODO: add format:fix\"",
         "deploy": "ts-node migrations/deploy.ts"
     },
     "dependencies": {
