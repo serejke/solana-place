@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import {Application} from "./Application";
 
 process.on('uncaughtException', (error, origin) => {

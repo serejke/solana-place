@@ -1,46 +1,9 @@
-import { Keypair, PublicKey } from "@solana/web3.js";
-import path from "path";
-import fs from "fs";
-
-const DEPLOYED_PROGRAM_ADDRESS = process.env.DEPLOYED_PROGRAM_ADDRESS;
-const DEPLOYED_GAME_PROGRAM_ACCOUNT = process.env.DEPLOYED_GAME_PROGRAM_ACCOUNT;
-
-const PROGRAM_KEYPAIR_PATH = path.resolve(
-  "..",
-  "program",
-  "target",
-  "deploy",
-  "solana_place-keypair.json"
-);
-const GAME_PROGRAM_KEYPAIR_PATH = path.resolve(
-  "..",
-  "program",
-  "target",
-  "deploy",
-  "game_account_keypair.json"
-);
+import { PublicKey } from "@solana/web3.js";
 
 export const PROGRAM_ID: PublicKey = (() => {
-  if (DEPLOYED_PROGRAM_ADDRESS) {
-    return new PublicKey(DEPLOYED_PROGRAM_ADDRESS);
-  } else {
-    return readKeypairFromFile(PROGRAM_KEYPAIR_PATH).publicKey;
-  }
+  return new PublicKey(process.env.DEPLOYED_PROGRAM_ADDRESS as string);
 })();
 
 export const GAME_PROGRAM_ACCOUNT: PublicKey = (() => {
-  if (DEPLOYED_GAME_PROGRAM_ACCOUNT) {
-    return new PublicKey(DEPLOYED_GAME_PROGRAM_ACCOUNT);
-  } else {
-    return readKeypairFromFile(GAME_PROGRAM_KEYPAIR_PATH).publicKey;
-  }
+  return new PublicKey(process.env.DEPLOYED_GAME_PROGRAM_ACCOUNT as string);
 })();
-
-/**
- * Create a Keypair from a keypair file
- */
-function readKeypairFromFile(filePath: string): Keypair {
-  const keypairString = fs.readFileSync(filePath, { encoding: "utf8" });
-  const keypairBuffer = Buffer.from(JSON.parse(keypairString));
-  return Keypair.fromSecretKey(keypairBuffer);
-}
