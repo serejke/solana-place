@@ -35,7 +35,7 @@ import {
 } from "../model/notification";
 import {
   SHORTENED_SYMBOL,
-  shortenPublicKey,
+  shortenBlockchainAddress,
   shortenTransactionSignature,
 } from "../utils/presentationUtils";
 import { ExplorerTransactionLink } from "./ExplorerTransactionLink";
@@ -385,7 +385,7 @@ function BoardHistoryTable() {
                   {SHORTENED_SYMBOL}
                 </td>
                 <td>
-                  {shortenPublicKey(transactionDetails.sender)}
+                  {shortenBlockchainAddress(transactionDetails.sender)}
                   {SHORTENED_SYMBOL}
                 </td>
                 <td>

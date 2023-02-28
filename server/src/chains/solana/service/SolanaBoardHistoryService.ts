@@ -17,6 +17,7 @@ import {
   TransactionSignature,
 } from "@solana/web3.js";
 import { BoardHistoryService } from "../../../service/BoardHistoryService";
+import { BlockchainAddress } from "../../../model/blockchainAddress";
 
 export class SolanaBoardHistoryService
   implements CloseableService, BoardHistoryService
@@ -115,7 +116,7 @@ export class SolanaBoardHistoryService
     const transactionDetails: TransactionDetails = {
       signature,
       confirmation,
-      sender,
+      sender: BlockchainAddress.from(sender),
       timestamp,
     };
     // eslint-disable-next-line

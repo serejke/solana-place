@@ -1,5 +1,8 @@
 import { Transaction } from "@solana/web3.js";
-import { SerializedTransactionDto } from "../dto/transactionDto";
+import {
+  SerializedTransactionDto,
+  TransactionDetailsDto,
+} from "../dto/transactionDto";
 import base58 from "bs58";
 import { BoardHistory, GameEventWithTransactionDetails } from "../model/model";
 import {
@@ -7,6 +10,8 @@ import {
   EventWithTransactionDetailsDto,
 } from "../dto/eventsWithTransactionDetailsDto";
 import { ServerErrorBodyDto } from "../dto/serverErrorBodyDto";
+import { TransactionDetails } from "../model/transactionDetails";
+import { BlockchainAddress } from "../model/blockchainAddress";
 
 export function toSerializedTransactionDto(
   transaction: Transaction
@@ -24,10 +29,21 @@ export function parseGameEventWithTransactionDetailsFromDto(
       message as EventWithTransactionDetailsDto;
     return {
       event: eventWithTransactionDetailsDto.event,
-      transactionDetails: eventWithTransactionDetailsDto.transactionDetails,
+      transactionDetails: parseTransactionDetailsDto(
+        eventWithTransactionDetailsDto.transactionDetails
+      ),
     };
   }
   return undefined;
+}
+
+function parseTransactionDetailsDto(
+  transactionDetailsDto: TransactionDetailsDto
+): TransactionDetails {
+  return {
+    ...transactionDetailsDto,
+    sender: BlockchainAddress.from(transactionDetailsDto.sender),
+  };
 }
 
 export function parseBoardHistory(

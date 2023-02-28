@@ -5,6 +5,7 @@ import { TransactionDetails } from "../../../model/transactionDetails";
 import { EventWithTransactionDetails } from "../../../model/eventsHistory";
 import { CloseableService } from "../../../service/CloseableService";
 import { Protocol } from "../../../protocol/protocol";
+import { BlockchainAddress } from "../../../model/blockchainAddress";
 
 const PENDING_TRANSACTIONS_PROCESSING_INTERVAL = 5000;
 const PENDING_TRANSACTION_TIMEOUT = 90000;
@@ -100,7 +101,7 @@ export class SolanaProtocol<T extends GameEvent>
     const transactionDetails: TransactionDetails = {
       signature,
       confirmation: commitment,
-      sender,
+      sender: BlockchainAddress.from(sender),
       timestamp,
     };
     return this.onEventConfirmation(event, slot, signature, transactionDetails);
@@ -134,7 +135,7 @@ export class SolanaProtocol<T extends GameEvent>
     console.log(
       `Transaction ${signature} has been ${
         transactionDetails.confirmation
-      }, sent by ${transactionDetails.sender.toBase58()} at ${
+      }, sent by ${transactionDetails.sender.toString()} at ${
         transactionDetails.timestamp
       }`
     );

@@ -1,12 +1,12 @@
 import {
-  PublicKey,
   TransactionConfirmationStatus,
   TransactionSignature,
 } from "@solana/web3.js";
+import { BlockchainAddress } from "./blockchainAddress";
 
 export type TransactionDetails = {
   signature: TransactionSignature;
-  sender: PublicKey;
+  sender: BlockchainAddress;
   timestamp: number;
   confirmation: TransactionConfirmationStatus;
 };

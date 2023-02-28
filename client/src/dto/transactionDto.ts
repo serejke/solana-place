@@ -7,7 +7,7 @@ export type TransactionConfirmationDto =
 
 export type TransactionDetailsDto = {
   signature: string;
-  sender: string;
+  sender: BlockchainAddressString;
   timestamp: number;
   confirmation: TransactionConfirmationDto;
 };

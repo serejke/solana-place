@@ -53,7 +53,7 @@ export function toTransactionDetailsDto(
   return {
     signature: transactionDetails.signature,
     confirmation: transactionDetails.confirmation,
-    sender: transactionDetails.sender.toBase58(),
+    sender: transactionDetails.sender.toString(),
     timestamp: transactionDetails.timestamp,
   };
 }
