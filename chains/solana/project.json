@@ -8,6 +8,53 @@
         "cwd": "chains/solana",
         "command": "npm install"
       }
+    },
+    "reset-solana-node": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "chains",
+        "commands": [
+          "rm -rf .nodes/solana"
+        ]
+      }
+    },
+    "run-solana-node": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "chains",
+        "commands": [
+          "mkdir -p .nodes",
+          "solana-test-validator --limit-ledger-size 5000000 --ledger .nodes/solana"
+        ]
+      }
+    },
+    "deploy-contract": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "chains/solana",
+        "commands": [
+          "anchor build",
+          "anchor deploy",
+          "anchor idl init --provider.cluster http://127.0.0.1:8899 --filepath target/idl/solana_place.json $(solana-keygen pubkey target/deploy/solana_place-keypair.json)"
+        ]
+      }
+    },
+    "deploy-board": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "chains/solana",
+        "commands": [
+          "anchor migrate --provider.cluster http://127.0.0.1:8899"
+        ]
+      }
+    },
+    "airdrop": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "solana airdrop 2 {args.wallet} -u http://127.0.0.1:8899"
+        ]
+      }
     }
   }
 }
