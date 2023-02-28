@@ -6,6 +6,7 @@
   },
   "scripts": {
     "client:build": "nx run @serejke/place/client:build",
+    "client:start:dev": "nx run @serejke/place/client:start:dev",
     "server:build": "nx run @serejke/place/server:build",
     "server:start": "nx run @serejke/place/server:start",
     "server:start:dev": "nx run @serejke/place/server:start:dev",
@@ -16,6 +17,7 @@
     "format": "nx run-many --target=format",
     "format:fix": "nx run-many --target=format:fix",
     "start": "npm run server:start",
+    "start:dev": "nx run-many --target=start:dev --projects=@serejke/place/server,@serejke/place/client",
     "postinstall": "nx run-many --target=npm-install"
   },
   "devDependencies": {
