@@ -9,7 +9,7 @@ cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [programs.localnet]
-solana_place = "PLACEMmfm3ZMpYKWfTwzHsTGnPnnDgmK2QkJPeLnZWE"
+solana_place = "PLAiGxpEhhechXPVUaR7A8S2p7daKWGV49EY3482JEh"
 
 [programs.mainnet]
 solana_place = "PLACEMmfm3ZMpYKWfTwzHsTGnPnnDgmK2QkJPeLnZWE"

@@ -7,7 +7,7 @@ pub mod instructions;
 pub mod state;
 pub mod events;
 
-declare_id!("PLACEMmfm3ZMpYKWfTwzHsTGnPnnDgmK2QkJPeLnZWE");
+declare_id!("PLAiGxpEhhechXPVUaR7A8S2p7daKWGV49EY3482JEh");
 
 #[program]
 pub mod solana_place {
