@@ -1,4 +1,4 @@
-import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+import { SystemProgram, Transaction } from "@solana/web3.js";
 import SolanaAnchorService from "./SolanaAnchorService";
 import { GAME_PROGRAM_ACCOUNT } from "../program/program";
 import { CloseableService } from "../../../service/CloseableService";
@@ -8,6 +8,7 @@ import { toSerializedMessageDto } from "../../../dto-converter/converter";
 import { encodeChangePixelColorRequests } from "../program/encoder";
 import { rethrowRpcError } from "../../../errors/serverError";
 import { TransactionBuilderService } from "../../../service/TransactionBuilderService";
+import { BlockchainAddress } from "../../../model/blockchainAddress";
 
 export class SolanaTransactionBuilderService
   implements CloseableService, TransactionBuilderService
@@ -21,7 +22,7 @@ export class SolanaTransactionBuilderService
   }
 
   async createTransactionToChangePixels(
-    feePayer: PublicKey,
+    feePayer: BlockchainAddress,
     requests: ChangePixelRequestDto[]
   ): Promise<SerializedMessageDto> {
     const encodedChanges = encodeChangePixelColorRequests(requests);
@@ -29,7 +30,7 @@ export class SolanaTransactionBuilderService
       .changeColors(encodedChanges)
       .accounts({
         gameAccount: GAME_PROGRAM_ACCOUNT,
-        payer: feePayer,
+        payer: feePayer.asSolanaAddress(),
         systemProgram: SystemProgram.programId,
       })
       .instruction()
@@ -39,7 +40,7 @@ export class SolanaTransactionBuilderService
       .getLatestBlockhash("finalized")
       .catch((e) => rethrowRpcError(e));
 
-    transaction.feePayer = feePayer;
+    transaction.feePayer = feePayer.asSolanaAddress();
     transaction.recentBlockhash = latestBlockhash.blockhash;
     transaction.add(instruction);
     return toSerializedMessageDto(transaction);

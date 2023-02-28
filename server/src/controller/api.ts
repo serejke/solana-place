@@ -11,7 +11,6 @@ import {
 } from "../dto-converter/converter";
 import { CloseableService } from "../service/CloseableService";
 import { ChangePixelRequestDto } from "../dto/changePixelRequestDto";
-import { PublicKey } from "@solana/web3.js";
 import {
   CreateTransactionRequestDto,
   SerializedTransactionDto,
@@ -28,6 +27,7 @@ import { BoardHistoryService } from "../service/BoardHistoryService";
 import { TransactionService } from "../service/TransactionService";
 import { TransactionBuilderService } from "../service/TransactionBuilderService";
 import { ServerInfoDto } from "../dto/clusterInfoDto";
+import { BlockchainAddress } from "../model/blockchainAddress";
 
 export default class ApiServer implements CloseableService {
   static async start(
@@ -62,14 +62,14 @@ export default class ApiServer implements CloseableService {
     });
 
     app.post("/api/board/changePixels/tx", async (req, res) => {
-      const requestsDto = req.body as CreateTransactionRequestDto<
+      const createTxRequestDto = req.body as CreateTransactionRequestDto<
         ChangePixelRequestDto[]
       >;
-      const feePayer = new PublicKey(requestsDto.feePayer);
+      const feePayer = BlockchainAddress.from(createTxRequestDto.feePayer);
       const serializedMessageDto =
         await transactionBuilderService.createTransactionToChangePixels(
           feePayer,
-          requestsDto.data
+          createTxRequestDto.data
         );
       res.json(serializedMessageDto);
     });

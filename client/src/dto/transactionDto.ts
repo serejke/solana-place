@@ -1,3 +1,5 @@
+import { BlockchainAddressString } from "../model/blockchainAddress";
+
 export type TransactionConfirmationDto =
   | "processed"
   | "confirmed"
@@ -11,7 +13,7 @@ export type TransactionDetailsDto = {
 };
 
 export type CreateTransactionRequestDto<T> = {
-  feePayer: string;
+  feePayer: BlockchainAddressString;
   data: T;
 };
 

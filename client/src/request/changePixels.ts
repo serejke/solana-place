@@ -6,6 +6,7 @@ import { toSerializedTransactionDto } from "../dto-converter/converter";
 import { TransactionSignature } from "@solana/web3.js";
 import { CreateTransactionRequestDto } from "../dto/transactionDto";
 import { ChangedPixel } from "../model/changedPixel";
+import { BlockchainAddress } from "../model/blockchainAddress";
 
 export const MAX_CHANGES_PER_TRANSACTION = 150;
 
@@ -21,7 +22,7 @@ export async function changePixels(
   const changePixelsRequestDto: CreateTransactionRequestDto<
     ChangePixelRequestDto[]
   > = {
-    feePayer: wallet.publicKey!.toBase58()!,
+    feePayer: BlockchainAddress.from(wallet.publicKey!).toString(),
     data: changedPixels.map((changedPixel) => ({
       row: changedPixel.coordinates.row,
       column: changedPixel.coordinates.column,

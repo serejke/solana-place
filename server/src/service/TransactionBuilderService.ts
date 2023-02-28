@@ -1,10 +1,10 @@
-import { PublicKey } from "@solana/web3.js";
 import { ChangePixelRequestDto } from "../dto/changePixelRequestDto";
 import { SerializedMessageDto } from "../dto/transactionDto";
+import { BlockchainAddress } from "../model/blockchainAddress";
 
 export interface TransactionBuilderService {
   createTransactionToChangePixels(
-    feePayer: PublicKey,
+    feePayer: BlockchainAddress,
     requests: ChangePixelRequestDto[]
   ): Promise<SerializedMessageDto>;
 }
