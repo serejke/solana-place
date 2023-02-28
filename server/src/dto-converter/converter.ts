@@ -3,7 +3,7 @@ import {
   EventWithTransactionDetailsDto,
 } from "../dto/eventsWithTransactionDetailsDto";
 import { BoardState } from "../model/boardState";
-import { Transaction, TransactionConfirmationStatus } from "@solana/web3.js";
+import { Transaction } from "@solana/web3.js";
 import {
   SerializedMessageDto,
   TransactionDetailsDto,
@@ -14,7 +14,10 @@ import {
   EventWithTransactionDetails,
   EventsHistory,
 } from "../model/eventsHistory";
-import { TransactionDetails } from "../model/transactionDetails";
+import {
+  TransactionConfirmation,
+  TransactionDetails,
+} from "../model/transactionDetails";
 import { EventWithTypeDto } from "../dto/eventWithTypeDto";
 import { GameEvent } from "../model/gameEvent";
 
@@ -61,13 +64,13 @@ export function toTransactionDetailsDto(
 export function toSerializedMessageDto(
   transaction: Transaction
 ): SerializedMessageDto {
-  const base58Buffer = base58.encode(transaction.serializeMessage());
-  return { messageBase58: base58Buffer };
+  const messageBase58 = base58.encode(transaction.serializeMessage());
+  return { messageBase58 };
 }
 
 export function parseTransactionConfirmationStatus(
   string: string | undefined
-): TransactionConfirmationStatus | undefined {
+): TransactionConfirmation | undefined {
   switch (string) {
     case "confirmed":
     case "processed":

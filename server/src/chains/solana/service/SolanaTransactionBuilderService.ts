@@ -4,11 +4,11 @@ import { GAME_PROGRAM_ACCOUNT } from "../program/program";
 import { CloseableService } from "../../../service/CloseableService";
 import { ChangePixelRequestDto } from "../../../dto/changePixelRequestDto";
 import { SerializedMessageDto } from "../../../dto/transactionDto";
-import { toSerializedMessageDto } from "../../../dto-converter/converter";
 import { encodeChangePixelColorRequests } from "../program/encoder";
 import { rethrowRpcError } from "../../../errors/serverError";
 import { TransactionBuilderService } from "../../../service/TransactionBuilderService";
 import { BlockchainAddress } from "../../../model/blockchainAddress";
+import base58 from "bs58";
 
 export class SolanaTransactionBuilderService
   implements CloseableService, TransactionBuilderService
@@ -43,7 +43,14 @@ export class SolanaTransactionBuilderService
     transaction.feePayer = feePayer.asSolanaAddress();
     transaction.recentBlockhash = latestBlockhash.blockhash;
     transaction.add(instruction);
-    return toSerializedMessageDto(transaction);
+    return this.toSerializedMessageDto(transaction);
+  }
+
+  private toSerializedMessageDto(
+    transaction: Transaction
+  ): SerializedMessageDto {
+    const base58Buffer = base58.encode(transaction.serializeMessage());
+    return { messageBase58: base58Buffer };
   }
 
   async close(): Promise<void> {
