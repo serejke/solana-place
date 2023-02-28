@@ -1,5 +1,6 @@
-import { TransactionSignature } from "@solana/web3.js";
 import { BlockchainAddress } from "./blockchainAddress";
+
+export type TransactionSignature = string;
 
 export type TransactionConfirmation = "processed" | "confirmed" | "finalized";
 

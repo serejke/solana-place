@@ -3,10 +3,10 @@ import { ChangePixelRequestDto } from "../dto/changePixelRequestDto";
 import { WalletContextState } from "@solana/wallet-adapter-react";
 import { sendTransaction } from "./sendTransaction";
 import { toSerializedTransactionDto } from "../dto-converter/converter";
-import { TransactionSignature } from "@solana/web3.js";
 import { CreateTransactionRequestDto } from "../dto/transactionDto";
 import { ChangedPixel } from "../model/changedPixel";
 import { BlockchainAddress } from "../model/blockchainAddress";
+import { TransactionSignature } from "../model/transactionDetails";
 
 export const MAX_CHANGES_PER_TRANSACTION = 150;
 

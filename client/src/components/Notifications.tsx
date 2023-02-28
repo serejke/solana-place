@@ -3,7 +3,6 @@ import {
   useSetNotifications,
 } from "../providers/notifications/notifications";
 import { Notification } from "../model/notification";
-import { TransactionSignature } from "@solana/web3.js";
 import {
   SHORTENED_SYMBOL,
   shortenTransactionSignature,
@@ -11,6 +10,7 @@ import {
 import { ExplorerTransactionLink } from "./ExplorerTransactionLink";
 import React from "react";
 import { useAddOrDeleteChangedPixel } from "../providers/transactions/pendingTransaction";
+import { TransactionSignature } from "../model/transactionDetails";
 
 export function Notifications() {
   const notifications = useNotificationsState();

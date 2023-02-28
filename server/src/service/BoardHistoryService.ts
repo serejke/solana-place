@@ -1,5 +1,5 @@
 import { EventsHistory } from "../model/eventsHistory";
-import { TransactionSignature } from "@solana/web3.js";
+import { TransactionSignature } from "../model/transactionDetails";
 
 export interface BoardHistoryService {
   getBoardHistory(limit: number): Promise<EventsHistory>;

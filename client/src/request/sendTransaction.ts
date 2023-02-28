@@ -1,7 +1,7 @@
-import { TransactionSignature } from "@solana/web3.js";
 import { SerializedTransactionDto } from "../dto/transactionDto";
 import { serverUrl } from "./serverUrls";
 import { rethrowIfFailed } from "./requestError";
+import { TransactionSignature } from "../model/transactionDetails";
 
 export async function sendTransaction(
   serializedTransactionDto: SerializedTransactionDto

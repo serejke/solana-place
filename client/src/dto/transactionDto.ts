@@ -1,12 +1,14 @@
 import { BlockchainAddressString } from "../model/blockchainAddress";
 
+export type TransactionSignatureDto = string;
+
 export type TransactionConfirmationDto =
   | "processed"
   | "confirmed"
   | "finalized";
 
 export type TransactionDetailsDto = {
-  signature: string;
+  signature: TransactionSignatureDto;
   sender: BlockchainAddressString;
   timestamp: number;
   confirmation: TransactionConfirmationDto;

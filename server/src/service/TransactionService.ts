@@ -1,5 +1,5 @@
 import { SerializedTransactionDto } from "../dto/transactionDto";
-import { TransactionSignature } from "@solana/web3.js";
+import { TransactionSignature } from "../model/transactionDetails";
 
 export interface TransactionService {
   send(

@@ -1,5 +1,5 @@
 import { RequestError } from "../request/requestError";
-import { TransactionSignature } from "@solana/web3.js";
+import { TransactionSignature } from "./transactionDetails";
 
 export enum NotificationLevel {
   INFO = "INFO",

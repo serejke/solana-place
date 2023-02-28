@@ -1,7 +1,6 @@
 import * as React from "react";
 import { useState } from "react";
 import { useBoardDispatch } from "../board/boardState";
-import { TransactionSignature } from "@solana/web3.js";
 import { fetchTransactionEvents } from "../../request/fetchTransactionEvents";
 import { useBoardHistoryDispatch } from "../board/boardHistory";
 import { updateBoardStateAndHistory } from "../../app";
@@ -15,6 +14,7 @@ import { BoardHistoryDispatch } from "../../reducers/boardHistoryReducer";
 import { ChangedPixel } from "../../model/changedPixel";
 import { areEqual } from "../../model/boardState";
 import { PixelCoordinates } from "../../model/pixelCoordinates";
+import { TransactionSignature } from "model/transactionDetails";
 
 const PENDING_TRANSACTION_PROCESSING_INTERVAL = 5000;
 const PENDING_TRANSACTION_TIMEOUT = 90000;

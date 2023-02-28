@@ -1,5 +1,5 @@
-import { TransactionSignature } from "@solana/web3.js";
 import { BlockchainAddress } from "../model/blockchainAddress";
+import { TransactionSignature } from "../model/transactionDetails";
 
 export const SHORTENED_SYMBOL = "…";
 

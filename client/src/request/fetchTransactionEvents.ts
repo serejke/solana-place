@@ -2,9 +2,9 @@ import { BoardHistory } from "../model/model";
 import { sleep } from "../utils";
 import { EventsWithTransactionDetailsDto } from "../dto/eventsWithTransactionDetailsDto";
 import { parseBoardHistory } from "../dto-converter/converter";
-import { TransactionSignature } from "@solana/web3.js";
 import { serverUrl } from "./serverUrls";
 import { rethrowIfFailed } from "./requestError";
+import { TransactionSignature } from "model/transactionDetails";
 
 export async function fetchTransactionEvents(
   signature: TransactionSignature
