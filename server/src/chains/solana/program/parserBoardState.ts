@@ -1,6 +1,6 @@
 // noinspection DuplicatedCode
 
-import { BoardState } from "../model/boardState";
+import { BoardState } from "../../../model/boardState";
 
 type AccountBoardState = {
   colors: unknown;

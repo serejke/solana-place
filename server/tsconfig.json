@@ -5,7 +5,10 @@
     "downlevelIteration": true,
     "module": "commonjs",
     "moduleResolution": "node",
-    "typeRoots": ["./src/types", "./node_modules/@types"]
+    "typeRoots": [
+      "./src/chains/solana/types",
+      "./node_modules/@types"
+    ]
   },
   "include": ["src"]
 }

@@ -2,11 +2,11 @@ import * as anchor from "@project-serum/anchor";
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import { IDL as SolanaPlaceIDL } from "../types/solana_place";
 import { Program } from "@project-serum/anchor";
-import { CloseableService } from "./CloseableService";
+import { CloseableService } from "../../../service/CloseableService";
 
 type SolanaPlaceProgram = anchor.Program<typeof SolanaPlaceIDL>;
 
-export default class AnchorService implements CloseableService {
+export default class SolanaAnchorService implements CloseableService {
   constructor(
     public solanaPlaceProgram: SolanaPlaceProgram,
     public anchorProvider: anchor.AnchorProvider
@@ -15,7 +15,7 @@ export default class AnchorService implements CloseableService {
   static async create(
     connection: Connection,
     programId: PublicKey
-  ): Promise<AnchorService> {
+  ): Promise<SolanaAnchorService> {
     const wallet = new anchor.Wallet(Keypair.generate());
 
     const anchorProvider = new anchor.AnchorProvider(connection, wallet, {
@@ -28,7 +28,7 @@ export default class AnchorService implements CloseableService {
         const anyProgram: unknown = rawProgram;
         return anyProgram as SolanaPlaceProgram;
       })
-      .then((program) => new AnchorService(program, anchorProvider));
+      .then((program) => new SolanaAnchorService(program, anchorProvider));
   }
 
   async close(): Promise<void> {

@@ -1,7 +1,7 @@
 import { Connection } from "@solana/web3.js";
-import { CloseableService } from "./CloseableService";
+import { CloseableService } from "../../../service/CloseableService";
 
-export class ClusterStateService implements CloseableService {
+export class SolanaClusterStateService implements CloseableService {
   private readonly listenerId: number;
 
   public latestSlot: number;
@@ -22,8 +22,8 @@ export class ClusterStateService implements CloseableService {
     });
   }
 
-  static create(connection: Connection): ClusterStateService {
-    return new ClusterStateService(connection);
+  static create(connection: Connection): SolanaClusterStateService {
+    return new SolanaClusterStateService(connection);
   }
 
   async close(): Promise<void> {

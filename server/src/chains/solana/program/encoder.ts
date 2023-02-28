@@ -1,4 +1,4 @@
-import { ChangePixelRequestDto } from "../dto/changePixelRequestDto";
+import { ChangePixelRequestDto } from "../../../dto/changePixelRequestDto";
 import { Buffer } from "buffer";
 
 // 5 consecutive bytes: <row 2><column 2><color 1>

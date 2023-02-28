@@ -1,5 +1,5 @@
 // eslint-disable-next-line
-import { GameEvent } from "../model/gameEvent";
+import { GameEvent } from "../../../model/gameEvent";
 
 type ProgramEvent = {
   name: string;

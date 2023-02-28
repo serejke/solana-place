@@ -15,8 +15,9 @@ const GAME_WIDTH = 500;
 const CHANGE_COST = 1000; // 1000 micro-lamports = 1/1000 SOL.
 
 module.exports = async function (provider) {
-  // copyPicture(provider);
-  // return;
+  if (process.env.COPY_PICTURE) {
+    return copyPicture(provider);
+  }
 
   // Configure client to use the provider.
   anchor.setProvider(provider);

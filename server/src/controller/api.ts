@@ -1,23 +1,21 @@
-import { cluster } from "../program/urls";
-import { GAME_PROGRAM_ACCOUNT, PROGRAM_ID } from "../program/program";
+import { cluster } from "../chains/solana/program/urls";
+import {
+  GAME_PROGRAM_ACCOUNT,
+  PROGRAM_ID,
+} from "../chains/solana/program/program";
 import { Express, NextFunction, Request, Response } from "express";
 import {
-  toEventsWithTransactionDetailsDto,
-  toBoardStateDto,
   parseTransactionConfirmationStatus,
+  toBoardStateDto,
+  toEventsWithTransactionDetailsDto,
 } from "../dto-converter/converter";
-import { BoardService } from "../service/BoardService";
-import { BoardHistoryService } from "../service/BoardHistoryService";
 import { CloseableService } from "../service/CloseableService";
 import { ChangePixelRequestDto } from "../dto/changePixelRequestDto";
-import { TransactionBuilderService } from "../service/TransactionBuilderService";
-import { PublicKey, Transaction } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 import {
   CreateTransactionRequestDto,
   SerializedTransactionDto,
 } from "../dto/transactionDto";
-import base58 from "bs58";
-import { TransactionService } from "../service/TransactionService";
 import {
   InvalidRequest,
   NotFound,
@@ -25,6 +23,10 @@ import {
   SERVER_ERROR_PREFIX,
   ServerError,
 } from "../errors/serverError";
+import { BoardService } from "../service/BoardService";
+import { BoardHistoryService } from "../service/BoardHistoryService";
+import { TransactionService } from "../service/TransactionService";
+import { TransactionBuilderService } from "../service/TransactionBuilderService";
 
 export default class ApiServer implements CloseableService {
   static async start(
@@ -45,18 +47,15 @@ export default class ApiServer implements CloseableService {
     });
 
     app.get("/api/board", async (req, res) => {
-      const boardState = await boardService.getBoardState("confirmed");
+      const boardState = await boardService.getBoardState();
       res.json(toBoardStateDto(boardState));
     });
 
     app.get("/api/board/history", async (req, res) => {
       const limitString = req.query["limit"]?.toString() ?? "10";
       const limit = parseInt(limitString);
-      res.json(
-        toEventsWithTransactionDetailsDto(
-          await boardHistoryService.getBoardHistory(limit)
-        )
-      );
+      const boardHistory = await boardHistoryService.getBoardHistory(limit);
+      res.json(toEventsWithTransactionDetailsDto(boardHistory));
     });
 
     app.post("/api/board/changePixels/tx", async (req, res) => {
@@ -96,11 +95,9 @@ export default class ApiServer implements CloseableService {
     });
 
     app.post("/api/transaction/send", async (req, res) => {
-      const serializedTransactionDto = req.body as SerializedTransactionDto;
-      const transaction = Transaction.from(
-        base58.decode(serializedTransactionDto.transactionBase58)
+      const transactionSignature = await transactionService.send(
+        req.body as SerializedTransactionDto
       );
-      const transactionSignature = await transactionService.send(transaction);
       res.json(transactionSignature);
     });
 

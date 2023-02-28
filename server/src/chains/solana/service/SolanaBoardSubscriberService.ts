@@ -1,18 +1,18 @@
-import AnchorService from "./AnchorService";
-import { CloseableService } from "./CloseableService";
-import { GameEvent } from "../model/gameEvent";
-import { Protocol } from "../protocol/protocol";
+import SolanaAnchorService from "./SolanaAnchorService";
+import { CloseableService } from "../../../service/CloseableService";
+import { GameEvent } from "../../../model/gameEvent";
+import { SolanaProtocol } from "../protocol/solanaProtocol";
 import {
   parseProgramGameEvent,
   PIXEL_COLORS_CHANGED_EVENT_NAME,
 } from "../program/parser";
 
-export class BoardSubscriberService implements CloseableService {
+export class SolanaBoardSubscriberService implements CloseableService {
   private readonly listenerId: number;
 
   constructor(
-    private anchorState: AnchorService,
-    private protocol: Protocol<GameEvent>
+    private anchorState: SolanaAnchorService,
+    private protocol: SolanaProtocol<GameEvent>
   ) {
     this.listenerId = anchorState.solanaPlaceProgram.addEventListener(
       PIXEL_COLORS_CHANGED_EVENT_NAME,
@@ -27,10 +27,10 @@ export class BoardSubscriberService implements CloseableService {
   }
 
   static create(
-    anchorState: AnchorService,
-    protocol: Protocol<GameEvent>
-  ): BoardSubscriberService {
-    return new BoardSubscriberService(anchorState, protocol);
+    anchorState: SolanaAnchorService,
+    protocol: SolanaProtocol<GameEvent>
+  ): SolanaBoardSubscriberService {
+    return new SolanaBoardSubscriberService(anchorState, protocol);
   }
 
   async close(): Promise<void> {
