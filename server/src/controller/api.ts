@@ -27,6 +27,7 @@ import { BoardService } from "../service/BoardService";
 import { BoardHistoryService } from "../service/BoardHistoryService";
 import { TransactionService } from "../service/TransactionService";
 import { TransactionBuilderService } from "../service/TransactionBuilderService";
+import { ServerInfoDto } from "../dto/clusterInfoDto";
 
 export default class ApiServer implements CloseableService {
   static async start(
@@ -36,14 +37,16 @@ export default class ApiServer implements CloseableService {
     transactionService: TransactionService,
     transactionBuilderService: TransactionBuilderService
   ): Promise<ApiServer> {
-    app.get("/api/init", async (req, res) => {
-      res
-        .json({
-          programId: PROGRAM_ID.toBase58(),
-          cluster,
-          gameAccount: GAME_PROGRAM_ACCOUNT.toBase58(),
-        })
-        .end();
+    app.get("/api/init", async (req, res: Response<ServerInfoDto>) => {
+      res.json({
+        chains: {
+          solana: {
+            programId: PROGRAM_ID.toBase58(),
+            cluster,
+            gameAccount: GAME_PROGRAM_ACCOUNT.toBase58(),
+          },
+        },
+      });
     });
 
     app.get("/api/board", async (req, res) => {

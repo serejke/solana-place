@@ -6,6 +6,7 @@ import {
   Dispatch,
 } from "../reducers/clusterConfigReducer";
 import { rethrowIfFailed } from "./requestError";
+import { ServerInfoDto } from "../dto/clusterInfoDto";
 
 export async function fetchClusterInfo(dispatch: Dispatch, serverUrl: string) {
   dispatch({
@@ -34,20 +35,13 @@ async function fetchClusterInfoOrRetry(
       })
     );
     await rethrowIfFailed(response);
-    const data = await response.json();
-    if (!("cluster" in data) || !("programId" in data)) {
-      console.error(
-        `/api/init failed because of invalid response ${JSON.stringify(data)}`
-      );
-      return "retry";
-    }
-
+    const data: ServerInfoDto = await response.json();
     return {
       status: ConfigStatus.Initialized,
       config: {
-        cluster: data.cluster,
-        programId: new PublicKey(data.programId),
-        gameAccount: new PublicKey(data.gameAccount),
+        cluster: data.chains.solana.cluster,
+        programId: new PublicKey(data.chains.solana.programId),
+        gameAccount: new PublicKey(data.chains.solana.gameAccount),
       },
     };
   } catch (err) {
