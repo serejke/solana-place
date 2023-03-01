@@ -3,12 +3,7 @@ import {
   EventWithTransactionDetailsDto,
 } from "../dto/eventsWithTransactionDetailsDto";
 import { BoardState } from "../model/boardState";
-import { Transaction } from "@solana/web3.js";
-import {
-  SerializedMessageDto,
-  TransactionDetailsDto,
-} from "../dto/transactionDto";
-import base58 from "bs58";
+import { TransactionDetailsDto } from "../dto/transactionDto";
 import { BoardStateDto } from "../dto/boardStateDto";
 import {
   EventWithTransactionDetails,
@@ -59,13 +54,6 @@ export function toTransactionDetailsDto(
     sender: transactionDetails.sender.toString(),
     timestamp: transactionDetails.timestamp,
   };
-}
-
-export function toSerializedMessageDto(
-  transaction: Transaction
-): SerializedMessageDto {
-  const messageBase58 = base58.encode(transaction.serializeMessage());
-  return { messageBase58 };
 }
 
 export function parseTransactionConfirmationStatus(
