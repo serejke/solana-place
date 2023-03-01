@@ -1,24 +1,29 @@
 import { sleep } from "utils";
 import { PublicKey } from "@solana/web3.js";
 import {
-  Action,
+  ClusterConfigState,
   ConfigStatus,
-  Dispatch,
+  SetClusterConfigState,
 } from "../reducers/clusterConfigReducer";
 import { rethrowIfFailed } from "./requestError";
 import { ServerInfoDto } from "../dto/clusterInfoDto";
 
-export async function fetchClusterInfo(dispatch: Dispatch, serverUrl: string) {
-  dispatch({
+export async function fetchClusterInfo(
+  setClusterConfigState: SetClusterConfigState,
+  serverUrl: string
+) {
+  setClusterConfigState({
     status: ConfigStatus.Fetching,
   });
 
   while (true) {
-    let response: Action | "retry" = await fetchClusterInfoOrRetry(serverUrl);
+    let response: ClusterConfigState | "retry" = await fetchClusterInfoOrRetry(
+      serverUrl
+    );
     if (response === "retry") {
       await sleep(2000);
     } else {
-      dispatch(response);
+      setClusterConfigState(response);
       break;
     }
   }
@@ -26,7 +31,7 @@ export async function fetchClusterInfo(dispatch: Dispatch, serverUrl: string) {
 
 async function fetchClusterInfoOrRetry(
   httpUrl: string
-): Promise<Action | "retry"> {
+): Promise<ClusterConfigState | "retry"> {
   try {
     const response = await fetch(
       new Request(httpUrl + "/api/init", {

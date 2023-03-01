@@ -1,4 +1,5 @@
 import { ClusterConfig } from "../model/clusterConfig";
+import React, { SetStateAction } from "react";
 
 export enum ConfigStatus {
   Initialized,
@@ -7,53 +8,24 @@ export enum ConfigStatus {
   Failure,
 }
 
-export interface ClusterConfigState {
-  status: ConfigStatus;
-  config?: ClusterConfig;
-}
-
-interface Initialized {
-  status: ConfigStatus.Initialized;
-  config: ClusterConfig;
-}
-
-interface Fetching {
-  status: ConfigStatus.Fetching;
-}
-
-interface Ready {
-  status: ConfigStatus.Ready;
-}
-
-interface Failure {
-  status: ConfigStatus.Failure;
-  config?: undefined;
-}
-
-export type Action = Initialized | Fetching | Ready | Failure;
-export type Dispatch = (action: Action) => void;
-
-export function clusterConfigReducer(
-  state: ClusterConfigState,
-  action: Action
-): ClusterConfigState {
-  switch (action.status) {
-    case ConfigStatus.Ready:
-    case ConfigStatus.Initialized: {
-      return { ...state, ...action };
+export type ClusterConfigState =
+  | {
+      status: ConfigStatus.Initialized;
+      config: ClusterConfig;
     }
-    case ConfigStatus.Failure: {
-      if (state.status === ConfigStatus.Fetching) {
-        return { ...state, ...action };
-      } else {
-        return state;
-      }
+  | {
+      status: ConfigStatus.Fetching;
+      config?: undefined;
     }
-    case ConfigStatus.Fetching: {
-      return {
-        ...state,
-        ...action,
-      };
+  | {
+      status: ConfigStatus.Ready;
+      config?: undefined;
     }
-  }
-}
+  | {
+      status: ConfigStatus.Failure;
+      config?: undefined;
+    };
+
+export type SetClusterConfigState = React.Dispatch<
+  SetStateAction<ClusterConfigState>
+>;
