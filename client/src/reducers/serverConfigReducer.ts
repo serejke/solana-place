@@ -1,4 +1,4 @@
-import { ClusterConfig } from "../model/clusterConfig";
+import { ServerConfig } from "../model/serverConfig";
 import React, { SetStateAction } from "react";
 
 export enum ConfigStatus {
@@ -8,10 +8,10 @@ export enum ConfigStatus {
   Failure,
 }
 
-export type ClusterConfigState =
+export type ServerConfigState =
   | {
       status: ConfigStatus.Initialized;
-      config: ClusterConfig;
+      config: ServerConfig;
     }
   | {
       status: ConfigStatus.Fetching;
@@ -26,6 +26,6 @@ export type ClusterConfigState =
       config?: undefined;
     };
 
-export type SetClusterConfigState = React.Dispatch<
-  SetStateAction<ClusterConfigState>
+export type SetServerConfigState = React.Dispatch<
+  SetStateAction<ServerConfigState>
 >;

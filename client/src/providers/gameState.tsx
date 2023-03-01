@@ -1,6 +1,6 @@
 import React from "react";
 
-import { useClusterConfig } from "providers/server/clusterConfig";
+import { useServerConfig } from "providers/server/serverConfig";
 import { useBoardState } from "./board/boardState";
 
 export type GameStateLoadingPhase = "config" | "initial-state" | "complete";
@@ -13,13 +13,13 @@ const GameStateContext = React.createContext<GameState | undefined>(undefined);
 
 type Props = { children: React.ReactNode };
 export function GameStateProvider({ children }: Props) {
-  const clusterConfig = useClusterConfig();
+  const serverConfig = useServerConfig();
   const boardState = useBoardState();
   const loadingPhase: GameStateLoadingPhase = React.useMemo(() => {
-    if (!clusterConfig) return "config";
+    if (!serverConfig) return "config";
     if (!boardState) return "initial-state";
     return "complete";
-  }, [clusterConfig, boardState]);
+  }, [serverConfig, boardState]);
 
   const gameState: GameState = React.useMemo(
     () => ({ loadingPhase }),

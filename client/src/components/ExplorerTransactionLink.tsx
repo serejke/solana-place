@@ -1,6 +1,6 @@
 import SolanaExplorerLogo from "../styles/icons/dark-solana-logo.svg";
 import * as React from "react";
-import { useClusterConfig } from "../providers/server/clusterConfig";
+import { useServerConfig } from "../providers/server/serverConfig";
 
 export function ExplorerTransactionLink({
   signature,
@@ -30,11 +30,11 @@ export function ExplorerTransactionLink({
 }
 
 function useClusterParam(): string | undefined {
-  const clusterConfig = useClusterConfig();
+  const clusterConfig = useServerConfig();
   if (!clusterConfig) {
     return undefined;
   }
-  const cluster = clusterConfig.cluster;
+  const cluster = clusterConfig.chains.solana.cluster;
   switch (cluster) {
     case "mainnet-beta":
       return "";

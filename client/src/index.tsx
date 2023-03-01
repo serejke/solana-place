@@ -11,7 +11,7 @@ import { WalletProvider } from "./providers/wallet";
 import { BoardConfigProvider } from "./providers/board/boardConfig";
 import { BoardHistoryProvider } from "./providers/board/boardHistory";
 import { WebSocketProvider } from "providers/server/webSocket";
-import { ClusterConfigProvider } from "./providers/server/clusterConfig";
+import { ServerConfigProvider } from "./providers/server/serverConfig";
 import { AboutProvider } from "./providers/about/about";
 import { NotificationsProvider } from "./providers/notifications/notifications";
 import { PendingTransactionProvider } from "./providers/transactions/pendingTransaction";
@@ -20,7 +20,7 @@ import { CurrentColorProvider } from "providers/color/currentColor";
 ReactDOM.render(
   <BrowserRouter>
     <NotificationsProvider>
-      <ClusterConfigProvider>
+      <ServerConfigProvider>
         <WebSocketProvider>
           <WalletProvider>
             <BoardConfigProvider>
@@ -40,7 +40,7 @@ ReactDOM.render(
             </BoardConfigProvider>
           </WalletProvider>
         </WebSocketProvider>
-      </ClusterConfigProvider>
+      </ServerConfigProvider>
     </NotificationsProvider>
   </BrowserRouter>,
   document.getElementById("root")

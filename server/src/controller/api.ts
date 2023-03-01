@@ -26,7 +26,7 @@ import { BoardService } from "../service/BoardService";
 import { BoardHistoryService } from "../service/BoardHistoryService";
 import { TransactionService } from "../service/TransactionService";
 import { TransactionBuilderService } from "../service/TransactionBuilderService";
-import { ServerInfoDto } from "../dto/clusterInfoDto";
+import { ServerInfoDto } from "../dto/serverInfoDto";
 import { BlockchainAddress } from "../model/blockchainAddress";
 
 export default class ApiServer implements CloseableService {
@@ -41,9 +41,10 @@ export default class ApiServer implements CloseableService {
       res.json({
         chains: {
           solana: {
-            programId: PROGRAM_ID.toBase58(),
+            programId: BlockchainAddress.from(PROGRAM_ID).toString(),
             cluster,
-            gameAccount: GAME_PROGRAM_ACCOUNT.toBase58(),
+            gameAccount:
+              BlockchainAddress.from(GAME_PROGRAM_ACCOUNT).toString(),
           },
         },
       });
