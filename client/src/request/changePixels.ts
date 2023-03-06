@@ -22,6 +22,7 @@ export async function changePixels(
   const changePixelsRequestDto: CreateTransactionRequestDto<
     ChangePixelRequestDto[]
   > = {
+    blockchain: "solana",
     feePayer: BlockchainAddress.from(wallet.publicKey!).toString(),
     data: changedPixels.map((changedPixel) => ({
       row: changedPixel.coordinates.row,

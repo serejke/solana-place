@@ -17,6 +17,7 @@ export function toSerializedTransactionDto(
   transaction: Transaction
 ): SerializedTransactionDto {
   return {
+    blockchain: "solana",
     transactionBase58: base58.encode(transaction.serialize()),
   };
 }

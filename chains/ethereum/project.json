@@ -1,0 +1,22 @@
+{
+  "name": "@serejke/place/chain/ethereum",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "targets": {
+    "run-ethereum-node": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "chains/ethereum",
+        "command": "npx hardhat node"
+      }
+    },
+    "deploy-contract": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "chains/ethereum",
+        "commands": [
+          "npx hardhat run scripts/deploy.ts --network localhost"
+        ]
+      }
+    }
+  }
+}

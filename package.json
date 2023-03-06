@@ -18,7 +18,14 @@
     "format:fix": "nx run-many --target=format:fix",
     "start": "npm run server:start",
     "start:dev": "nx run-many --target=start:dev --projects=@serejke/place/server,@serejke/place/client",
-    "postinstall": "nx run-many --target=npm-install"
+    "postinstall": "nx run-many --target=npm-install",
+
+    "solana:run-solana-node": "nx run @serejke/place/chain/solana:run-solana-node",
+    "solana:deploy-contract": "nx run @serejke/place/chain/solana:deploy-contract",
+    "solana:deploy-board": "nx run @serejke/place/chain/solana:deploy-board",
+
+    "ethereum:run-ethereum-node": "nx run @serejke/place/chain/ethereum:run-ethereum-node",
+    "ethereum:deploy-contract": "nx run @serejke/place/chain/ethereum:deploy-contract"
   },
   "devDependencies": {
     "nx": "^15.7.2"

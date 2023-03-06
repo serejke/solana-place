@@ -50,7 +50,10 @@ export class SolanaTransactionBuilderService
     transaction: Transaction
   ): SerializedMessageDto {
     const base58Buffer = base58.encode(transaction.serializeMessage());
-    return { messageBase58: base58Buffer };
+    return {
+      blockchain: "solana",
+      messageBase58: base58Buffer,
+    };
   }
 
   async close(): Promise<void> {
