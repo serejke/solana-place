@@ -1,4 +1,4 @@
-# [solana-place](https://solana-place.com)
+# solana-place
 Pixel canvas for Solana users inspired by [r/place](https://www.reddit.com/r/place/).
 
 ![Screenshot](docs/images/main.png)
@@ -12,9 +12,3 @@ Service fee is 0.001 SOL.
 Lock recently-changed pixels for N seconds, or charge more SOLs to change them.
 
 Integrate with NFTs: owner of a pixel can receive royalty fees when his/her pixel is changed.
-
-# Feedback
-
-Join our [Discord](https://discord.gg/eSvvbHe86R) with feedback, suggestions and contributions!
-
-Follow us on [Twitter](https://twitter.com/place_solana) to be notified on the updates.
