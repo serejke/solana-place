@@ -4,3 +4,4 @@ build/
 *.log
 /dist/
 node_modules
+chains
