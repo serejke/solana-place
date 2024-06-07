@@ -1,53 +1,89 @@
-import express, {Express} from "express";
-import 'express-async-errors'; // Enable error handling for async routes: https://github.com/davidbanham/express-async-errors/
+import express, { Express } from "express";
+import "express-async-errors"; // Enable error handling for async routes: https://github.com/davidbanham/express-async-errors/
 import http from "http";
 import cors from "cors";
-import {createTerminus} from "@godaddy/terminus";
+import { createTerminus } from "@godaddy/terminus";
 import ApiServer from "./controller/api";
-import {Connection} from "@solana/web3.js";
-import {clusterUrl} from "./program/urls";
+import { Connection } from "@solana/web3.js";
+import { clusterUrl } from "./program/urls";
 import WebSocketServer from "./controller/socket";
 import AnchorService from "./service/AnchorService";
-import {GAME_PROGRAM_ACCOUNT, PROGRAM_ID} from "./program/program";
-import {BoardSubscriberService} from "./service/BoardSubscriberService";
-import {BoardService} from "./service/BoardService";
-import {BoardHistoryService} from "./service/BoardHistoryService";
-import {CloseableService} from "./service/CloseableService";
-import {TransactionBuilderService} from "./service/TransactionBuilderService";
-import {TransactionService} from "./service/TransactionService";
+import { GAME_PROGRAM_ACCOUNT, PROGRAM_ID } from "./program/program";
+import { BoardSubscriberService } from "./service/BoardSubscriberService";
+import { BoardService } from "./service/BoardService";
+import { BoardHistoryService } from "./service/BoardHistoryService";
+import { CloseableService } from "./service/CloseableService";
+import { TransactionBuilderService } from "./service/TransactionBuilderService";
+import { TransactionService } from "./service/TransactionService";
 import path from "path";
-import {Protocol} from "./protocol/protocol";
-import {GameEvent} from "./model/gameEvent";
-import {toEventWithTransactionDetailsDto} from "./dto-converter/converter";
+import { Protocol } from "./protocol/protocol";
+import { GameEvent } from "./model/gameEvent";
+import { toEventWithTransactionDetailsDto } from "./dto-converter/converter";
+import { isMockEnvironment } from "./service-mock/env";
+import { BoardServiceMock } from "./service-mock/BoardService";
+import { BoardHistoryServiceMock } from "./service-mock/BoardHistoryServiceMock";
+import { TransactionServiceMock } from "./service-mock/TransactionServiceMock";
+import { TransactionBuilderServiceMock } from "./service-mock/TransactionBuilderServiceMock";
 
 export class Application {
-  constructor(
-    private closeableServices: CloseableService[]
-  ) {
-  }
+  constructor(private closeableServices: CloseableService[]) {}
 
   static async start(): Promise<Application> {
     const [app, httpServer] = this.startExpressApp();
 
-    const connection = new Connection(clusterUrl, "confirmed");
-    console.log(`Connected to RPC node ${clusterUrl}`)
-    console.log(`Solana Place Program ID ${PROGRAM_ID.toBase58()}`)
-    console.log(`Solana Place Game Account ${GAME_PROGRAM_ACCOUNT.toBase58()}`)
+    let anchorService;
+    let protocol;
+    let boardService;
+    let boardHistoryService;
+    let transactionBuilderService;
+    let transactionService;
+    let webSocketServer: WebSocketServer;
+    const allServices: CloseableService[] = [];
 
-    const webSocketServer = WebSocketServer.start(httpServer);
+    if (isMockEnvironment()) {
+      boardService = BoardServiceMock.create() as BoardService;
+      boardHistoryService =
+        BoardHistoryServiceMock.create() as BoardHistoryService;
+      transactionBuilderService =
+        TransactionBuilderServiceMock.create() as TransactionBuilderService;
+      transactionService =
+        TransactionServiceMock.create() as TransactionService;
+    } else {
+      const connection = new Connection(clusterUrl, "confirmed");
+      console.log(`Connected to RPC node ${clusterUrl}`);
+      console.log(`Solana Place Program ID ${PROGRAM_ID.toBase58()}`);
+      console.log(
+        `Solana Place Game Account ${GAME_PROGRAM_ACCOUNT.toBase58()}`
+      );
 
-    const anchorService = await AnchorService.create(connection, PROGRAM_ID);
-    const protocol: Protocol<GameEvent> = new Protocol<GameEvent>(connection);
-    protocol.addListener((eventWithTransactionDetails) => {
-      const eventWithTransactionDetailsDto = toEventWithTransactionDetailsDto(eventWithTransactionDetails);
-      webSocketServer.send(eventWithTransactionDetailsDto);
-    });
-    const boardSubscriberService = BoardSubscriberService.create(anchorService, protocol);
-    const boardService = BoardService.create(anchorService);
-    const boardHistoryService = BoardHistoryService.create(anchorService);
-    const transactionBuilderService = TransactionBuilderService.create(anchorService);
-    const transactionService = TransactionService.create(connection);
-    // const clusterStateService = ClusterStateService.create(connection);
+      webSocketServer = WebSocketServer.start(httpServer);
+
+      anchorService = await AnchorService.create(connection, PROGRAM_ID);
+      protocol = new Protocol<GameEvent>(connection);
+      protocol.addListener((eventWithTransactionDetails) => {
+        const eventWithTransactionDetailsDto = toEventWithTransactionDetailsDto(
+          eventWithTransactionDetails
+        );
+        webSocketServer.send(eventWithTransactionDetailsDto);
+      });
+
+      const boardSubscriberService = BoardSubscriberService.create(
+        anchorService,
+        protocol
+      );
+      boardService = BoardService.create(anchorService);
+      boardHistoryService = BoardHistoryService.create(anchorService);
+      transactionBuilderService =
+        TransactionBuilderService.create(anchorService);
+      transactionService = TransactionService.create(connection);
+
+      allServices.push(
+        anchorService,
+        boardSubscriberService,
+        protocol,
+        webSocketServer
+      );
+    }
 
     const apiServer = await ApiServer.start(
       app,
@@ -57,33 +93,26 @@ export class Application {
       transactionBuilderService
     );
 
-    const allServices = [
-      anchorService,
-      boardSubscriberService,
+    allServices.push(
+      apiServer,
       boardService,
       boardHistoryService,
       transactionService,
-      transactionBuilderService,
-      // clusterStateService,
-
-      webSocketServer,
-      apiServer,
-
-      protocol
-    ]
+      transactionBuilderService
+    );
 
     const application = new Application(allServices);
 
     createTerminus(httpServer, {
-      signal: 'SIGINT',
+      signal: "SIGINT",
       healthChecks: {
-        '/health': async () => "OK"
+        "/health": async () => "OK",
       },
       onSignal: async () => {
-        console.log("Shutting down the server")
+        console.log("Shutting down the server");
         await application.close();
-      }
-    })
+      },
+    });
 
     return application;
   }
