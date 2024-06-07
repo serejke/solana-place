@@ -2,3 +2,4 @@ dist
 build
 dashkit
 animate.scss
+node_modules
